@@ -1,0 +1,69 @@
+.dashboard {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.questSection,
+.activeQuests,
+.availableQuests,
+.skillsOverview,
+.teamOverview {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.questGrid,
+.skillGrid,
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.createQuestButton,
+.manageSkillsButton,
+.viewTeamButton {
+  display: inline-block;
+  background: #3498db;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.createQuestButton:hover,
+.manageSkillsButton:hover,
+.viewTeamButton:hover {
+  background: #2980b9;
+}
+
+.taggedSkills,
+.otherSkills {
+  margin-bottom: 1.5rem;
+}
+
+.taggedSkills h3,
+.otherSkills h3 {
+  color: #34495e;
+  margin-bottom: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+  }
+
+  .questGrid,
+  .skillGrid,
+  .teamGrid {
+    grid-template-columns: 1fr;
+  }
+} 

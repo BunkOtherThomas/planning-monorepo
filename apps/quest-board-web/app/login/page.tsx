@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
 import styles from './login.module.css';
 import { login } from '../lib/api';
 
-export default function Login() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string>('');
@@ -27,7 +27,7 @@ export default function Login() {
       // Redirect to the original destination or dashboard
       const redirectTo = searchParams.get('from') || '/dashboard';
       router.push(redirectTo);
-    } catch (err) {
+    } catch {
       setError('Your scroll of passage seems to be incorrect. Please try again.');
     } finally {
       setIsLoading(false);
@@ -82,5 +82,13 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 } 

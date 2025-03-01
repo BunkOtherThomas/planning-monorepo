@@ -1,0 +1,308 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.skillsButton {
+  composes: button from global;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  background: linear-gradient(
+    to bottom,
+    var(--accent-brown) 0%,
+    var(--accent-brown-dark) 100%
+  );
+  color: var(--parchment-color);
+  border: 2px solid var(--accent-gold);
+  position: relative;
+  overflow: hidden;
+}
+
+.skillsButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.skillsButton:hover::before {
+  left: 100%;
+}
+
+.questBoards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.questBoard {
+  background: linear-gradient(
+    to bottom,
+    var(--parchment-color-light) 0%,
+    var(--parchment-color) 100%
+  );
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--accent-gold);
+}
+
+.questBoard h2 {
+  font-family: var(--font-cinzel);
+  color: var(--accent-brown);
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent-gold);
+  padding-bottom: 0.5rem;
+  text-align: center;
+}
+
+.subtitle {
+  color: var(--text-color-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+  text-align: center;
+  font-family: var(--font-lora);
+}
+
+.questList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.questCard {
+  background: white;
+  border-radius: 6px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--accent-brown-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.questCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.questCard:hover::before {
+  left: 100%;
+}
+
+.questCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-gold);
+}
+
+.questHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.questHeader h3 {
+  font-family: var(--font-cinzel);
+  color: var(--accent-brown);
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.deadline {
+  font-size: 0.9rem;
+  color: var(--text-color-muted);
+  background: linear-gradient(
+    to bottom,
+    var(--accent-brown-light) 0%,
+    var(--accent-brown) 100%
+  );
+  color: var(--parchment-color);
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-family: var(--font-lora);
+}
+
+.questCard p {
+  font-family: var(--font-lora);
+  font-size: 0.95rem;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.complexity {
+  font-size: 0.95rem;
+  color: var(--accent-brown);
+  margin-bottom: 0.75rem;
+  font-family: var(--font-lora);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.complexity::before {
+  content: '⚔️';
+  font-size: 1.1rem;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.skill {
+  background: linear-gradient(
+    to bottom,
+    var(--accent-brown-light) 0%,
+    var(--accent-brown) 100%
+  );
+  color: var(--parchment-color);
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: var(--font-lora);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.skill.tagged {
+  background: linear-gradient(
+    to bottom,
+    var(--accent-gold) 0%,
+    var(--accent-gold-dark) 100%
+  );
+  color: var(--accent-brown);
+  border: 1px solid var(--accent-gold-dark);
+}
+
+.tagIcon {
+  font-size: 0.9rem;
+  color: var(--accent-brown);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .questBoard {
+    background: linear-gradient(
+      to bottom,
+      var(--dark-accent) 0%,
+      var(--dark-accent-darker) 100%
+    );
+    border-color: var(--accent-gold-dark);
+  }
+
+  .questCard {
+    background-color: var(--dark-bg);
+    border-color: var(--accent-brown);
+  }
+
+  .questCard:hover {
+    border-color: var(--accent-gold);
+  }
+
+  .questCard h3 {
+    color: var(--accent-gold);
+  }
+
+  .complexity {
+    color: var(--accent-gold);
+  }
+
+  .deadline {
+    background: linear-gradient(
+      to bottom,
+      var(--accent-brown) 0%,
+      var(--dark-accent) 100%
+    );
+  }
+
+  .skill {
+    background: linear-gradient(
+      to bottom,
+      var(--accent-brown) 0%,
+      var(--dark-accent) 100%
+    );
+  }
+
+  .skill.tagged {
+    background: linear-gradient(
+      to bottom,
+      var(--accent-gold) 0%,
+      var(--accent-gold-dark) 100%
+    );
+    color: var(--dark-bg);
+  }
+
+  .tagIcon {
+    color: var(--dark-bg);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column;
+  }
+
+  .skillsButton {
+    width: 100%;
+  }
+
+  .questBoards {
+    grid-template-columns: 1fr;
+  }
+
+  .questBoard {
+    padding: 1rem;
+  }
+
+  .questCard {
+    padding: 1rem;
+  }
+
+  .questHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .deadline {
+    align-self: flex-start;
+  }
+} 

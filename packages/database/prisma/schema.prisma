@@ -1,0 +1,151 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String              @id @default(cuid())
+  email             String              @unique
+  password          String
+  displayName       String
+  avatarUrl         String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  isProjectManager   Boolean            @default(false)
+  isTeamMember      Boolean            @default(false)
+  businessDetails   BusinessDetails?
+  managedTeams      TeamMembership[]    @relation("ManagedTeams")
+  createdQuests     Quest[]             @relation("CreatedQuests")
+  userSkills        UserSkill[]
+  assignedQuests    Quest[]             @relation("AssignedQuests")
+  teamMemberships   TeamMembership[]    @relation("TeamMemberships")
+  notifications     Notification[]
+  taggedSkills      TaggedSkill[]
+}
+
+model BusinessDetails {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id              String        @id @default(cuid())
+  name            String        @unique
+  description     String?
+  businessId      String?       // null means it's a global skill
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  userSkills      UserSkill[]
+  questSkills     QuestSkill[]
+  taggedSkills    TaggedSkill[]
+}
+
+model UserSkill {
+  id                    String    @id @default(cuid())
+  userId                String
+  skillId               String
+  level                 Int       @default(0)
+  currentXP             Int       @default(0)
+  professionalExp       Int       // 0-10 slider
+  formalEducation      Int       // 0-10 slider
+  informalEducation    Int       // 0-10 slider
+  confidenceMultiplier Float     // 0.25-1.0
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill                Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+}
+
+model TaggedSkill {
+  id        String   @id @default(cuid())
+  userId    String
+  skillId   String
+  priority  Int      // 1-3 for ordering
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@unique([userId, priority]) // Ensures no duplicate priorities per user
+}
+
+model Quest {
+  id              String        @id @default(cuid())
+  title           String
+  description     String
+  difficulty      Int          // 1-10
+  status          QuestStatus  @default(OPEN)
+  createdById     String
+  assignedToId    String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deadline        DateTime?
+  createdBy       User         @relation("CreatedQuests", fields: [createdById], references: [id])
+  assignedTo      User?        @relation("AssignedQuests", fields: [assignedToId], references: [id])
+  questSkills     QuestSkill[]
+  completedAt     DateTime?
+}
+
+model QuestSkill {
+  id        String   @id @default(cuid())
+  questId   String
+  skillId   String
+  weight    Float    @default(1.0) // Importance multiplier for XP calculation
+  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([questId, skillId])
+}
+
+model TeamMembership {
+  id                String    @id @default(cuid())
+  teamMemberId      String
+  projectManagerId  String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  teamMember        User      @relation("TeamMemberships", fields: [teamMemberId], references: [id], onDelete: Cascade)
+  projectManager    User      @relation("ManagedTeams", fields: [projectManagerId], references: [id], onDelete: Cascade)
+
+  @@unique([teamMemberId, projectManagerId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  message   String
+  read      Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum QuestStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  QUEST_ASSIGNED
+  QUEST_COMPLETED
+  SKILL_LEVELED_UP
+  TEAM_INVITATION
+  GENERAL
+} 

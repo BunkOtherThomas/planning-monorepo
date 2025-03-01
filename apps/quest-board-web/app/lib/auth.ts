@@ -1,68 +1,109 @@
-import { PrismaClient } from '@prisma/client';
+import { NextAuthOptions } from 'next-auth';
+import { AdapterUser } from 'next-auth/adapters';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
-
-// JWT secret key - in production, use a proper secret management system
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-scroll';
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+interface CustomUser extends AdapterUser {
+  displayName: string;
+  isProjectManager: boolean;
+  isTeamMember: boolean;
+  password: string;
 }
 
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
+interface Credentials {
+  email: string;
+  password: string;
 }
 
-export async function createSession(userId: string): Promise<string> {
-  // Create a session that expires in 7 days
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  
-  // Generate JWT token
-  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
-  
-  // Store session in database
-  await prisma.session.create({
-    data: {
-      userId,
-      token,
-      expiresAt,
-    },
-  });
-  
-  return token;
-}
-
-export async function verifySession(token: string): Promise<{ userId: string } | null> {
-  try {
-    // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    
-    // Check if session exists and is valid
-    const session = await prisma.session.findFirst({
-      where: {
-        token,
-        expiresAt: {
-          gt: new Date(),
-        },
-      },
-    });
-    
-    if (!session) {
-      return null;
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      displayName: string;
+      isProjectManager: boolean;
+      isTeamMember: boolean;
     }
-    
-    return { userId: decoded.userId };
-  } catch (error) {
-    return null;
   }
 }
 
-export async function deleteSession(token: string): Promise<void> {
-  await prisma.session.delete({
-    where: {
-      token,
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id: string;
+    displayName: string;
+    isProjectManager: boolean;
+    isTeamMember: boolean;
+  }
+}
+
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: 'jwt'
+  },
+  providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials: Credentials | undefined) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Missing credentials');
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        }) as CustomUser | null;
+
+        if (!user) {
+          throw new Error('No user found');
+        }
+
+        const isValid = await bcrypt.compare(credentials.password, user.password);
+
+        if (!isValid) {
+          throw new Error('Invalid password');
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          displayName: user.displayName,
+          isProjectManager: user.isProjectManager,
+          isTeamMember: user.isTeamMember,
+          emailVerified: user.emailVerified
+        };
+      }
+    })
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user && 'displayName' in user) {
+        const customUser = user as CustomUser;
+        token.id = customUser.id;
+        token.displayName = customUser.displayName;
+        token.isProjectManager = customUser.isProjectManager;
+        token.isTeamMember = customUser.isTeamMember;
+      }
+      return token;
     },
-  });
-} 
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.displayName = token.displayName;
+        session.user.isProjectManager = token.isProjectManager;
+        session.user.isTeamMember = token.isTeamMember;
+      }
+      return session;
+    }
+  },
+  pages: {
+    signIn: '/login',
+    signOut: '/',
+    error: '/login'
+  }
+}; 

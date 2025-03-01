@@ -168,4 +168,123 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.dashboardLayout {
+  min-height: 100vh;
+  background-color: var(--parchment-color);
+  color: var(--text-color);
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(
+    to bottom,
+    var(--accent-brown) 0%,
+    var(--accent-brown-dark) 100%
+  );
+  border-bottom: 3px solid var(--accent-gold);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-cinzel);
+  font-size: 1.1rem;
+  color: var(--parchment-color);
+  background: transparent;
+  border: 2px solid var(--accent-gold);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.tab:hover::before {
+  left: 100%;
+}
+
+.tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tab.active {
+  background: linear-gradient(
+    to bottom,
+    var(--accent-gold) 0%,
+    var(--accent-gold-dark) 100%
+  );
+  color: var(--accent-brown);
+  border-color: var(--accent-gold-dark);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.content {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .dashboardLayout {
+    background-color: var(--dark-bg);
+  }
+
+  .tabs {
+    background: linear-gradient(
+      to bottom,
+      var(--dark-accent) 0%,
+      var(--dark-accent-darker) 100%
+    );
+  }
+
+  .tab {
+    color: var(--text-color-dark);
+    border-color: var(--accent-gold-dark);
+  }
+
+  .tab.active {
+    color: var(--dark-bg);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+  }
+
+  .tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .tab {
+    width: 100%;
+    text-align: center;
+  }
 } 

@@ -1,10 +1,9 @@
 import { defineConfig } from 'cypress';
-import type { Config } from 'cypress';
 
 export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:3000',
-    setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): void {
+    setupNodeEvents(on, config) {
       // implement node event listeners here
     },
   },
@@ -14,4 +13,4 @@ export default defineConfig({
       bundler: 'webpack',
     },
   },
-} as Config); 
+}); 

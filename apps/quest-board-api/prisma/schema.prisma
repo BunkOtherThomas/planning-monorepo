@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  password        String
+  displayName     String
+  avatarUrl       String?
+  isProjectManager Boolean        @default(false)
+  isTeamMember    Boolean        @default(false)
+  emailVerified   DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  businessDetails BusinessDetails?
+  skills          UserSkill[]
+  createdQuests   Quest[]        @relation("CreatedQuests")
+  assignedQuests  Quest[]        @relation("AssignedQuests")
+}
+
+model BusinessDetails {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  description String
+  isGlobal    Boolean     @default(false)
+  users       UserSkill[]
+  quests      QuestSkill[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model UserSkill {
+  id                  String   @id @default(cuid())
+  userId              String
+  skillId             String
+  professionalExp     Int      @default(0)
+  formalEducation     Int      @default(0)
+  informalEducation   Int      @default(0)
+  confidenceMultiplier Float   @default(1.0)
+  isTagged            Boolean  @default(false)
+  user                User     @relation(fields: [userId], references: [id])
+  skill               Skill    @relation(fields: [skillId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([userId, skillId])
+}
+
+model Quest {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  creatorId   String
+  assigneeId  String?
+  status      String       @default("open")
+  deadline    DateTime?
+  creator     User         @relation("CreatedQuests", fields: [creatorId], references: [id])
+  assignee    User?        @relation("AssignedQuests", fields: [assigneeId], references: [id])
+  skills      QuestSkill[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model QuestSkill {
+  id        String   @id @default(cuid())
+  questId   String
+  skillId   String
+  weight    Float    @default(1.0)
+  quest     Quest    @relation(fields: [questId], references: [id])
+  skill     Skill    @relation(fields: [skillId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([questId, skillId])
+} 

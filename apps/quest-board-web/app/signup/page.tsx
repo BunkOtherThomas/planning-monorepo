@@ -41,7 +41,13 @@ export default function Signup() {
     }
 
     try {
-      await signup(username, email, password, role);
+      await signup(
+        email,
+        password,
+        username,
+        role === 'guild_leader',
+        role === 'adventurer'
+      );
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof Error && err.message.includes('email')) {

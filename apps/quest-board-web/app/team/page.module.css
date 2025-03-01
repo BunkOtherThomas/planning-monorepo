@@ -1,0 +1,138 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.searchBar input,
+.skillFilter select {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-width: 200px;
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.memberCard {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.memberHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.memberHeader h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #2c3e50;
+}
+
+.skillsSection,
+.questsSection {
+  margin-bottom: 1.5rem;
+}
+
+.skillsSection h3,
+.questsSection h3 {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-bottom: 0.75rem;
+}
+
+.skillsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skillBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f5f6fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.skillBadge.tagged {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.skillName {
+  font-weight: 500;
+}
+
+.skillLevel {
+  color: #666;
+}
+
+.tagIcon {
+  color: #f1c40f;
+}
+
+.questsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.questLink {
+  display: block;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  color: #2c3e50;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.questLink:hover {
+  background: #e9ecef;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .searchBar input,
+  .skillFilter select {
+    width: 100%;
+  }
+
+  .teamGrid {
+    grid-template-columns: 1fr;
+  }
+} 
