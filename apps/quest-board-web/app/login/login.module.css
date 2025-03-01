@@ -127,10 +127,69 @@
   transform: translateY(-1px);
 }
 
+.error {
+  background-color: rgba(220, 38, 38, 0.1);
+  border: 2px solid rgba(220, 38, 38, 0.5);
+  color: rgb(220, 38, 38);
+  padding: 12px;
+  border-radius: 4px;
+  font-family: var(--font-cormorant);
+  font-size: 1rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.loading {
+  position: relative;
+  color: transparent;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--parchment-color);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
   .input {
     background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .error {
+    background-color: rgba(220, 38, 38, 0.2);
+    border-color: rgba(220, 38, 38, 0.6);
+    color: rgb(248, 113, 113);
+  }
+
+  .input:disabled {
+    background-color: rgba(255, 255, 255, 0.05);
   }
 }
 
