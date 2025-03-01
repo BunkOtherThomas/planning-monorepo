@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, FormEvent } from 'react';
 import styles from './login.module.css';
+import { login } from '../lib/api';
 
 export default function Login() {
   const router = useRouter();
@@ -17,28 +18,12 @@ export default function Login() {
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get('email');
-    const password = formData.get('password');
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
     try {
-      // Here you would typically make an API call to your backend
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
-
-      const data = await response.json();
-
-      // Set the auth token in a cookie (this should be done by your API)
-      document.cookie = `auth-token=${data.token}; path=/`;
-
+      await login(email, password);
+      
       // Redirect to the original destination or dashboard
       const redirectTo = searchParams.get('from') || '/dashboard';
       router.push(redirectTo);

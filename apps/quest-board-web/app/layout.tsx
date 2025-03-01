@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Almendra } from 'next/font/google';
+import { Cormorant_Garamond, Almendra, Cinzel, Lora } from 'next/font/google';
+import AuthLayout from './components/AuthLayout';
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -14,6 +15,20 @@ const almendra = Almendra({
   weight: ['400', '700'],
   display: 'swap',
   variable: '--font-almendra',
+});
+
+const cinzel = Cinzel({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-cinzel',
+});
+
+const lora = Lora({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-lora',
 });
 
 export const metadata: Metadata = {
@@ -34,8 +49,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorantGaramond.variable} ${almendra.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${cormorantGaramond.variable} ${almendra.variable} ${cinzel.variable} ${lora.variable}`}>
+      <body>
+        <AuthLayout>
+          {children}
+        </AuthLayout>
+      </body>
     </html>
   );
 }
