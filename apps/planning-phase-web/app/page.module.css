@@ -1,0 +1,236 @@
+/* Medieval RPG Theme */
+.page {
+  --parchment-color: #f4e4bc;
+  --ink-color: #2c1810;
+  --accent-gold: #c6a964;
+  --accent-brown: #8b4513;
+  --scroll-border: #8b4513;
+  --button-primary: #8b4513;
+  --button-secondary: #c6a964;
+  
+  background-color: var(--parchment-color);
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.15' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
+  color: var(--ink-color);
+  display: grid;
+  grid-template-rows: 20px 1fr 20px;
+  align-items: center;
+  justify-items: center;
+  min-height: 100svh;
+  padding: 40px;
+  gap: 64px;
+  font-synthesis: none;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  grid-row-start: 2;
+  background: var(--parchment-color);
+  padding: 40px;
+  border: 2px solid var(--scroll-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  max-width: 800px;
+}
+
+.main::before,
+.main::after {
+  content: '';
+  position: absolute;
+  height: 40px;
+  width: 40px;
+  background: var(--accent-brown);
+  border-radius: 50%;
+}
+
+.main::before {
+  top: -20px;
+  left: -20px;
+}
+
+.main::after {
+  bottom: -20px;
+  right: -20px;
+}
+
+.main ol {
+  font-family: 'Cormorant Garamond', serif;
+  padding-left: 0;
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+  list-style-type: none;
+  counter-reset: medieval-counter;
+}
+
+.main li {
+  counter-increment: medieval-counter;
+  padding-left: 40px;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.main li::before {
+  content: counter(medieval-counter);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  background: var(--accent-brown);
+  color: var(--parchment-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Almendra', serif;
+  font-weight: bold;
+}
+
+.main code {
+  font-family: 'Cormorant Garamond', serif;
+  background: rgba(139, 69, 19, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: var(--accent-brown);
+}
+
+.ctas {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.ctas a,
+button.secondary {
+  appearance: none;
+  border-radius: 4px;
+  height: 48px;
+  padding: 0 24px;
+  font-family: 'Almendra', serif;
+  border: 2px solid var(--accent-brown);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+a.primary {
+  background: var(--button-primary);
+  color: var(--parchment-color);
+  gap: 8px;
+}
+
+a.secondary,
+button.secondary {
+  background: transparent;
+  color: var(--button-primary);
+  border-color: var(--button-primary);
+}
+
+.footer {
+  font-family: 'Cormorant Garamond', serif;
+  grid-row-start: 3;
+  display: flex;
+  gap: 32px;
+  padding: 20px;
+  border-top: 2px solid var(--accent-brown);
+}
+
+.footer a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--accent-brown);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Hover Effects */
+@media (hover: hover) and (pointer: fine) {
+  a.primary:hover,
+  button.primary:hover {
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
+  }
+
+  a.secondary:hover,
+  button.secondary:hover {
+    background: var(--accent-brown);
+    color: var(--parchment-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
+  }
+
+  .footer a:hover {
+    color: var(--accent-gold);
+    text-decoration: none;
+    transform: translateY(-2px);
+  }
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  .page {
+    --parchment-color: #2c1810;
+    --ink-color: #f4e4bc;
+    --accent-gold: #d4b36b;
+    --accent-brown: #c6a964;
+    --scroll-border: #c6a964;
+  }
+
+  .main code {
+    background: rgba(198, 169, 100, 0.2);
+    color: var(--accent-gold);
+  }
+
+  .logo {
+    filter: none;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .page {
+    padding: 20px;
+  }
+
+  .main {
+    padding: 20px;
+  }
+
+  .ctas {
+    flex-direction: column;
+  }
+
+  .ctas a,
+  button.secondary {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+}
