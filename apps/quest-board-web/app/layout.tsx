@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Medieval RPG Planning",
-  description: "A medieval RPG planning application",
+  title: "Quest Board",
+  description: "A medieval RPG quest board application",
 };
 
 export default function RootLayout({

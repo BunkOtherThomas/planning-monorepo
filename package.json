@@ -1,5 +1,5 @@
 {
-  "name": "planning-monorepo",
+  "name": "quest-board-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
