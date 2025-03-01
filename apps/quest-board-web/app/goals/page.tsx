@@ -14,7 +14,16 @@ export default function GoalsPage() {
   const [customSkills, setCustomSkills] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [skipGoals, setSkipGoals] = useState(false);
+  const [showGoalsSection, setShowGoalsSection] = useState(true);
+  const [hasStartedSkillsSelection, setHasStartedSkillsSelection] = useState(false);
+
+  const handleSkipGoals = () => {
+    setSkills([]);
+    setSelectedSkills([]);
+    setShowGoalsSection(false);
+    setHasStartedSkillsSelection(true);
+    setLoading(false);
+  };
 
   const handleSubmitGoals = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,22 +43,22 @@ export default function GoalsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ goals, skipGoals } as ProjectManagerGoals),
+        body: JSON.stringify({ goals } as ProjectManagerGoals),
       });
 
       const data: SkillsResponse = await response.json();
-
+      
       if (data.error) {
         setError(data.error);
-        return;
+      } else {
+        setSkills(data.skills);
+        setHasStartedSkillsSelection(true);
       }
-
-      setSkills(data.skills);
     } catch (err) {
       setError('Failed to generate skills. Please try again.');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const handleSkillToggle = (skill: string) => {
@@ -71,7 +80,7 @@ export default function GoalsPage() {
     setCustomSkills(prev => prev.filter(s => s !== skill));
   };
 
-  const handleSubmitSkills = () => {
+  const handleComplete = () => {
     // For now, just console log the selected skills
     console.log({
       selectedSkills,
@@ -81,119 +90,152 @@ export default function GoalsPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Welcome, Guild Leader!</h1>
+      <h1 className={styles.title}>Project Manager Setup</h1>
       
-      {!skills.length ? (
-        <form onSubmit={handleSubmitGoals} className={styles.form}>
+      {showGoalsSection && (
+        <div className={styles.form}>
           <div className={styles.goalsSection}>
-            <label htmlFor="goals" className={styles.label}>
-              Outline Your Quest
+            <h2 className={styles.subtitle}>Project Goals</h2>
+            <label className={styles.label} htmlFor="goals">
+              What are your project goals?
             </label>
             <textarea
               id="goals"
               className={styles.textarea}
               value={goals}
               onChange={(e) => setGoals(e.target.value)}
-              placeholder="Describe the goals of your project or business..."
-              disabled={skipGoals || loading}
-              rows={6}
+              placeholder="Describe your project goals..."
             />
             <p className={styles.description}>
-              Be as specific as you'd like about your project's goals, tools, and processes.
-              This will help us suggest relevant skills for your team members.
+              Your goals will help us suggest relevant skills for your project. This will make it easier to match with the right team members.
             </p>
             
-            <div className={styles.skipOption}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={skipGoals}
-                  onChange={(e) => setSkipGoals(e.target.checked)}
-                  disabled={loading}
-                />
-                Skip this step and enter skills manually
-              </label>
-            </div>
-
-            {error && <p className={styles.error}>{error}</p>}
-            
-            <button 
-              type="submit" 
-              className={styles.button}
-              disabled={loading || ((!goals.trim()) && !skipGoals)}
-            >
-              {loading ? 'Consulting the Sages...' : 'Continue'}
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className={styles.skillsSection}>
-          <h2 className={styles.subtitle}>Required Skills</h2>
-          <p className={styles.description}>
-            Select the skills that are relevant to your project:
-          </p>
-          
-          <div className={styles.skillsList}>
-            {skills.map((skill) => (
-              <div
-                key={skill}
-                className={styles.skillLabel}
-                onClick={() => handleSkillToggle(skill)}
-                data-checked={selectedSkills.includes(skill)}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedSkills.includes(skill)}
-                  onChange={() => {}}
-                  hidden
-                />
-                <span>{skill}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.customSkills}>
-            <h3 className={styles.subtitle}>Add Custom Skills</h3>
-            <div className={styles.customSkillInput}>
-              <input
-                type="text"
-                value={customSkill}
-                onChange={(e) => setCustomSkill(e.target.value)}
-                placeholder="Enter a custom skill..."
-                className={styles.input}
-              />
+            <div className={styles.buttonContainer}>
               <button
                 type="button"
-                onClick={handleAddCustomSkill}
-                className={styles.addButton}
-                disabled={!customSkill.trim()}
+                className={styles.skipButton}
+                onClick={handleSkipGoals}
               >
-                Add
+                Skip and add skills manually
+              </button>
+              
+              <button
+                type="submit"
+                className={styles.button}
+                onClick={handleSubmitGoals}
+                disabled={loading || !goals.trim()}
+              >
+                {loading ? 'Generating Skills...' : 'Generate Skills'}
               </button>
             </div>
 
-            {customSkills.length > 0 && (
-              <div className={styles.customSkillsList}>
-                {customSkills.map((skill) => (
-                  <div key={skill} className={styles.customSkillItem}>
+            {error && <p className={styles.error}>{error}</p>}
+          </div>
+        </div>
+      )}
+
+      {hasStartedSkillsSelection && (
+        <div className={styles.skillsSection}>
+          <h2 className={styles.subtitle}>Required Skills</h2>
+          
+          {skills.length > 0 && (
+            <>
+              <div className={styles.skillsList}>
+                {skills.map((skill) => (
+                  <div
+                    key={skill}
+                    className={styles.skillLabel}
+                    onClick={() => handleSkillToggle(skill)}
+                    data-checked={selectedSkills.includes(skill)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedSkills.includes(skill)}
+                      onChange={() => {}}
+                      hidden
+                    />
                     <span>{skill}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCustomSkill(skill)}
-                      className={styles.removeButton}
-                    >
-                      ×
-                    </button>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+              <div className={styles.customSkills}>
+                <h3 className={styles.subtitle}>Additional Custom Skills</h3>
+                <div className={styles.customSkillInput}>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={customSkill}
+                    onChange={(e) => setCustomSkill(e.target.value)}
+                    placeholder="Enter a custom skill..."
+                  />
+                  <button
+                    className={styles.addButton}
+                    onClick={handleAddCustomSkill}
+                    disabled={!customSkill.trim()}
+                  >
+                    Add Skill
+                  </button>
+                </div>
+
+                {customSkills.length > 0 && (
+                  <div className={styles.customSkillsList}>
+                    {customSkills.map((skill) => (
+                      <div key={skill} className={styles.customSkillItem}>
+                        <span>{skill}</span>
+                        <button
+                          className={styles.removeButton}
+                          onClick={() => handleRemoveCustomSkill(skill)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {skills.length === 0 && (
+            <div className={styles.customSkills} style={{ borderTop: 'none', marginTop: 0, paddingTop: 0 }}>
+              <div className={styles.customSkillInput}>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={customSkill}
+                  onChange={(e) => setCustomSkill(e.target.value)}
+                  placeholder="Enter a custom skill..."
+                />
+                <button
+                  className={styles.addButton}
+                  onClick={handleAddCustomSkill}
+                  disabled={!customSkill.trim()}
+                >
+                  Add Skill
+                </button>
+              </div>
+
+              {customSkills.length > 0 && (
+                <div className={styles.customSkillsList}>
+                  {customSkills.map((skill) => (
+                    <div key={skill} className={styles.customSkillItem}>
+                      <span>{skill}</span>
+                      <button
+                        className={styles.removeButton}
+                        onClick={() => handleRemoveCustomSkill(skill)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <button
-            type="button"
-            onClick={handleSubmitSkills}
             className={styles.button}
+            onClick={handleComplete}
             disabled={selectedSkills.length === 0 && customSkills.length === 0}
           >
             Complete Setup
