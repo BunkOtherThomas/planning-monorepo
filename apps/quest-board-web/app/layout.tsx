@@ -19,6 +19,13 @@ const almendra = Almendra({
 export const metadata: Metadata = {
   title: "Quest Board",
   description: "A medieval RPG quest board application",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: '16x16', type: 'image/x-icon' },
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+    ],
+  },
 };
 
 export default function RootLayout({
