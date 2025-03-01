@@ -19,7 +19,7 @@
   padding: 40px;
   gap: 64px;
   font-synthesis: none;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   font-size: 18px;
 }
 
@@ -58,7 +58,7 @@
 }
 
 .main ol {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   padding-left: 0;
   margin: 0;
   font-size: 18px;
@@ -89,12 +89,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Almendra', serif;
+  font-family: var(--font-almendra), serif;
   font-weight: bold;
 }
 
 .main code {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   background: rgba(139, 69, 19, 0.1);
   padding: 4px 8px;
   border-radius: 4px;
@@ -115,7 +115,7 @@ button.secondary {
   border-radius: 4px;
   height: 48px;
   padding: 0 24px;
-  font-family: 'Almendra', serif;
+  font-family: var(--font-almendra), serif;
   border: 2px solid var(--accent-brown);
   transition: all 0.3s ease;
   cursor: pointer;
@@ -145,7 +145,7 @@ button.secondary {
 }
 
 .footer {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   grid-row-start: 3;
   display: flex;
   gap: 32px;
