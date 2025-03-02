@@ -80,12 +80,36 @@ export default function GoalsPage() {
     setCustomSkills(prev => prev.filter(s => s !== skill));
   };
 
-  const handleComplete = () => {
-    // For now, just console log the selected skills
-    console.log({
-      selectedSkills,
-      customSkills,
-    });
+  const handleComplete = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        setError('API URL is not configured');
+        return;
+      }
+
+      // Combine selected and custom skills
+      const allSkills = [...selectedSkills, ...customSkills];
+
+      const response = await fetch(`${apiUrl}/api/teams`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ skills: allSkills }),
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        setError(data.error);
+      } else {
+        // Redirect to the dashboard after successful team creation
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      setError('Failed to create team. Please try again.');
+    }
   };
 
   return (

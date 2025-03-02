@@ -1,13 +1,21 @@
 import {
-  SignupRequest,
   LoginRequest,
+  SignupRequest,
   SkillDeclarationRequest,
   QuestCreationRequest,
-  QuestStatus
+  QuestStatus,
+  AuthResponse,
+  QuestResponse,
+  QuestListResponse,
+  CreateQuestRequest,
+  UpdateQuestRequest,
+  AssignQuestRequest,
+  SkillsResponse,
+  ProjectManagerGoals,
 } from '@quest-board/types';
 
 // API routes are now running on port 3001
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface User {
   id: string;
@@ -18,37 +26,54 @@ interface User {
   isTeamMember: boolean;
 }
 
-interface AuthResponse {
-  user: User;
-  token: string;
-}
-
 // Common fetch options for all API requests
-const defaultOptions: RequestInit = {
-  credentials: 'include',
+const defaultOptions = {
   headers: {
     'Content-Type': 'application/json',
   },
+  credentials: 'include' as const,
 };
 
+// Helper function to handle API responses
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+}
+
+// Auth API calls
 export async function login(email: string, password: string): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    ...defaultOptions,
+  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({ email, password } as LoginRequest),
+    credentials: 'include',
   });
 
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Failed to login');
   }
+  return response.json();
+}
 
-  const data = await response.json();
-  
-  // Set the auth token cookie
-  document.cookie = `auth-token=${data.token}; path=/; max-age=86400; samesite=lax`;
+export async function logout(): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
 
-  return data;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to logout');
+  }
 }
 
 export async function signup(
@@ -62,7 +87,7 @@ export async function signup(
     description: string;
   }
 ): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+  const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
     ...defaultOptions,
     method: 'POST',
     body: JSON.stringify({
@@ -165,19 +190,4 @@ export async function getQuests(type: 'created' | 'assigned' | 'available', stat
   }
 
   return response.json();
-}
-
-export async function logout(): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-    ...defaultOptions,
-    method: 'POST',
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to logout');
-  }
-
-  // Remove the auth token cookie
-  document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
 } 

@@ -1,24 +1,19 @@
 'use client';
 
-import { FC } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { logout } from '../lib/api';
 import styles from './Header.module.css';
-
-interface User {
-  id: string;
-  displayName: string;
-  avatarUrl?: string;
-  isProjectManager: boolean;
-  isTeamMember: boolean;
-}
+import { logout } from '../lib/api';
 
 interface HeaderProps {
-  user: User;
+  user?: {
+    displayName: string;
+    avatarUrl?: string;
+    isProjectManager: boolean;
+    isTeamMember: boolean;
+  };
 }
 
-const Header: FC<HeaderProps> = ({ user }) => {
+export default function Header({ user }: HeaderProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -30,44 +25,37 @@ const Header: FC<HeaderProps> = ({ user }) => {
     }
   };
 
+  const handleLogoClick = () => {
+    router.push('/dashboard');
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.content}>
-        <div className={styles.logo}>
-          <Link href="/dashboard">
-            <h1>Quest Board</h1>
-          </Link>
+        <div className={styles.logo} onClick={handleLogoClick} role="button" tabIndex={0}>
+          <h1>Quest Board</h1>
         </div>
-        
-        <div className={styles.userActions}>
-          <button className={styles.notifications} aria-label="Notifications">
-            <span>🔔</span>
-          </button>
-          
-          <Link href="/profile" className={styles.profileLink}>
-            {user.avatarUrl ? (
-              <img 
-                src={user.avatarUrl} 
-                alt={user.displayName} 
-                className={styles.avatar}
-              />
-            ) : (
-              <div className={styles.avatarPlaceholder}>
-                {user.displayName[0].toUpperCase()}
-              </div>
-            )}
-          </Link>
-          
-          <button 
-            className={styles.signOut}
-            onClick={handleLogout}
-          >
-            Leave the Realm
-          </button>
-        </div>
+        {user && (
+          <div className={styles.userSection}>
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>{user.displayName}</span>
+              {user.avatarUrl && (
+                <img
+                  src={user.avatarUrl}
+                  alt={`${user.displayName}'s avatar`}
+                  className={styles.avatar}
+                />
+              )}
+            </div>
+            <button
+              className={styles.signOut}
+              onClick={handleLogout}
+            >
+              Sign Out
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
-};
-
-export default Header; 
+} 

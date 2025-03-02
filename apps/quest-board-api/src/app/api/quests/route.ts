@@ -1,160 +1,94 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../lib/prisma';
-import { QuestCreationRequest } from '@quest-board/types';
+import { auth } from '@/lib/auth';
+import { prisma } from '@quest-board/database';
 import { z } from 'zod';
 
 const questSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
+  title: z.string(),
+  description: z.string(),
+  difficulty: z.number().min(1).max(10),
+  deadline: z.string().optional(),
   skills: z.array(z.object({
-    skillId: z.string(),
-    weight: z.number().min(0).max(1)
+    name: z.string(),
+    weight: z.number().min(0.1).max(10).default(1.0),
   })),
-  deadline: z.string().datetime().optional()
 });
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
-    const body: QuestCreationRequest = await request.json();
-    const validatedData = questSchema.parse(body);
-
-    // Check if user is a project manager
-    const user = await prisma.user.findFirst({
-      where: { id: 'user-id' } // TODO: Get from auth session
-    });
-
-    if (!user?.isProjectManager) {
-      return NextResponse.json(
-        { error: 'Only project managers can create quests' },
-        { status: 403 }
-      );
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Create quest with skills
+    const quests = await prisma.quest.findMany({
+      include: {
+        questSkills: {
+          include: {
+            skill: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(quests);
+  } catch (error) {
+    console.error('Failed to fetch quests:', error);
+    return NextResponse.json({ error: 'Failed to fetch quests' }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'User ID not found in session' }, { status: 401 });
+    }
+
+    const createdById = session.user.id;
+
+    const body = await req.json();
+    const validatedData = questSchema.parse(body);
+
+    // Find or create skills
+    const questSkillsData = await Promise.all(
+      validatedData.skills.map(async (skillData) => {
+        const skill = await prisma.skill.upsert({
+          where: { name: skillData.name },
+          create: { name: skillData.name },
+          update: {},
+        });
+        return {
+          skillId: skill.id,
+          weight: skillData.weight,
+        };
+      })
+    );
+
     const quest = await prisma.quest.create({
       data: {
         title: validatedData.title,
         description: validatedData.description,
-        creatorId: user.id,
-        deadline: validatedData.deadline ? new Date(validatedData.deadline) : null,
-        skills: {
-          create: validatedData.skills.map(skill => ({
-            skill: {
-              connect: { id: skill.skillId }
-            },
-            weight: skill.weight
-          }))
-        }
+        createdById,
+        difficulty: validatedData.difficulty,
+        deadline: validatedData.deadline,
+        questSkills: {
+          create: questSkillsData,
+        },
       },
       include: {
-        skills: {
+        questSkills: {
           include: {
-            skill: true
-          }
-        }
-      }
+            skill: true,
+          },
+        },
+      },
     });
 
-    return NextResponse.json(quest, { status: 201 });
+    return NextResponse.json(quest);
   } catch (error) {
-    console.error('Quest creation error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || 'available';
-    const status = searchParams.get('status');
-
-    // TODO: Get user ID from auth session
-    const userId = 'user-id';
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    let quests;
-    const includeOptions = {
-      creator: true,
-      assignee: true,
-      skills: {
-        include: {
-          skill: true
-        }
-      }
-    };
-
-    switch (type) {
-      case 'created':
-        if (!user.isProjectManager) {
-          return NextResponse.json(
-            { error: 'Only project managers can view created quests' },
-            { status: 403 }
-          );
-        }
-        quests = await prisma.quest.findMany({
-          where: {
-            creatorId: userId,
-            ...(status && { status })
-          },
-          include: includeOptions,
-          orderBy: {
-            createdAt: 'desc'
-          }
-        });
-        break;
-
-      case 'assigned':
-        if (!user.isTeamMember) {
-          return NextResponse.json(
-            { error: 'Only team members can view assigned quests' },
-            { status: 403 }
-          );
-        }
-        quests = await prisma.quest.findMany({
-          where: {
-            assigneeId: userId,
-            ...(status && { status })
-          },
-          include: includeOptions,
-          orderBy: {
-            createdAt: 'desc'
-          }
-        });
-        break;
-
-      default: // available
-        quests = await prisma.quest.findMany({
-          where: {
-            assigneeId: null,
-            status: 'open'
-          },
-          include: includeOptions,
-          orderBy: {
-            createdAt: 'desc'
-          }
-        });
-    }
-
-    return NextResponse.json(quests);
-  } catch (error) {
-    console.error('Quest fetch error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Failed to create quest:', error);
+    return NextResponse.json({ error: 'Failed to create quest' }, { status: 500 });
   }
 }
 

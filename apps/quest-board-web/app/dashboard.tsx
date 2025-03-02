@@ -1,71 +1,74 @@
-import Image, { type ImageProps } from "next/image";
+'use client';
+
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import type { StaticImageData } from 'next/image';
 import { Button } from "@repo/ui/button";
 import styles from "./dashboard.module.css";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+interface DualImageProps {
+  className?: string;
+  srcLight: string | StaticImageData;
+  srcDark: string | StaticImageData;
+  alt?: string;
+  width?: number;
+  height?: number;
+  priority?: boolean;
+}
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+function DualImage({ srcLight, srcDark, alt = '', ...rest }: DualImageProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <div className={`${rest.className || ''} imgLight`}>
+        <img
+          src={srcLight as string}
+          alt={alt}
+          width={rest.width}
+          height={rest.height}
+        />
+      </div>
+      <div className={`${rest.className || ''} imgDark`}>
+        <img
+          src={srcDark as string}
+          alt={alt}
+          width={rest.width}
+          height={rest.height}
+        />
+      </div>
+    </div>
   );
-};
+}
 
 export default function Dashboard() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <ThemeImage
+        <DualImage
           className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
+          srcLight="/turborepo-light.svg"
+          srcDark="/turborepo-dark.svg"
+          alt="Turborepo Logo"
+          width={160}
+          height={160}
           priority
         />
-        <ol>
-          <li>
-            Get started by editing <code>apps/quest-board-web/app/dashboard.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turbo.build/repo/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+        <div className={styles.content}>
+          <h1>Web</h1>
+          <p>This is the Quest Board web application.</p>
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
+        <div className={styles.grid}>
+          <Button appName="web">Click me</Button>
+        </div>
       </main>
       <footer className={styles.footer}>
         <a

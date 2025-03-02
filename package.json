@@ -1,23 +1,23 @@
 {
-  "name": "quest-board-monorepo",
+  "name": "quest-board",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "build": "turbo build",
+    "clean": "turbo clean",
+    "dev": "pnpm --filter @quest-board/database db:reset && turbo dev --parallel",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
-    "test": "turbo run test",
-    "test:watch": "turbo run test:watch",
-    "test:e2e": "turbo run test:e2e",
-    "test:e2e:dev": "turbo run dev test:e2e:dev --parallel"
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "type-check": "turbo type-check"
   },
   "devDependencies": {
-    "prettier": "^3.5.0",
-    "turbo": "^2.4.4",
-    "typescript": "5.7.3"
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "prettier": "^3.1.1",
+    "turbo": "latest"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@8.9.0",
   "engines": {
     "node": ">=18"
   }

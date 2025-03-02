@@ -61,6 +61,31 @@ export default function AuthLayout({
     }
   }, [user, isPublicRoute, isOnboardingRoute, router]);
 
+  useEffect(() => {
+    const checkUserTeam = async () => {
+      if (user?.isProjectManager) {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!apiUrl) return;
+
+        try {
+          const response = await fetch(`${apiUrl}/api/teams/check`, {
+            credentials: 'include'
+          });
+          const data = await response.json();
+
+          // If the user doesn't have a team with skills, redirect to goals
+          if (!data.hasTeamWithSkills && !pathname.startsWith('/goals')) {
+            router.push('/goals');
+          }
+        } catch (error) {
+          console.error('Error checking team status:', error);
+        }
+      }
+    };
+
+    checkUserTeam();
+  }, [user, router, pathname]);
+
   // Show header on all routes except public routes
   const showHeader = !isPublicRoute && user;
 

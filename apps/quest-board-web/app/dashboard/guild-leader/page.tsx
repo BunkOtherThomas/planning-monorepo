@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getQuests } from '../../lib/api';
+import { QuestStatus } from '@quest-board/types';
 import styles from './guild-leader.module.css';
 
 interface Quest {
   id: string;
   title: string;
   description: string;
-  status: 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+  status: QuestStatus;
   skills: Array<{
     skillId: string;
     name: string;
@@ -31,8 +32,8 @@ export default function GuildLeaderDashboard() {
     async function fetchQuests() {
       try {
         const [unassigned, assigned] = await Promise.all([
-          getQuests('created', 'open'),
-          getQuests('created', 'assigned'),
+          getQuests('created', QuestStatus.OPEN),
+          getQuests('created', QuestStatus.IN_PROGRESS),
         ]);
         setUnassignedQuests(unassigned);
         setAssignedQuests(assigned);

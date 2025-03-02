@@ -27,6 +27,7 @@ model User {
   teamMemberships   TeamMembership[]    @relation("TeamMemberships")
   notifications     Notification[]
   taggedSkills      TaggedSkill[]
+  teams             TeamsOnUsers[]
 }
 
 model BusinessDetails {
@@ -132,6 +133,26 @@ model Notification {
   read      Boolean         @default(false)
   createdAt DateTime        @default(now())
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String?
+  inviteCode  String   @unique @default(cuid())
+  skills      String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  members     TeamsOnUsers[]
+}
+
+model TeamsOnUsers {
+  team      Team     @relation(fields: [teamId], references: [id])
+  teamId    String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  @@id([teamId, userId])
 }
 
 enum QuestStatus {

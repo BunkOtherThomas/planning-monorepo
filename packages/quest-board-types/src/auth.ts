@@ -13,4 +13,15 @@ export interface SignupRequest {
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface AuthResponse {
+  user: {
+    id: string;
+    email: string;
+    displayName: string;
+    avatarUrl?: string;
+    isProjectManager: boolean;
+    isTeamMember: boolean;
+  };
 } 
