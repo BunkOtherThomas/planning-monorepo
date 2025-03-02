@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import { prisma } from '@quest-board/database';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: Request) {
   try {
     // Get the token from the Authorization header
@@ -16,23 +14,28 @@ export async function GET(request: Request) {
     
     // Verify the token
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
-
-    // Find teams that the user belongs to
-    const userTeams = await prisma.teamsOnUsers.findMany({
-      where: {
-        userId: decoded.userId
-      }
+    
+    // Get user data
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        isProjectManager: true,
+        isTeamMember: true,
+        businessDetails: true,
+      },
     });
 
-    // Check if the user belongs to any teams
-    const hasTeamWithSkills = userTeams.length > 0;
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
-    return NextResponse.json({ hasTeamWithSkills });
+    return NextResponse.json(user);
   } catch (error) {
-    console.error('Error checking team membership:', error);
-    return NextResponse.json(
-      { error: 'Failed to check team membership' },
-      { status: 500 }
-    );
+    console.error('Error fetching user data:', error);
+    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
 } 

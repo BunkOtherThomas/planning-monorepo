@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Header from './Header';
+import { checkTeamStatus } from '../lib/api';
 
 interface User {
   id: string;
@@ -28,28 +29,50 @@ export default function AuthLayout({
   const isOnboardingRoute = onboardingRoutes.includes(pathname);
 
   useEffect(() => {
-    // Check if user is logged in by looking for the auth token in cookies
-    const cookies = document.cookie.split(';');
-    const hasAuthToken = cookies.some(cookie => 
-      cookie.trim().startsWith('auth-token=')
-    );
-    
-    // If not logged in and not on a public route, redirect to login
-    if (!hasAuthToken && !isPublicRoute) {
-      router.push(`/login?from=${encodeURIComponent(pathname)}`);
-      return;
-    }
+    const checkAuth = async () => {
+      // Check if user is logged in by looking for the auth token in cookies
+      const cookies = document.cookie.split(';');
+      const authToken = cookies
+        .find(cookie => cookie.trim().startsWith('auth-token='))
+        ?.split('=')[1];
 
-    // Set mock user data for now
-    if (hasAuthToken) {
-      setUser({
-        id: '1',
-        displayName: 'Test User',
-        isProjectManager: true,
-        isTeamMember: true,
-        hasCompletedOnboarding: false, // This will come from the API
-      });
-    }
+      if (!authToken && !isPublicRoute) {
+        router.push(`/login?from=${encodeURIComponent(pathname)}`);
+        return;
+      }
+
+      if (authToken && isPublicRoute) {
+        router.push('/dashboard');
+        return;
+      }
+
+      // If we have a token and we're not on a public route, fetch user data
+      if (authToken && !isPublicRoute) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            },
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          } else {
+            // If we can't get user data, clear the token and redirect to login
+            document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            router.push('/login');
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+          router.push('/login');
+        }
+      }
+    };
+
+    checkAuth();
   }, [isPublicRoute, router, pathname]);
 
   // Handle onboarding redirection
@@ -64,17 +87,11 @@ export default function AuthLayout({
   useEffect(() => {
     const checkUserTeam = async () => {
       if (user?.isProjectManager) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        if (!apiUrl) return;
-
         try {
-          const response = await fetch(`${apiUrl}/api/teams/check`, {
-            credentials: 'include'
-          });
-          const data = await response.json();
+          const { hasTeamWithSkills } = await checkTeamStatus();
 
           // If the user doesn't have a team with skills, redirect to goals
-          if (!data.hasTeamWithSkills && !pathname.startsWith('/goals')) {
+          if (!hasTeamWithSkills && !pathname.startsWith('/goals')) {
             router.push('/goals');
           }
         } catch (error) {

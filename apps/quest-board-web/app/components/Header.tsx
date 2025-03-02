@@ -19,9 +19,12 @@ export default function Header({ user }: HeaderProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      router.push('/login');
+      // Force a page reload to clear all state and redirect to login
+      window.location.href = '/login';
     } catch (error) {
       console.error('Failed to logout:', error);
+      // Even if logout fails, redirect to login
+      window.location.href = '/login';
     }
   };
 
