@@ -258,7 +258,7 @@ export async function createTeam(skills: string[]) {
   }
 }
   export async function checkTeamStatus() {
-    const response = await fetch(`${API_BASE_URL}/api/teams/status`, {
+    const response = await fetch(`${API_BASE_URL}/api/teams/check`, {
       ...getDefaultOptions(true),
     });
     return handleResponse<{ hasTeamWithSkills: boolean }>(response);
