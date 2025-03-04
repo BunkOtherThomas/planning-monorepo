@@ -5,29 +5,31 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist/**"
-  ],
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf .turbo node_modules dist",
+    "clean": "rimraf .turbo node_modules dist",
+    "db:create": "PGPASSWORD=postgres psql -U postgres -h localhost -d postgres -c 'CREATE DATABASE quest_board;' || true",
     "db:generate": "prisma generate",
     "db:push": "prisma db push --skip-generate",
-    "db:reset": "prisma db push --force-reset && prisma db push",
+    "db:reset": "pnpm run db:create && prisma db push --force-reset && prisma db push --accept-data-loss && prisma generate",
     "dev": "tsup --watch",
     "format": "prisma format",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "prebuild": "pnpm run db:generate",
+    "predev": "pnpm run db:generate",
+    "studio": "prisma studio",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^6.4.1"
+    "@prisma/client": "^5.7.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "prisma": "^6.4.1",
-    "tsup": "^8.0.2",
+    "@types/node": "^20.10.6",
+    "prisma": "^5.7.1",
+    "rimraf": "^5.0.5",
+    "tsup": "^8.0.1",
     "typescript": "^5.3.3"
   }
 } 

@@ -47,21 +47,25 @@ function getAuthToken(): string | null {
 // Helper function to get default options with auth header if needed
 function getDefaultOptions(requiresAuth: boolean = false): RequestInit {
   const headers: Record<string, string> = {
-    'content-type': 'application/json'  // lowercase for consistency
+    'Content-Type': 'application/json'  // Use consistent casing
   };
 
   if (requiresAuth) {
     const token = getAuthToken();
+    
     if (!token) {
       throw new Error('No authentication token available');
     }
-    headers['authorization'] = `Bearer ${token}`;  // lowercase for consistency
+    
+    headers['Authorization'] = `Bearer ${token}`;  // Use consistent casing
   }
 
-  return {
+  const options = {
     headers,
     credentials: 'include' as const
   };
+
+  return options;
 }
 
 // Auth API calls
@@ -113,28 +117,13 @@ export async function logout(): Promise<void> {
   }
 }
 
-export async function signup(
-  email: string,
-  password: string,
-  displayName: string,
-  isProjectManager: boolean,
-  isTeamMember: boolean,
-  businessDetails?: {
-    name: string;
-    description: string;
-  }
-): Promise<AuthResponse> {
+export async function signup(data: SignupRequest): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-    ...defaultOptions,
     method: 'POST',
-    body: JSON.stringify({
-      email,
-      password,
-      displayName,
-      isProjectManager,
-      isTeamMember,
-      businessDetails
-    } as SignupRequest),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
@@ -230,13 +219,12 @@ export async function getQuests(type: 'created' | 'assigned' | 'available', stat
 }
 
 export async function createTeam(skills: string[]) {
-  
   const options = {
     ...getDefaultOptions(true),
     method: 'POST',
     body: JSON.stringify({ skills })
   };
-    
+  
   try {
     const response = await fetch(`${API_BASE_URL}/api/teams`, options);
     
@@ -245,7 +233,6 @@ export async function createTeam(skills: string[]) {
       console.error('Team creation failed:', {
         status: response.status,
         statusText: response.statusText,
-        headers: Array.from(response.headers.entries()),
         error: errorData
       });
       throw new Error(errorData.error || `Failed to create team: ${response.status}`);
@@ -263,3 +250,15 @@ export async function createTeam(skills: string[]) {
     });
     return handleResponse<{ hasTeamWithSkills: boolean }>(response);
   }
+
+export async function getCurrentUser(): Promise<User> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to get current user');
+  }
+
+  return response.json();
+}

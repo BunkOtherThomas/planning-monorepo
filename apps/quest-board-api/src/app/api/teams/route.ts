@@ -2,23 +2,26 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@quest-board/database';
 import { verify } from 'jsonwebtoken';
 
-export async function POST(request: Request) {
-  console.log('POST /api/teams - Request received');
+export async function POST(request: Request) {  
+  // Get the token from the Authorization header
+  const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
+
+  if (!authHeader?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: `Missing token` }, { status: 401 });
+  }
+
+  const token = authHeader.split(' ')[1];
+
   try {
-    // Log all headers for debugging
-    const headers = Object.fromEntries(request.headers.entries());
-
-    // Get the token from the Authorization header
-    const authHeader = request.headers.get('Authorization');
-
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Missing token' }, { status: 401 });
-    }
-
-    const token = authHeader.split(' ')[1];
-    
     // Verify the token
-    const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
+    let decoded;
+    try {
+      decoded = verify(token, process.env.JWT_SECRET!) as { userId: string };
+    }
+    catch (e) {
+      console.error('section 1', {token, sectrey: process.env.JWT_SECRET});
+      throw new Error('Invalid token');
+    }
 
     const body = await request.json();
 
@@ -27,12 +30,12 @@ export async function POST(request: Request) {
     // Create a new team with the current user as the first member
     const team = await prisma.team.create({
       data: {
-        skills,
         members: {
           create: {
             userId: decoded.userId
           }
-        }
+        },
+        skills
       },
       include: {
         members: true
@@ -41,8 +44,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ team });
   } catch (error) {
-    console.error('Error in POST /api/teams:', error);
-    return NextResponse.json({ error: 'Failed to create team' }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Invalid token' },
+      { status: 401 }
+    );
   }
 }
 

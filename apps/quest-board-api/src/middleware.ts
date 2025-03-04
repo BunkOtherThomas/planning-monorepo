@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const allowedHeaders = [
-  'content-type',
-  'authorization'
+  'Content-Type',
+  'Authorization'
 ];
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'http://localhost:3000',
+  'Access-Control-Allow-Origin': 'http://localhost:3030',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': allowedHeaders.join(', '),
   'Access-Control-Allow-Credentials': 'true',
@@ -17,15 +17,16 @@ const corsHeaders = {
 export async function middleware(request: NextRequest) {
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
-      return new NextResponse(null, { 
+    return new NextResponse(null, { 
       status: 204,
       headers: corsHeaders
     });
   }
 
-  // For all other requests, add CORS headers to the response
+  // For all other requests, clone the request to preserve headers
   const response = NextResponse.next();
   
+  // Add CORS headers
   Object.entries(corsHeaders).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
