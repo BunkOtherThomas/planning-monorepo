@@ -24,4 +24,5 @@ export interface AuthResponse {
     isProjectManager: boolean;
     isTeamMember: boolean;
   };
+  token: string;
 } 
