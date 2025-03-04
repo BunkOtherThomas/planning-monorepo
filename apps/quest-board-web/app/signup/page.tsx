@@ -41,13 +41,18 @@ export default function Signup() {
     }
 
     try {
-      await signup({
+      const response = await signup({
         email,
         password,
         displayName: username,
         isProjectManager: role === 'guild_leader',
         isTeamMember: role === 'adventurer'
       });
+
+      // Set the auth token in cookies with SameSite attribute
+      const cookieValue = `auth-token=${response.token}; path=/; max-age=604800; SameSite=Lax`;  // 7 days
+      document.cookie = cookieValue;
+
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof Error && err.message.includes('email')) {

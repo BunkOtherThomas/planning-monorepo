@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { prisma } from '@quest-board/database';
 import { z } from 'zod';
+import { sign } from 'jsonwebtoken';
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -42,15 +43,25 @@ export async function POST(req: Request) {
       },
     });
 
+    // Generate JWT token
+    const token = sign(
+      {
+        userId: user.id,
+        email: user.email,
+        isProjectManager: user.isProjectManager,
+        isTeamMember: user.isTeamMember,
+      },
+      process.env.JWT_SECRET || 'your-secret-scroll',
+      { expiresIn: '7d' }
+    );
+
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
     return NextResponse.json(
       { 
-        user: {
-          id: user.id,
-          email: user.email,
-          displayName: user.displayName,
-          isProjectManager: user.isProjectManager,
-          isTeamMember: user.isTeamMember,
-        }
+        token,
+        user: userWithoutPassword,
       },
       { status: 201 }
     );
