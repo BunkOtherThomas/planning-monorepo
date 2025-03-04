@@ -1,136 +1,41 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { FC } from 'react';
 import Link from 'next/link';
-import { getQuests } from '../../lib/api';
-import { QuestStatus } from '@quest-board/types';
-import styles from './guild-leader.module.css';
+import styles from './page.module.css';
 
-interface Quest {
-  id: string;
-  title: string;
-  description: string;
-  status: QuestStatus;
-  skills: Array<{
-    skillId: string;
-    name: string;
-    weight: number;
-  }>;
-  assignee?: {
-    id: string;
-    displayName: string;
-    avatarUrl?: string;
-  };
-}
-
-export default function GuildLeaderDashboard() {
-  const [unassignedQuests, setUnassignedQuests] = useState<Quest[]>([]);
-  const [assignedQuests, setAssignedQuests] = useState<Quest[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchQuests() {
-      try {
-        const [unassigned, assigned] = await Promise.all([
-          getQuests('created', QuestStatus.OPEN),
-          getQuests('created', QuestStatus.IN_PROGRESS),
-        ]);
-        setUnassignedQuests(unassigned);
-        setAssignedQuests(assigned);
-      } catch (error) {
-        console.error('Failed to fetch quests:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchQuests();
-  }, []);
-
-  if (isLoading) {
-    return <div>Loading your quest boards...</div>;
-  }
-
+const PMDashboard: FC = () => {
   return (
-    <div className={styles.container}>
-      <div className={styles.actions}>
-        <Link href="/quests/new" className={styles.newQuestButton}>
-          Post New Quest
-        </Link>
-        <Link href="/team" className={styles.teamButton}>
-          View Team
-        </Link>
-      </div>
-
+    <div className={styles.dashboard}>
       <div className={styles.questBoards}>
-        <section className={styles.questBoard}>
+        <section className={styles.questSection}>
           <h2>Unassigned Quests</h2>
-          {unassignedQuests.length === 0 ? (
-            <p>No unassigned quests available</p>
-          ) : (
-            <div className={styles.questList}>
-              {unassignedQuests.map((quest) => (
-                <Link 
-                  href={`/quests/${quest.id}`} 
-                  key={quest.id}
-                  className={styles.questCard}
-                >
-                  <h3>{quest.title}</h3>
-                  <p>{quest.description}</p>
-                  <div className={styles.skills}>
-                    {quest.skills.map((skill) => (
-                      <span key={skill.skillId} className={styles.skill}>
-                        {skill.name} ({skill.weight}%)
-                      </span>
-                    ))}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          <div className={styles.questGrid}>
+            {/* Quest cards will be mapped here */}
+          </div>
         </section>
 
-        <section className={styles.questBoard}>
+        <section className={styles.questSection}>
           <h2>Assigned Quests</h2>
-          {assignedQuests.length === 0 ? (
-            <p>No assigned quests</p>
-          ) : (
-            <div className={styles.questList}>
-              {assignedQuests.map((quest) => (
-                <Link 
-                  href={`/quests/${quest.id}`} 
-                  key={quest.id}
-                  className={styles.questCard}
-                >
-                  <h3>{quest.title}</h3>
-                  <p>{quest.description}</p>
-                  <div className={styles.assignee}>
-                    {quest.assignee?.avatarUrl ? (
-                      <img 
-                        src={quest.assignee.avatarUrl} 
-                        alt={quest.assignee.displayName} 
-                        className={styles.assigneeAvatar}
-                      />
-                    ) : (
-                      <div className={styles.assigneePlaceholder}>
-                        {quest.assignee?.displayName[0]}
-                      </div>
-                    )}
-                    <span>{quest.assignee?.displayName}</span>
-                  </div>
-                  <div className={styles.skills}>
-                    {quest.skills.map((skill) => (
-                      <span key={skill.skillId} className={styles.skill}>
-                        {skill.name} ({skill.weight}%)
-                      </span>
-                    ))}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          <div className={styles.questGrid}>
+            {/* Quest cards will be mapped here */}
+          </div>
         </section>
+
+        <Link href="/quests/new" className={styles.createQuestButton}>
+          Create New Quest
+        </Link>
       </div>
+
+      <section className={styles.teamOverview}>
+        <h2>Team Overview</h2>
+        <div className={styles.teamGrid}>
+          {/* Team member cards will be mapped here */}
+        </div>
+        <Link href="/team" className={styles.viewTeamButton}>
+          View Full Team
+        </Link>
+      </section>
     </div>
   );
-} 
+};
+
+export default PMDashboard; 

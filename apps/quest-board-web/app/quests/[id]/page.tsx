@@ -3,33 +3,8 @@
 import { FC, useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import styles from './page.module.css';
-
-interface Quest {
-  id: string;
-  title: string;
-  description: string;
-  status: 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
-  difficulty: number;
-  skills: {
-    name: string;
-    level: number;
-  }[];
-  assignedTo?: {
-    id: string;
-    displayName: string;
-    avatarUrl: string;
-  };
-  suggestedAdventurers: {
-    id: string;
-    displayName: string;
-    avatarUrl: string;
-    skillLevels: {
-      name: string;
-      level: number;
-    }[];
-    type: 'highest' | 'second' | 'underdog';
-  }[];
-}
+import { getOpenQuestsForUser, getSkillsForUser } from '../../lib/api';
+import { Quest } from '@quest-board/types';
 
 const QuestPage: FC = () => {
   const params = useParams();
@@ -43,8 +18,8 @@ const QuestPage: FC = () => {
     const fetchQuest = async () => {
       try {
         const [questResponse, skillsResponse] = await Promise.all([
-          fetch(`/api/quests/${params.id}`),
-          fetch('/api/skills'),
+          getOpenQuestsForUser(params.id as string),
+          getSkillsForUser(params.id as string),
         ]);
 
         if (!questResponse.ok || !skillsResponse.ok) {

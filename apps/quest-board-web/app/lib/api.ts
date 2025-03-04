@@ -5,6 +5,7 @@ import {
   QuestCreationRequest,
   QuestStatus,
   AuthResponse,
+  Quest,
 } from '@quest-board/types';
 
 // API routes are now running on port 3001
@@ -173,6 +174,29 @@ export async function getSkills(includeGlobal = true) {
   }
 
   return response.json();
+}
+
+export async function getSkillsForUser(id: string) {
+  const placeholderSkill = 'Playing tennis';
+  return {ok: true, json: () => Promise.resolve([placeholderSkill])};
+}
+
+export async function getOpenQuestsForUser(id: string) {
+  const placeholderQuest: Quest = {
+    id: '1',
+    title: 'Placeholder Quest',
+    description: 'Placeholder Description',
+    status: 'open',
+    difficulty: 1,
+    skills: [],
+    assignedTo: {
+      id: '1',
+      displayName: 'Placeholder User',
+      avatarUrl: 'https://via.placeholder.com/150',
+    },
+    suggestedAdventurers: [],
+  };
+  return {ok: true, json: () => Promise.resolve(placeholderQuest)};
 }
 
 export async function createQuest(

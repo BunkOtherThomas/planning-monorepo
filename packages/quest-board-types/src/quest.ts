@@ -46,3 +46,30 @@ export interface AssignQuestRequest {
   questId: string;
   userId: string;
 } 
+
+export interface Quest {
+    id: string;
+    title: string;
+    description: string;
+    status: 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+    difficulty: number;
+    skills: {
+      name: string;
+      level: number;
+    }[];
+    assignedTo?: {
+      id: string;
+      displayName: string;
+      avatarUrl: string;
+    };
+    suggestedAdventurers: {
+      id: string;
+      displayName: string;
+      avatarUrl: string;
+      skillLevels: {
+        name: string;
+        level: number;
+      }[];
+      type: 'highest' | 'second' | 'underdog';
+    }[];
+  }
