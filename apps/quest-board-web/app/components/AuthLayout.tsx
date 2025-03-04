@@ -8,7 +8,7 @@ import { checkTeamStatus } from '../lib/api';
 interface User {
   id: string;
   displayName: string;
-  avatarUrl?: string;
+  avatarId: number;
   isProjectManager: boolean;
   isTeamMember: boolean;
   hasCompletedOnboarding?: boolean;
@@ -58,7 +58,10 @@ export default function AuthLayout({
 
           if (response.ok) {
             const userData = await response.json();
-            setUser(userData);
+            setUser({
+              ...userData,
+              avatarId: userData.avatarId || 0 // Default to first avatar if none selected
+            });
           } else {
             // If we can't get user data, clear the token and redirect to login
             document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';

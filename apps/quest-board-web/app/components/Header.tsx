@@ -3,11 +3,12 @@
 import { useRouter } from 'next/navigation';
 import styles from './Header.module.css';
 import { logout } from '../lib/api';
+import { Avatar } from './Avatar';
 
 interface HeaderProps {
   user?: {
     displayName: string;
-    avatarUrl?: string;
+    avatarId: number;
     isProjectManager: boolean;
     isTeamMember: boolean;
   };
@@ -41,14 +42,8 @@ export default function Header({ user }: HeaderProps) {
         {user && (
           <div className={styles.userSection}>
             <div className={styles.userInfo}>
+              <Avatar avatarId={user.avatarId} size={100} className={styles.avatar} />
               <span className={styles.userName}>{user.displayName}</span>
-              {user.avatarUrl && (
-                <img
-                  src={user.avatarUrl}
-                  alt={`${user.displayName}'s avatar`}
-                  className={styles.avatar}
-                />
-              )}
             </div>
             <button
               className={styles.signOut}

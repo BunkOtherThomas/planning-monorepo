@@ -164,7 +164,7 @@ describe('Authentication Flow', () => {
     cy.contains(/enter/i).click();
     
     // Check loading state immediately after click
-    cy.contains(/opening/i, { timeout: 1000 }).should('be.visible');
+    cy.contains(/Opening Portal\.\.\./i, { timeout: 1000 }).should('be.visible');
     cy.wait('@loginRequest');
   });
 }); 

@@ -4,6 +4,7 @@ export interface SignupRequest {
   displayName: string;
   isProjectManager: boolean;
   isTeamMember: boolean;
+  avatarId: number;
   businessDetails?: {
     name: string;
     description: string;

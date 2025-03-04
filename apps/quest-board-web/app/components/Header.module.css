@@ -31,10 +31,22 @@
   letter-spacing: 1px;
 }
 
-.userActions {
+.userSection {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userName {
+  color: var(--accent-gold);
+  font-family: var(--font-cinzel);
+  font-size: 1.1rem;
 }
 
 .notifications {

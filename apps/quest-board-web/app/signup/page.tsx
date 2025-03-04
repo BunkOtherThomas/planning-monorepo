@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import styles from './signup.module.css';
 import { signup } from '../lib/api';
 import PasswordRequirements from '../components/PasswordRequirements';
+import { AvatarSelector } from '../components/AvatarSelector';
 
 type Role = 'guild_leader' | 'adventurer';
 
@@ -16,6 +17,7 @@ export default function Signup() {
   const [role, setRole] = useState<Role>('adventurer');
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [selectedAvatarId, setSelectedAvatarId] = useState(0);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,14 +48,20 @@ export default function Signup() {
         password,
         displayName: username,
         isProjectManager: role === 'guild_leader',
-        isTeamMember: role === 'adventurer'
+        isTeamMember: role === 'adventurer',
+        avatarId: selectedAvatarId
       });
 
       // Set the auth token in cookies with SameSite attribute
       const cookieValue = `auth-token=${response.token}; path=/; max-age=604800; SameSite=Lax`;  // 7 days
       document.cookie = cookieValue;
 
-      router.push('/dashboard');
+      // Redirect based on role
+      if (role === 'guild_leader') {
+        router.push('/goals');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       if (err instanceof Error && err.message.includes('email')) {
         setError('This scroll of identification is already registered. Please use another.');
@@ -72,7 +80,7 @@ export default function Signup() {
         {error && <div className={styles.error}>{error}</div>}
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
-            <label htmlFor="username">Display Name</label>
+            <label>Display Name</label>
             <input
               type="text"
               id="username"
@@ -155,8 +163,15 @@ export default function Signup() {
               </label>
             </div>
           </div>
+          <div className={styles.avatarSection}>
+            <label>Choose Your Avatar</label>
+            <AvatarSelector
+              onSelect={setSelectedAvatarId}
+              initialAvatarId={selectedAvatarId}
+            />
+          </div>
           <button 
-            type="submit" 
+            type="submit"
             className={`${styles.submitButton} ${isLoading ? styles.loading : ''}`}
             disabled={isLoading || !isPasswordValid}
           >

@@ -212,4 +212,16 @@
     font-size: 1rem;
     padding: 10px 20px;
   }
+}
+
+.avatarSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.avatarSection label {
+  color: var(--accent-gold);
+  font-family: var(--font-cinzel);
+  font-size: 1.1rem;
 } 
