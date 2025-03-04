@@ -75,15 +75,6 @@ export default function AuthLayout({
     checkAuth();
   }, [isPublicRoute, router, pathname]);
 
-  // Handle onboarding redirection
-  useEffect(() => {
-    if (user && !isPublicRoute && !isOnboardingRoute) {
-      if (user.isProjectManager && !user.hasCompletedOnboarding) {
-        router.push('/goals');
-      }
-    }
-  }, [user, isPublicRoute, isOnboardingRoute, router]);
-
   useEffect(() => {
     const checkUserTeam = async () => {
       if (user?.isProjectManager) {

@@ -14,14 +14,7 @@ export async function POST(request: Request) {
 
   try {
     // Verify the token
-    let decoded;
-    try {
-      decoded = verify(token, process.env.JWT_SECRET!) as { userId: string };
-    }
-    catch (e) {
-      console.error('section 1', {token, sectrey: process.env.JWT_SECRET});
-      throw new Error('Invalid token');
-    }
+    const decoded = verify(token, process.env.JWT_SECRET ?? 'your-secret-scroll') as { userId: string };
 
     const body = await request.json();
 

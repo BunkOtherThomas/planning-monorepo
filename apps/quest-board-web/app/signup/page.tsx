@@ -41,13 +41,13 @@ export default function Signup() {
     }
 
     try {
-      await signup(
+      await signup({
         email,
         password,
-        username,
-        role === 'guild_leader',
-        role === 'adventurer'
-      );
+        displayName: username,
+        isProjectManager: role === 'guild_leader',
+        isTeamMember: role === 'adventurer'
+      });
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof Error && err.message.includes('email')) {
