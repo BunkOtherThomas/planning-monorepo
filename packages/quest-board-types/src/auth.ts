@@ -21,7 +21,6 @@ export interface AuthResponse {
     id: string;
     email: string;
     displayName: string;
-    avatarUrl?: string;
     isProjectManager: boolean;
     avatarId: number;
     isTeamMember: boolean;

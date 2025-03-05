@@ -22,10 +22,9 @@ export async function GET(request: Request) {
         id: true,
         email: true,
         displayName: true,
-        avatarUrl: true,
+        avatarId: true,
         isProjectManager: true,
         isTeamMember: true,
-        businessDetails: true,
       },
     });
 

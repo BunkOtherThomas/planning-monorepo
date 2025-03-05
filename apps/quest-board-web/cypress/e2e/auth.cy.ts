@@ -12,7 +12,7 @@ describe('Authentication Flow', () => {
           email: 'test@example.com',
           isProjectManager: false,
           isTeamMember: true,
-          avatarUrl: null,
+          avatarId: 0,
         },
       },
     }).as('signupRequest');
@@ -28,7 +28,7 @@ describe('Authentication Flow', () => {
           email: 'test@example.com',
           isProjectManager: false,
           isTeamMember: true,
-          avatarUrl: null,
+          avatarId: 0,
         },
       },
     }).as('loginRequest');

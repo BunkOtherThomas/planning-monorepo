@@ -26,7 +26,6 @@ export default function AuthLayout({
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const isPublicRoute = publicRoutes.includes(pathname);
-  const isOnboardingRoute = onboardingRoutes.includes(pathname);
 
   useEffect(() => {
     const checkAuth = async () => {

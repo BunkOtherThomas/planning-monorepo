@@ -10,7 +10,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "displayName" TEXT NOT NULL,
-    "avatarUrl" TEXT,
+    "avatarId" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "isProjectManager" BOOLEAN NOT NULL DEFAULT false,

@@ -15,7 +15,7 @@ interface User {
   id: string;
   email: string;
   displayName: string;
-  avatarUrl?: string;
+  avatarId?: number;
   isProjectManager: boolean;
   isTeamMember: boolean;
 }
@@ -192,7 +192,7 @@ export async function getOpenQuestsForUser(id: string) {
     assignedTo: {
       id: '1',
       displayName: 'Placeholder User',
-      avatarUrl: 'https://via.placeholder.com/150',
+      avatarId: 0,
     },
     suggestedAdventurers: [],
   };

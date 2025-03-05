@@ -114,7 +114,7 @@ export async function GET(request: Request) {
                 'user', json_build_object(
                   'id', u.id,
                   'displayName', u.displayName,
-                  'avatarUrl', u.avatarUrl
+                  'avatarId', u.avatarId
                 )
               )
             ) FILTER (WHERE us.id IS NOT NULL),

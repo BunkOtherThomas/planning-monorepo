@@ -192,11 +192,6 @@ const QuestPage: FC = () => {
           <h2>Assignment</h2>
           {quest.assignedTo ? (
             <div className={styles.assignedAdventurer}>
-              <img
-                src={quest.assignedTo.avatarUrl}
-                alt={quest.assignedTo.displayName}
-                className={styles.adventurerAvatar}
-              />
               <div className={styles.adventurerInfo}>
                 <h3>{quest.assignedTo.displayName}</h3>
                 <button
@@ -213,11 +208,6 @@ const QuestPage: FC = () => {
               <div className={styles.adventurersList}>
                 {quest.suggestedAdventurers.map((adventurer) => (
                   <div key={adventurer.id} className={styles.adventurerCard}>
-                    <img
-                      src={adventurer.avatarUrl}
-                      alt={adventurer.displayName}
-                      className={styles.adventurerAvatar}
-                    />
                     <div className={styles.adventurerInfo}>
                       <h4>{adventurer.displayName}</h4>
                       <div className={styles.adventurerSkills}>

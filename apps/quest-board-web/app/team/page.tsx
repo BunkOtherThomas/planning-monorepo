@@ -7,7 +7,7 @@ import styles from './page.module.css';
 interface TeamMember {
   id: string;
   displayName: string;
-  avatarUrl: string;
+  avatarId: number;
   topSkills: {
     name: string;
     level: number;
@@ -90,11 +90,6 @@ const TeamPage: FC = () => {
         {filteredMembers.map((member) => (
           <div key={member.id} className={styles.memberCard}>
             <div className={styles.memberHeader}>
-              <img
-                src={member.avatarUrl}
-                alt={member.displayName}
-                className={styles.avatar}
-              />
               <h2>{member.displayName}</h2>
             </div>
 

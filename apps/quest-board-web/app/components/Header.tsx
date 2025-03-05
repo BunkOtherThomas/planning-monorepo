@@ -42,7 +42,7 @@ export default function Header({ user }: HeaderProps) {
         {user && (
           <div className={styles.userSection}>
             <div className={styles.userInfo}>
-              <Avatar avatarId={user.avatarId} size={100} className={styles.avatar} />
+              <Avatar avatarId={user.avatarId} size={40} className={styles.avatar} />
               <span className={styles.userName}>{user.displayName}</span>
             </div>
             <button

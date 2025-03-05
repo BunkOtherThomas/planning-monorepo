@@ -60,12 +60,12 @@ export interface Quest {
     assignedTo?: {
       id: string;
       displayName: string;
-      avatarUrl: string;
+      avatarId: number;
     };
     suggestedAdventurers: {
       id: string;
       displayName: string;
-      avatarUrl: string;
+      avatarId: number;
       skillLevels: {
         name: string;
         level: number;

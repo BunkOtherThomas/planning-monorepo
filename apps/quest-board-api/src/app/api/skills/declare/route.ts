@@ -26,7 +26,7 @@ interface UserSkill {
   user: {
     id: string;
     displayName: string;
-    avatarUrl: string | null;
+    avatarId: number | null;
   };
 }
 
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
           SELECT json_build_object(
             'id', u.id,
             'displayName', u.displayName,
-            'avatarUrl', u.avatarUrl
+            'avatarId', u.avatarId
           )
           FROM "User" u
           WHERE u.id = UserSkill.userId

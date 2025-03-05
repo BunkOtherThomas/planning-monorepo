@@ -7,7 +7,7 @@ import styles from './dashboard.module.css';
 interface User {
   id: string;
   displayName: string;
-  avatarUrl?: string;
+  avatarId?: number;
   isProjectManager: boolean;
   isTeamMember: boolean;
 }

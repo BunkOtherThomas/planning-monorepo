@@ -84,20 +84,6 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-.avatarPlaceholder {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid var(--accent-gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: var(--accent-gold);
-  font-family: var(--font-cinzel);
-}
-
 .signOut {
   background: transparent;
   border: 2px solid var(--accent-gold);
