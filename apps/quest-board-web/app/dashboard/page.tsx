@@ -10,7 +10,7 @@ export default function Dashboard() {
   useEffect(() => {
     // For now, we'll just use a placeholder role
     // Later, this will be fetched from the API or user context
-    setUserRole('guild_leader');
+    setUserRole('adventurer');
   }, []);
 
   if (!userRole) {

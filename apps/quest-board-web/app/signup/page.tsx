@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './signup.module.css';
@@ -8,7 +8,7 @@ import { signup } from '../lib/api';
 import PasswordRequirements from '../components/PasswordRequirements';
 import { AvatarSelector } from '../components/AvatarSelector';
 
-export default function Signup() {
+function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string>('');
@@ -182,5 +182,13 @@ export default function Signup() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Signup() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignupForm />
+    </Suspense>
   );
 } 
