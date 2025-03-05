@@ -327,13 +327,44 @@
 }
 
 .inviteCode {
-  display: inline-block;
-  background: var(--bg-secondary);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 1.1rem;
-  color: var(--text-primary);
+  display: block;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--accent-brown);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-lora);
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: all;
+}
+
+.inviteHeader {
+  font-family: var(--font-cinzel);
+  font-size: 1.2rem;
+  color: var(--accent-gold);
+  margin-bottom: 0.5rem;
+  text-shadow: var(--text-shadow);
+}
+
+.inviteUrl {
+  font-family: var(--font-lora);
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.inviteCode:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-gold);
+}
+
+.inviteCode.copied {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: #00ff00;
+}
+
+.inviteCode.copied .inviteUrl {
+  color: #00ff00;
 }
 
 .teamMembers {
@@ -379,4 +410,24 @@
   text-align: center;
   padding: 2rem;
   color: var(--text-secondary);
+}
+
+.copyMessage {
+  margin-top: 0.5rem;
+  color: #00ff00;
+  font-family: var(--font-lora);
+  font-size: 0.9rem;
+  text-align: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 } 
