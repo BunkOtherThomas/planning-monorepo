@@ -269,11 +269,25 @@ export async function createTeam(skills: string[]) {
 
 export async function getCurrentUser(): Promise<User> {
   const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    ...getDefaultOptions(true),
     credentials: 'include',
   });
 
   if (!response.ok) {
     throw new Error('Failed to get current user');
+  }
+
+  return response.json();
+}
+
+export async function getCurrentTeam() {
+  const response = await fetch(`${API_BASE_URL}/api/teams`, {
+    ...getDefaultOptions(true),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch team');
   }
 
   return response.json();

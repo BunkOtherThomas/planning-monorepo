@@ -1,11 +1,68 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { getCurrentTeam } from '../lib/api';
 import styles from './Dashboard.module.css';
 
+interface TeamMember {
+  id: string;
+  displayName: string;
+  avatarId: number;
+}
+
+interface Team {
+  id: string;
+  inviteCode: string;
+  members: TeamMember[];
+}
+
 export default function GuildLeaderDashboard() {
+  const [team, setTeam] = useState<Team | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTeam = async () => {
+      try {
+        const teamData = await getCurrentTeam();
+        setTeam(teamData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch team');
+      }
+    };
+
+    fetchTeam();
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Team Information</h3>
+          {error ? (
+            <div className={styles.error}>{error}</div>
+          ) : team ? (
+            <div className={styles.teamInfo}>
+              <div className={styles.teamCode}>
+                <h4>Team Invite Code</h4>
+                <code className={styles.inviteCode}>{team.inviteCode}</code>
+              </div>
+              <div className={styles.teamMembers}>
+                <h4>Team Members</h4>
+                <ul className={styles.memberList}>
+                  {team.members.map((member) => (
+                    <li key={member.id} className={styles.memberItem}>
+                      <span className={styles.memberAvatar}>👤</span>
+                      <span className={styles.memberName}>{member.displayName}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.loading}>Loading team information...</div>
+          )}
+        </section>
+
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Your Posted Quests</h3>
           <div className={styles.questList}>

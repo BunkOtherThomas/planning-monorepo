@@ -57,21 +57,40 @@ export async function GET(request: Request) {
     // Verify the token
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
 
-    // Get all teams the user is a member of
-    const teams = await prisma.teamsOnUsers.findMany({
+    // Get the team that the user is a member of
+    const teamMembership = await prisma.teamsOnUsers.findFirst({
       where: {
         userId: decoded.userId,
       },
       include: {
-        team: true,
-      },
+        team: {
+          include: {
+            members: {
+              include: {
+                user: true
+              }
+            }
+          }
+        }
+      }
     });
 
-    return NextResponse.json({ teams: teams.map(t => t.team) });
+    if (!teamMembership) {
+      return NextResponse.json({ error: 'User is not a member of any team' }, { status: 404 });
+    }
+
+    const team = teamMembership.team;
+    const teamResponse = {
+      id: team.id,
+      inviteCode: team.inviteCode,
+      members: team.members.map(member => member.user)
+    };
+
+    return NextResponse.json(teamResponse);
   } catch (error) {
-    console.error('Error fetching teams:', error);
+    console.error('Error fetching team:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch teams' },
+      { error: 'Failed to fetch team' },
       { status: 500 }
     );
   }

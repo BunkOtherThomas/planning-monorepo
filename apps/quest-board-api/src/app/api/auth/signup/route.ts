@@ -11,12 +11,13 @@ const signupSchema = z.object({
   isProjectManager: z.boolean().optional(),
   isTeamMember: z.boolean().optional(),
   avatarId: z.number().optional(),
+  teamCode: z.string().optional(),
 });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, displayName, isProjectManager, isTeamMember, avatarId } = signupSchema.parse(body);
+    const { email, password, displayName, isProjectManager, isTeamMember, avatarId, teamCode } = signupSchema.parse(body);
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -44,6 +45,33 @@ export async function POST(req: Request) {
         avatarId: avatarId || 0,
       },
     });
+
+    console.log({teamCode});
+    // If team code is provided, validate and add user to team
+    if (teamCode) {
+      const team = await prisma.team.findUnique({
+        where: { inviteCode: teamCode },
+      });
+
+      if (!team) {
+        // If team not found, delete the created user and return error
+        await prisma.user.delete({
+          where: { id: user.id },
+        });
+        return NextResponse.json(
+          { error: 'Invalid team code' },
+          { status: 400 }
+        );
+      }
+
+      // Add user to team
+      await prisma.teamsOnUsers.create({
+        data: {
+          teamId: team.id,
+          userId: user.id,
+        },
+      });
+    }
 
     // Generate JWT token
     const token = sign(

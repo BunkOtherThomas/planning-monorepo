@@ -57,7 +57,8 @@ function SignupForm() {
         displayName: username,
         isProjectManager: !teamCode, // If no team code, they're a PM
         isTeamMember: !!teamCode, // If there's a team code, they're a team member
-        avatarId: selectedAvatarId
+        avatarId: selectedAvatarId,
+        teamCode: teamCode
       });
 
       // Set the auth token in cookies with SameSite attribute
