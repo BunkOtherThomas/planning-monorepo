@@ -138,7 +138,7 @@ model Notification {
 model Team {
   id          String   @id @default(cuid())
   name        String?
-  inviteCode  String   @unique @default(cuid())
+  inviteCode  String   @unique @default(dbgenerated("substring(md5(random()::text) from 1 for 4)"))
   skills      String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
