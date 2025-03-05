@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import styles from './Header.module.css';
 import { logout } from '../lib/api';
-import { Avatar } from './Avatar';
+import { Avatar } from '../../components/Avatar';
 
 interface HeaderProps {
   user?: {
