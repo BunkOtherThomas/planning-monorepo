@@ -15,6 +15,7 @@ model User {
   password          String
   displayName       String
   avatarUrl         String?
+  avatarId          Int                @default(0)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   isProjectManager   Boolean            @default(false)

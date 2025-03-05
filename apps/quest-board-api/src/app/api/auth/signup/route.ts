@@ -10,12 +10,13 @@ const signupSchema = z.object({
   displayName: z.string().min(2),
   isProjectManager: z.boolean().optional(),
   isTeamMember: z.boolean().optional(),
+  avatarId: z.number().optional(),
 });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, displayName, isProjectManager, isTeamMember } = signupSchema.parse(body);
+    const { email, password, displayName, isProjectManager, isTeamMember, avatarId } = signupSchema.parse(body);
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
         displayName,
         isProjectManager: isProjectManager || false,
         isTeamMember: isTeamMember || false,
+        avatarId: avatarId || 0,
       },
     });
 
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
         userId: user.id,
         email: user.email,
         isProjectManager: user.isProjectManager,
-        isTeamMember: user.isTeamMember,
+        isTeamMember: user.isTeamMember
       },
       process.env.JWT_SECRET || 'your-secret-scroll',
       { expiresIn: '7d' }
