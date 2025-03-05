@@ -6,19 +6,11 @@ import {
   QuestStatus,
   AuthResponse,
   Quest,
+  User,
 } from '@quest-board/types';
 
 // API routes are now running on port 3001
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-interface User {
-  id: string;
-  email: string;
-  displayName: string;
-  avatarId?: number;
-  isProjectManager: boolean;
-  isTeamMember: boolean;
-}
 
 // Common fetch options for all API requests
 const defaultOptions = {

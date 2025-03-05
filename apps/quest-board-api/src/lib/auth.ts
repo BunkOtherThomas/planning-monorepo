@@ -15,12 +15,6 @@ declare module "next-auth" {
       isTeamMember?: boolean;
     } & DefaultSession["user"];
   }
-
-  interface User {
-    id?: string;
-    isProjectManager?: boolean;
-    isTeamMember?: boolean;
-  }
 }
 
 export const authOptions = {

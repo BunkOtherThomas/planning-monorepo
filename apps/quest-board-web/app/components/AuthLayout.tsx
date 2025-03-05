@@ -4,18 +4,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Header from './Header';
 import { checkTeamStatus } from '../lib/api';
-
-interface User {
-  id: string;
-  displayName: string;
-  avatarId: number;
-  isProjectManager: boolean;
-  isTeamMember: boolean;
-  hasCompletedOnboarding?: boolean;
-}
+import { User } from '@quest-board/types';
 
 const publicRoutes = ['/login', '/signup'];
-const onboardingRoutes = ['/goals'];
 
 export default function AuthLayout({
   children,

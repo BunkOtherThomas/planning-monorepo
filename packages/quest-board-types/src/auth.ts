@@ -26,4 +26,13 @@ export interface AuthResponse {
     isTeamMember: boolean;
   };
   token: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarId?: number;
+  isProjectManager: boolean;
+  isTeamMember: boolean;
 } 

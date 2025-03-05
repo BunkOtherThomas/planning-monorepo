@@ -4,14 +4,10 @@ import { useRouter } from 'next/navigation';
 import styles from './Header.module.css';
 import { logout } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
+import { User } from '@quest-board/types';
 
 interface HeaderProps {
-  user?: {
-    displayName: string;
-    avatarId: number;
-    isProjectManager: boolean;
-    isTeamMember: boolean;
-  };
+  user?: User;
 }
 
 export default function Header({ user }: HeaderProps) {
@@ -42,7 +38,7 @@ export default function Header({ user }: HeaderProps) {
         {user && (
           <div className={styles.userSection}>
             <div className={styles.userInfo}>
-              <Avatar avatarId={user.avatarId} size={40} className={styles.avatar} />
+              <Avatar avatarId={user.avatarId ?? 0} size={40} className={styles.avatar} />
               <span className={styles.userName}>{user.displayName}</span>
             </div>
             <button
