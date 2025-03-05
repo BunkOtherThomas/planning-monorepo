@@ -15,6 +15,7 @@ interface Team {
   id: string;
   inviteCode: string;
   members: TeamMember[];
+  skills: string[];
 }
 
 export default function GuildLeaderDashboard() {
@@ -148,6 +149,30 @@ export default function GuildLeaderDashboard() {
           ) : (
             <div className={styles.loading}>Loading team information...</div>
           )}
+        </section>
+
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Team Skills</h3>
+          <div className={styles.questList}>
+            {team?.skills && team.skills.length > 0 ? (
+              team.skills.map((skill, index) => (
+                <div key={index} className={styles.quest}>
+                  <div className={styles.applicantInfo}>
+                    <span className={styles.statIcon}>⚔️</span>
+                    <span>{skill}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className={styles.emptyState}>No skills defined yet</div>
+            )}
+          </div>
+          <div className={styles.stickyAddButton}>
+            <button className={styles.addButton}>
+              <span className={styles.statIcon}>➕</span>
+              Add Skill
+            </button>
+          </div>
         </section>
       </div>
     </div>

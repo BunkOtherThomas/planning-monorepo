@@ -83,7 +83,8 @@ export async function GET(request: Request) {
     const teamResponse = {
       id: team.id,
       inviteCode: team.inviteCode,
-      members: team.members.map(member => member.user)
+      members: team.members.map(member => member.user),
+      skills: team.skills || []
     };
 
     return NextResponse.json(teamResponse);
