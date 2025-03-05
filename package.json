@@ -1,22 +1,24 @@
 {
-  "name": "planning-monorepo",
+  "name": "quest-board",
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
-    "lint": "turbo lint",
+    "clean": "turbo clean",
+    "dev": "pnpm --filter @quest-board/database db:reset && turbo dev --parallel",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint": "turbo lint",
     "test": "turbo test",
-    "test:e2e": "turbo test:e2e"
+    "test:e2e": "turbo test:e2e",
+    "type-check": "turbo type-check"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "prettier": "^3.5.0",
-    "turbo": "^2.4.4"
+    "prettier": "^3.1.1",
+    "turbo": "latest"
   },
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@8.9.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18"
   }
 }
