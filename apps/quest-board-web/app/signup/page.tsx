@@ -8,16 +8,15 @@ import { signup } from '../lib/api';
 import PasswordRequirements from '../components/PasswordRequirements';
 import { AvatarSelector } from '../components/AvatarSelector';
 
-type Role = 'guild_leader' | 'adventurer';
-
 export default function Signup() {
   const router = useRouter();
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [role, setRole] = useState<Role>('adventurer');
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [selectedAvatarId, setSelectedAvatarId] = useState(0);
+  const [teamCode, setTeamCode] = useState('');
+  const [isTeamCodeDisabled, setIsTeamCodeDisabled] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,8 +46,8 @@ export default function Signup() {
         email,
         password,
         displayName: username,
-        isProjectManager: role === 'guild_leader',
-        isTeamMember: role === 'adventurer',
+        isProjectManager: !teamCode, // If no team code, they're a PM
+        isTeamMember: !!teamCode, // If there's a team code, they're a team member
         avatarId: selectedAvatarId
       });
 
@@ -57,7 +56,7 @@ export default function Signup() {
       document.cookie = cookieValue;
 
       // Redirect based on role
-      if (role === 'guild_leader') {
+      if (!teamCode) {
         router.push('/goals');
       } else {
         router.push('/dashboard');
@@ -134,34 +133,23 @@ export default function Signup() {
               disabled={isLoading}
             />
           </div>
-          <div className={styles.roleGroup}>
-            <label>Choose Your Path</label>
-            <div className={styles.roleOptions}>
-              <label className={`${styles.roleOption} ${role === 'adventurer' ? styles.selected : ''}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="adventurer"
-                  checked={role === 'adventurer'}
-                  onChange={(e) => setRole(e.target.value as Role)}
-                  disabled={isLoading}
-                />
-                <span className={styles.roleTitle}>Adventurer</span>
-                <span className={styles.roleDescription}>Take on quests and earn rewards</span>
-              </label>
-              <label className={`${styles.roleOption} ${role === 'guild_leader' ? styles.selected : ''}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="guild_leader"
-                  checked={role === 'guild_leader'}
-                  onChange={(e) => setRole(e.target.value as Role)}
-                  disabled={isLoading}
-                />
-                <span className={styles.roleTitle}>Guild Leader</span>
-                <span className={styles.roleDescription}>Post quests and manage rewards</span>
-              </label>
-            </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="teamCode">Team Code (Optional)</label>
+            <input
+              type="text"
+              id="teamCode"
+              name="teamCode"
+              placeholder="Enter team code to join as an adventurer"
+              className={styles.input}
+              disabled={isLoading || isTeamCodeDisabled}
+              value={teamCode}
+              onChange={(e) => setTeamCode(e.target.value)}
+            />
+            <span className={styles.hint}>
+              {isTeamCodeDisabled 
+                ? "You're joining as an adventurer" 
+                : "Leave empty to create a new team as a Guild Leader"}
+            </span>
           </div>
           <div className={styles.avatarSection}>
             <label>Choose Your Avatar</label>

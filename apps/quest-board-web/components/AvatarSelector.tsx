@@ -1,4 +1,4 @@
-import { useState, MouseEvent } from 'react';
+import { useState } from 'react';
 import { Avatar } from './Avatar';
 import { avatarSprites } from '../lib/avatarSprites';
 
