@@ -12,7 +12,10 @@ export function AvatarSelector({ onSelect, initialAvatarId = 0 }: AvatarSelector
 
   const handleAvatarChange = (event: React.MouseEvent, direction: number) => {
     event.preventDefault();
-    const newId = (currentAvatarId + direction) % avatarSprites.length;
+    let newId = (currentAvatarId + direction) % avatarSprites.length;
+    if (newId < 0) {
+      newId = avatarSprites.length - 1;
+    }
     setCurrentAvatarId(newId);
     onSelect(newId);
   };

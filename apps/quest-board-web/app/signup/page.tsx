@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './signup.module.css';
 import { signup } from '../lib/api';
 import PasswordRequirements from '../components/PasswordRequirements';
@@ -10,6 +10,7 @@ import { AvatarSelector } from '../components/AvatarSelector';
 
 export default function Signup() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState('');
@@ -17,6 +18,14 @@ export default function Signup() {
   const [selectedAvatarId, setSelectedAvatarId] = useState(0);
   const [teamCode, setTeamCode] = useState('');
   const [isTeamCodeDisabled, setIsTeamCodeDisabled] = useState(false);
+
+  useEffect(() => {
+    const teamParam = searchParams.get('team');
+    if (teamParam) {
+      setTeamCode(teamParam);
+      setIsTeamCodeDisabled(true);
+    }
+  }, [searchParams]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
