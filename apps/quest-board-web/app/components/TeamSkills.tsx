@@ -63,14 +63,14 @@ const TeamSkills: FC<TeamSkillsProps> = ({
                 <div className="flex items-center font-lora text-text-light">
                   {getSkillName(skill)}
                 </div>
-                {isNewSkill && (
+                {isNewSkill ? (
                   <div className="flex items-center gap-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onDeclineSkill(skill);
                       }}
-                      className="text-red-500 hover:text-red-600 transition-colors"
+                      className="flex items-center justify-center p-1 rounded-full hover:bg-red-500/10 text-red-500 transition-all hover:scale-110"
                       aria-label="Decline skill"
                     >
                       <svg
@@ -92,7 +92,7 @@ const TeamSkills: FC<TeamSkillsProps> = ({
                         e.stopPropagation();
                         onSkillClick(skill);
                       }}
-                      className="text-green-500 hover:text-green-600 transition-colors"
+                      className="flex items-center justify-center p-1 rounded-full hover:bg-green-500/10 text-green-500 transition-all hover:scale-110"
                       aria-label="Assess skill"
                     >
                       <svg
@@ -105,12 +105,16 @@ const TeamSkills: FC<TeamSkillsProps> = ({
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          d="M5 13l4 4L19 7"
                         />
                       </svg>
                     </button>
                   </div>
-                )}
+                ) : user?.skills?.[skill] !== undefined ? (
+                  <span className="ml-2 font-lora text-text-light">
+                    Lv. {getLevel(user.skills[skill] || 0).level}
+                  </span>
+                ) : null}
               </div>
             );
           })}
