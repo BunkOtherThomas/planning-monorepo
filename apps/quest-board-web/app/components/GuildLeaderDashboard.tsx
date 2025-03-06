@@ -10,6 +10,7 @@ import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 import TeamSkills from './TeamSkills';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
 import { SkillLevelModal } from './SkillLevelModal';
+import { ScrollableSection } from './ScrollableSection';
 
 interface Team {
   id: string;
@@ -193,8 +194,7 @@ export default function GuildLeaderDashboard() {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Team</h3>
+        <ScrollableSection title="Team">
           {error ? (
             <div className={styles.error}>{error}</div>
           ) : team ? (
@@ -232,59 +232,60 @@ export default function GuildLeaderDashboard() {
           ) : (
             <div className={styles.loading}>Loading team information...</div>
           )}
-        </section>
+        </ScrollableSection>
 
-        <TeamSkills
-          team={team}
-          user={currentUser}
-          error={error}
-          onSkillClick={handleSkillClick}
-          onDeclineSkill={handleDeclineSkill}
-          isGuildLeader={true}
-        />
+        <ScrollableSection title="Skills">
+          <TeamSkills
+            team={team}
+            user={currentUser}
+            error={error}
+            onSkillClick={handleSkillClick}
+            onDeclineSkill={handleDeclineSkill}
+            isGuildLeader={true}
+          />
+        </ScrollableSection>
 
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Quests</h3>
-          <div className={styles.questListContainer}>
-            {error ? (
-              <div className={styles.error}>{error}</div>
-            ) : quests.length > 0 ? (
-              sortedQuests.map((quest) => (
-                <div 
-                  key={quest.id} 
-                  className={styles.quest}
-                  onClick={() => setSelectedQuest(quest)}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className={styles.questHeader}>
-                    <h4 className={styles.questTitle}>{quest.title}</h4>
-                    <span className={`${styles.questStatus} ${styles[quest.status.toLowerCase()]}`}>
-                      {quest.status.toLowerCase().replace('_', ' ')}
-                    </span>
-                  </div>
-                  {quest.assignedTo && (
-                    <div className={styles.assignedTo}>
-                      <Avatar avatarId={quest.assignedTo.avatarId} size={24} />
-                      <span>{quest.assignedTo.displayName}</span>
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className={styles.emptyState}>No quests created yet</div>
-            )}
-            <div className={styles.stickyAddButton}>
-              <button 
-                className={styles.addButton}
-                onClick={() => setIsCreateQuestModalOpen(true)}
+        <ScrollableSection 
+          title="Quests"
+          footer={
+            <button 
+              className={styles.addButton}
+              onClick={() => setIsCreateQuestModalOpen(true)}
+            >
+              <span className={styles.statIcon}>➕</span>
+              Create New Quest
+            </button>
+          }
+        >
+          {error ? (
+            <div className={styles.error}>{error}</div>
+          ) : quests.length > 0 ? (
+            sortedQuests.map((quest) => (
+              <div 
+                key={quest.id} 
+                className={styles.quest}
+                onClick={() => setSelectedQuest(quest)}
+                role="button"
+                tabIndex={0}
               >
-                <span className={styles.statIcon}>➕</span>
-                Create New Quest
-              </button>
-            </div>
-          </div>
-        </section>
+                <div className={styles.questHeader}>
+                  <h4 className={styles.questTitle}>{quest.title}</h4>
+                  <span className={`${styles.questStatus} ${styles[quest.status.toLowerCase()]}`}>
+                    {quest.status.toLowerCase().replace('_', ' ')}
+                  </span>
+                </div>
+                {quest.assignedTo && (
+                  <div className={styles.assignedTo}>
+                    <Avatar avatarId={quest.assignedTo.avatarId} size={24} />
+                    <span>{quest.assignedTo.displayName}</span>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className={styles.emptyState}>No quests created yet</div>
+          )}
+        </ScrollableSection>
       </div>
 
       <CreateQuestModal

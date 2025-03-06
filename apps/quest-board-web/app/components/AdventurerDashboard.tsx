@@ -11,6 +11,7 @@ import { getLevel } from '@planning/common-utils';
 import AssignedQuests from './AssignedQuests';
 import UnassignedQuests from './UnassignedQuests';
 import TeamSkills from './TeamSkills';
+import { ScrollableSection } from './ScrollableSection';
 
 interface Skill {
   id: string;
@@ -154,16 +155,23 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <TeamSkills
-          team={team}
-          user={user}
-          error={error}
-          onSkillClick={handleSkillClick}
-          onDeclineSkill={handleDeclineSkill}
-        />
+        <ScrollableSection title="Skills">
+          <TeamSkills
+            team={team}
+            user={user}
+            error={error}
+            onSkillClick={handleSkillClick}
+            onDeclineSkill={handleDeclineSkill}
+          />
+        </ScrollableSection>
 
-        <AssignedQuests />
-        <UnassignedQuests />
+        <ScrollableSection title="My Quests">
+          <AssignedQuests />
+        </ScrollableSection>
+
+        <ScrollableSection title="Available Quests">
+          <UnassignedQuests />
+        </ScrollableSection>
 
         {selectedSkill && (
           <SkillAssessmentModal

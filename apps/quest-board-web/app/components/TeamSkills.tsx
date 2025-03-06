@@ -3,7 +3,7 @@ import styles from './Dashboard.module.css';
 import { Team as TeamType, User } from '@quest-board/types';
 import { getLevel } from '@planning/common-utils';
 
-interface Team {
+interface LocalTeam {
   id: string;
   inviteCode: string;
   members: User[];
@@ -18,11 +18,11 @@ interface Skill {
 }
 
 interface TeamSkillsProps {
-  team: Team | null;
-  user?: User | null;
+  team: LocalTeam | TeamType | null;
+  user: User | null;
   error: string | null;
-  onSkillClick?: (skill: string) => void;
-  onDeclineSkill?: (skill: string) => void;
+  onSkillClick: (skill: string) => void;
+  onDeclineSkill: (skill: string) => void;
   isGuildLeader?: boolean;
 }
 
@@ -44,8 +44,7 @@ const TeamSkills: FC<TeamSkillsProps> = ({
   }) || [];
 
   return (
-    <section className={styles.section}>
-      <h3 className={styles.sectionTitle}>Skills</h3>
+    <>
       {error ? (
         <div className={styles.error}>{error}</div>
       ) : team ? (
@@ -56,15 +55,15 @@ const TeamSkills: FC<TeamSkillsProps> = ({
             return (
               <div
                 key={skill}
-                className={`${styles.skillTag} relative flex justify-between items-center ${onSkillClick ? 'cursor-pointer' : ''} ${
+                className={`${styles.skillTag} relative flex justify-between items-center cursor-pointer ${
                   user?.skills?.[skill] === 0 ? 'opacity-10' : ''
                 }`}
-                onClick={() => !isNewSkill && onSkillClick?.(skill)}
+                onClick={() => !isNewSkill && onSkillClick(skill)}
               >
                 <div className="flex items-center font-lora text-text-light">
                   {getSkillName(skill)}
                 </div>
-                {isNewSkill && onDeclineSkill ? (
+                {isNewSkill && (
                   <div className="flex items-center gap-2">
                     <button
                       onClick={(e) => {
@@ -91,7 +90,7 @@ const TeamSkills: FC<TeamSkillsProps> = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSkillClick?.(skill);
+                        onSkillClick(skill);
                       }}
                       className="text-green-500 hover:text-green-600 transition-colors"
                       aria-label="Assess skill"
@@ -106,24 +105,20 @@ const TeamSkills: FC<TeamSkillsProps> = ({
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
                     </button>
                   </div>
-                ) : user?.skills?.[skill] !== undefined ? (
-                  <span className="ml-2 font-lora text-text-light">
-                    Lv. {getLevel(user.skills[skill] || 0).level}
-                  </span>
-                ) : null}
+                )}
               </div>
             );
           })}
         </div>
       ) : (
-        <div className={styles.loading}>Loading team skills...</div>
+        <div className={styles.loading}>Loading skills...</div>
       )}
-    </section>
+    </>
   );
 };
 

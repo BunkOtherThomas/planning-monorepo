@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getQuests, getCurrentUser, turnInQuest, assignQuestToSelf } from '../lib/api';
-import { Avatar } from '../../components/Avatar';
-import styles from './Dashboard.module.css';
+import { getQuests, getCurrentUser } from '../lib/api';
 import { QuestResponse, QuestStatus, User } from '@quest-board/types';
+import { Avatar } from '../../components/Avatar';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
+import styles from './Dashboard.module.css';
 
 export default function AssignedQuests() {
   const [quests, setQuests] = useState<QuestResponse[]>([]);
@@ -14,31 +14,21 @@ export default function AssignedQuests() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-
     const fetchData = async () => {
       try {
         const [questsData, userData] = await Promise.all([
           getQuests('assigned'),
           getCurrentUser()
         ]);
-        
-        if (isMounted) {
-          setQuests(questsData);
-          setCurrentUser(userData);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Failed to fetch data');
-        }
+        setQuests(questsData);
+        setCurrentUser(userData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load quests');
       }
     };
 
     fetchData();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const sortedQuests = [...quests].sort((a, b) => {
@@ -56,39 +46,48 @@ export default function AssignedQuests() {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
+  const turnInQuest = async () => {
+    // Refresh quests after turn in
+    const updatedQuests = await getQuests('assigned');
+    setQuests(updatedQuests);
+  };
+
+  const assignQuestToSelf = async () => {
+    // Refresh quests after assignment
+    const updatedQuests = await getQuests('assigned');
+    setQuests(updatedQuests);
+  };
+
   return (
-    <div className={styles.section}>
-      <h3 className={styles.sectionTitle}>My Quests</h3>
-      <div className={styles.questListContainer}>
-        {error ? (
-          <div className={styles.error}>{error}</div>
-        ) : quests.length > 0 ? (
-          sortedQuests.map((quest) => (
-            <div 
-              key={quest.id} 
-              className={styles.quest}
-              onClick={() => setSelectedQuest(quest)}
-              role="button"
-              tabIndex={0}
-            >
-              <div className={styles.questHeader}>
-                <h4 className={styles.questTitle}>{quest.title}</h4>
-                <span className={`${styles.questStatus} ${styles[quest.status.toLowerCase()]}`}>
-                  {quest.status.toLowerCase().replace('_', ' ')}
-                </span>
-              </div>
-              {quest.assignedTo && (
-                <div className={styles.assignedTo}>
-                  <Avatar avatarId={quest.assignedTo.avatarId} size={24} />
-                  <span>{quest.assignedTo.displayName}</span>
-                </div>
-              )}
+    <>
+      {error ? (
+        <div className={styles.error}>{error}</div>
+      ) : quests.length > 0 ? (
+        sortedQuests.map((quest) => (
+          <div 
+            key={quest.id} 
+            className={styles.quest}
+            onClick={() => setSelectedQuest(quest)}
+            role="button"
+            tabIndex={0}
+          >
+            <div className={styles.questHeader}>
+              <h4 className={styles.questTitle}>{quest.title}</h4>
+              <span className={`${styles.questStatus} ${styles[quest.status.toLowerCase()]}`}>
+                {quest.status.toLowerCase().replace('_', ' ')}
+              </span>
             </div>
-          ))
-        ) : (
-          <div className={styles.emptyState}>No quests assigned to you</div>
-        )}
-      </div>
+            {quest.assignedTo && (
+              <div className={styles.assignedTo}>
+                <Avatar avatarId={quest.assignedTo.avatarId} size={24} />
+                <span>{quest.assignedTo.displayName}</span>
+              </div>
+            )}
+          </div>
+        ))
+      ) : (
+        <div className={styles.emptyState}>No quests assigned to you</div>
+      )}
 
       {selectedQuest && currentUser && (
         <QuestDetailsModal
@@ -113,6 +112,6 @@ export default function AssignedQuests() {
           }}
         />
       )}
-    </div>
+    </>
   );
 } 
