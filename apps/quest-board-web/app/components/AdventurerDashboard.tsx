@@ -8,6 +8,8 @@ import { SkillLevelModal } from './SkillLevelModal';
 import { Team, UserSkills, SkillAssessment, User } from '@quest-board/types';
 import { FC } from 'react';
 import { getLevel } from '@planning/common-utils';
+import AssignedQuests from './AssignedQuests';
+import UnassignedQuests from './UnassignedQuests';
 
 interface Skill {
   id: string;
@@ -223,6 +225,9 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
             <div className={styles.loading}>Loading team skills...</div>
           )}
         </section>
+
+        <AssignedQuests />
+        <UnassignedQuests />
 
         {selectedSkill && (
           <SkillAssessmentModal
