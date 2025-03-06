@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Color palette */
   --primary-dark: #1a1a2e;
@@ -8,8 +12,16 @@
   --accent-brown-dark: #6b5a40;
   --text-light: #e0e0e0;
   --text-dark: #d4d4d4;
+  --text-muted: #a0a0a0;
   --error-red: #ff6b6b;
   --success-green: #60b347;
+  --bg-dark: #2a2a3a;
+  --bg-darker: #1a1a2a;
+  --border: #3a3a4a;
+
+  /* Fonts */
+  --font-cinzel: 'Cinzel', serif;
+  --font-lora: 'Lora', serif;
 
   /* Gradients */
   --gradient-background: linear-gradient(to bottom, var(--primary-dark), var(--primary-darker));
@@ -213,4 +225,29 @@ a:hover {
   min-height: calc(100vh - 80px); /* Adjust based on banner height */
   width: 100%;
   position: relative;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  position: relative;
+  background: rgba(47, 51, 73);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  max-width: 66vw;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--accent-brown);
 }

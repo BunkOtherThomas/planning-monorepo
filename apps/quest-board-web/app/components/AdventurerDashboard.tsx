@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getCurrentTeam } from '../lib/api';
 import styles from './Dashboard.module.css';
+import { SkillAssessmentModal } from './SkillAssessmentModal';
 
 interface Team {
   id: string;
@@ -15,9 +16,19 @@ interface Team {
   skills: string[];
 }
 
+interface SkillAssessment {
+  skill: string;
+  professionalExperience: number;
+  formalEducation: number;
+  informalEducation: number;
+  confidence: number;
+}
+
 export default function AdventurerDashboard() {
   const [team, setTeam] = useState<Team | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [skillAssessments, setSkillAssessments] = useState<SkillAssessment[]>([]);
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -32,6 +43,25 @@ export default function AdventurerDashboard() {
     fetchTeam();
   }, []);
 
+  const handleSkillClick = (skill: string) => {
+    setSelectedSkill(skill);
+  };
+
+  const handleAssessmentSubmit = (values: Omit<SkillAssessment, 'skill'>) => {
+    if (!selectedSkill) return;
+    
+    setSkillAssessments(prev => {
+      const existingIndex = prev.findIndex(a => a.skill === selectedSkill);
+      if (existingIndex >= 0) {
+        const newAssessments = [...prev];
+        newAssessments[existingIndex] = { ...values, skill: selectedSkill };
+        return newAssessments;
+      }
+      return [...prev, { ...values, skill: selectedSkill }];
+    });
+    setSelectedSkill(null);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
@@ -42,7 +72,11 @@ export default function AdventurerDashboard() {
           ) : team ? (
             <div className={styles.skillsList}>
               {team.skills.map((skill) => (
-                <div key={skill} className={styles.skillTag}>
+                <div
+                  key={skill}
+                  className={`${styles.skillTag} cursor-pointer hover:bg-blue-100 transition-colors`}
+                  onClick={() => handleSkillClick(skill)}
+                >
                   {skill}
                 </div>
               ))}
@@ -51,6 +85,14 @@ export default function AdventurerDashboard() {
             <div className={styles.loading}>Loading team skills...</div>
           )}
         </section>
+
+        {selectedSkill && (
+          <SkillAssessmentModal
+            skillName={selectedSkill}
+            onSubmit={handleAssessmentSubmit}
+            onClose={() => setSelectedSkill(null)}
+          />
+        )}
 
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Available Quests</h3>
