@@ -98,6 +98,7 @@
   padding: 1rem;
   transition: all 0.2s ease;
   cursor: pointer;
+  width: 98%;
 }
 
 .quest:hover {

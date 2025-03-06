@@ -1,6 +1,6 @@
 .container {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   animation: fadeIn 0.5s ease-out;
 }
@@ -64,23 +64,53 @@
 
 .section {
   composes: card from global;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 2rem;
+  height: calc(100vh - 160px);
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
 }
 
 .sectionTitle {
   font-family: var(--font-cinzel);
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   color: var(--accent-gold);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
   border-bottom: 2px solid var(--accent-brown);
-  text-shadow: var(--text-shadow);
+  padding-bottom: 0.5rem;
+  flex-shrink: 0;
 }
 
 .questListContainer {
   position: relative;
-  max-height: 600px;
+  flex: 1;
   overflow-y: auto;
-  padding-bottom: 80px; /* Space for sticky button */
+  padding-right: 8px;
+  margin-right: -8px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-brown) transparent;
+}
+
+.questListContainer > *:not(.stickyAddButton) {
+  flex: 0 0 auto;
+}
+
+.questListContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.questListContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.questListContainer::-webkit-scrollbar-thumb {
+  background-color: var(--accent-brown);
+  border-radius: 4px;
 }
 
 .quest {
@@ -91,6 +121,7 @@
   margin-bottom: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 98%;
 }
 
 .quest:hover {
@@ -156,14 +187,19 @@
 }
 
 .stickyAddButton {
-  position: absolute;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 1rem;
-  background: linear-gradient(to bottom, transparent, var(--background-color) 20%);
+  padding: 1rem 2rem;
+  background: var(--card-bg);
+  border-top: 1px solid var(--accent-brown);
   display: flex;
   justify-content: center;
+  z-index: 10;
+  flex: 0 0 auto;
+  margin: 0 -2rem;
+  margin-top: 1rem;
 }
 
 .modalOverlay {
@@ -440,17 +476,33 @@
 .teamInfo {
   background: var(--card-bg);
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.teamMembers {
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 3rem; /* Make room for sticky team code */
 }
 
 .teamCode {
-  margin-bottom: 1.5rem;
+  position: sticky;
+  bottom: 0;
+  background: var(--card-bg);
+  padding: 0.5rem;
+  border-top: 1px solid var(--accent-brown);
+  margin: 0;
+  width: 100%;
+  z-index: 1;
 }
 
 .inviteCode {
   display: block;
-  padding: 1rem;
+  padding: 0.75rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--accent-brown);
   border-radius: var(--radius-sm);
@@ -463,15 +515,15 @@
 
 .inviteHeader {
   font-family: var(--font-cinzel);
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--accent-gold);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   text-shadow: var(--text-shadow);
 }
 
 .inviteUrl {
   font-family: var(--font-lora);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--text-light);
 }
 
@@ -489,8 +541,15 @@
   color: #00ff00;
 }
 
-.teamMembers {
-  margin-top: 1rem;
+.teamMembers .quest {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.teamMembers .applicantInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .memberList {
@@ -535,10 +594,10 @@
 }
 
 .copyMessage {
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
   color: #00ff00;
   font-family: var(--font-lora);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   text-align: center;
   animation: fadeIn 0.2s ease-out;
 }

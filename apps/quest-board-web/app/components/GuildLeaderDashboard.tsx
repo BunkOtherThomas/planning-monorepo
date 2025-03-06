@@ -48,7 +48,7 @@ export default function GuildLeaderDashboard() {
           getQuests('created'),
           getCurrentUser()
         ]);
-        
+
         if (isMounted) {
           setTeam(teamData);
           setQuests(questsData);
@@ -99,7 +99,7 @@ export default function GuildLeaderDashboard() {
         0, // informalExperience
         0, // confidence
       );
-      
+
       setSkillAssessments(prev => {
         const existingIndex = prev.findIndex(a => a.skill === skill);
         if (existingIndex >= 0) {
@@ -120,7 +120,7 @@ export default function GuildLeaderDashboard() {
 
   const handleAssessmentSubmit = async (values: SkillAssessmentValues) => {
     if (!selectedSkill) return;
-    
+
     try {
       const response = await declareSkill(
         selectedSkill,
@@ -129,7 +129,7 @@ export default function GuildLeaderDashboard() {
         values.informalExperience,
         values.confidence
       );
-      
+
       setSkillAssessments(prev => {
         const existingIndex = prev.findIndex(a => a.skill === selectedSkill);
         if (existingIndex >= 0) {
@@ -143,7 +143,7 @@ export default function GuildLeaderDashboard() {
       // Refresh user data to get updated skills
       const updatedUser = await getCurrentUser();
       setCurrentUser(updatedUser);
-      
+
       setSelectedSkill(null);
     } catch (error) {
       console.error('Error submitting skill assessment:', error);
@@ -160,7 +160,7 @@ export default function GuildLeaderDashboard() {
     };
     const statusDiff = statusOrder[a.status] - statusOrder[b.status];
     if (statusDiff !== 0) return statusDiff;
-    
+
     // Then by creation date (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -171,7 +171,7 @@ export default function GuildLeaderDashboard() {
       selectedSkills?.forEach(skill => {
         transformedSkills[skill.skill] = skill.proficiency;
       });
-      
+
       // Call the API to create the quest
       const newQuest = await createQuest(
         title,
@@ -183,7 +183,7 @@ export default function GuildLeaderDashboard() {
       // Refresh the quests list
       const updatedQuests = await getQuests('created');
       setQuests(updatedQuests);
-      
+
       setIsCreateQuestModalOpen(false);
     } catch (error) {
       console.error('Failed to create quest:', error);
@@ -200,20 +200,17 @@ export default function GuildLeaderDashboard() {
           ) : team ? (
             <div className={styles.teamInfo}>
               <div className={styles.teamMembers}>
-                <div className={styles.questList}>
-                  {team.members.map((member) => (
-                    <div key={member.id} className={styles.quest}>
-                      <div className={styles.applicantInfo}>
-                        <Avatar avatarId={member.avatarId || 0} size={32} />
-                        <span className={styles.memberName}>{member.displayName}</span>
-                      </div>
+                {team.members.map((member) => (
+                  <div key={member.id} className={styles.quest} style={{ maxHeight: '60px' }}>
+                    <div className={styles.applicantInfo}>
+                      <Avatar avatarId={member.avatarId || 0} size={32} />
+                      <span className={styles.memberName}>{member.displayName}</span>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
               <div className={styles.teamCode}>
-                <h4 className={styles.questTitle}>Invite team members</h4>
-                <code 
+                <code
                   className={`${styles.inviteCode} ${copied ? styles.copied : ''}`}
                   onClick={handleCopyInvite}
                   role="button"
@@ -245,10 +242,10 @@ export default function GuildLeaderDashboard() {
           />
         </ScrollableSection>
 
-        <ScrollableSection 
+        <ScrollableSection
           title="Quests"
           footer={
-            <button 
+            <button
               className={styles.addButton}
               onClick={() => setIsCreateQuestModalOpen(true)}
             >
@@ -257,34 +254,36 @@ export default function GuildLeaderDashboard() {
             </button>
           }
         >
-          {error ? (
-            <div className={styles.error}>{error}</div>
-          ) : quests.length > 0 ? (
-            sortedQuests.map((quest) => (
-              <div 
-                key={quest.id} 
-                className={styles.quest}
-                onClick={() => setSelectedQuest(quest)}
-                role="button"
-                tabIndex={0}
-              >
-                <div className={styles.questHeader}>
-                  <h4 className={styles.questTitle}>{quest.title}</h4>
-                  <span className={`${styles.questStatus} ${styles[quest.status.toLowerCase()]}`}>
-                    {quest.status.toLowerCase().replace('_', ' ')}
-                  </span>
-                </div>
-                {quest.assignedTo && (
-                  <div className={styles.assignedTo}>
-                    <Avatar avatarId={quest.assignedTo.avatarId} size={24} />
-                    <span>{quest.assignedTo.displayName}</span>
+          <div className={styles.questList}>
+            {error ? (
+              <div className={styles.error}>{error}</div>
+            ) : quests.length > 0 ? (
+              sortedQuests.map((quest) => (
+                <div
+                  key={quest.id}
+                  className={styles.quest}
+                  onClick={() => setSelectedQuest(quest)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className={styles.questHeader}>
+                    <h4 className={styles.questTitle}>{quest.title}</h4>
+                    <span className={`${styles.questStatus} ${styles[quest.status.toLowerCase()]}`}>
+                      {quest.status.toLowerCase().replace('_', ' ')}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className={styles.emptyState}>No quests created yet</div>
-          )}
+                  {quest.assignedTo && (
+                    <div className={styles.assignedTo}>
+                      <Avatar avatarId={quest.assignedTo.avatarId} size={24} />
+                      <span>{quest.assignedTo.displayName}</span>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className={styles.emptyState}>No quests created yet</div>
+            )}
+          </div>
         </ScrollableSection>
       </div>
 
