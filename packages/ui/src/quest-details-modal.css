@@ -80,4 +80,36 @@
   font-weight: 500;
   color: var(--text-light);
   font-family: var(--font-lora);
+}
+
+.modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.skill-button {
+  background: var(--accent-gold);
+  color: var(--background-color);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-cinzel);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.skill-button:hover {
+  background: var(--accent-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.skill-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 } 

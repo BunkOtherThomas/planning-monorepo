@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentTeam, addTeamSkill, getQuests, createQuest } from '../lib/api';
+import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
-import { QuestResponse, QuestStatus } from '@quest-board/types';
+import { QuestResponse, QuestStatus, User } from '@quest-board/types';
 import { CreateQuestModal } from './CreateQuestModal';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 
@@ -31,20 +31,23 @@ export default function GuildLeaderDashboard() {
   const [quests, setQuests] = useState<QuestResponse[]>([]);
   const [isCreateQuestModalOpen, setIsCreateQuestModalOpen] = useState(false);
   const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchData = async () => {
       try {
-        const [teamData, questsData] = await Promise.all([
+        const [teamData, questsData, userData] = await Promise.all([
           getCurrentTeam(),
-          getQuests('created')
+          getQuests('created'),
+          getCurrentUser()
         ]);
         
         if (isMounted) {
           setTeam(teamData);
           setQuests(questsData);
+          setCurrentUser(userData);
         }
       } catch (err) {
         if (isMounted) {
@@ -287,10 +290,11 @@ export default function GuildLeaderDashboard() {
         team={team}
       />
 
-      {selectedQuest && (
+      {selectedQuest && currentUser && (
         <QuestDetailsModal
           isOpen={!!selectedQuest}
           onClose={() => setSelectedQuest(null)}
+          currentUserId={currentUser.id}
           quest={{
             title: selectedQuest.title,
             description: selectedQuest.description,
@@ -299,6 +303,7 @@ export default function GuildLeaderDashboard() {
               xp: xp
             })),
             assignedTo: selectedQuest.assignedTo ? {
+              id: selectedQuest.assignedTo.id,
               displayName: selectedQuest.assignedTo.displayName,
               avatarId: selectedQuest.assignedTo.avatarId
             } : undefined

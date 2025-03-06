@@ -6,6 +6,7 @@ import './quest-details-modal.css';
 interface QuestDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  currentUserId: string;
   quest: {
     title: string;
     description: string;
@@ -14,13 +15,24 @@ interface QuestDetailsModalProps {
       xp: number;
     }>;
     assignedTo?: {
+      id: string;
       displayName: string;
       avatarId: number;
     };
   };
 }
 
-export function QuestDetailsModal({ isOpen, onClose, quest }: QuestDetailsModalProps): JSX.Element {
+export function QuestDetailsModal({ isOpen, onClose, quest, currentUserId }: QuestDetailsModalProps): JSX.Element {
+  const isCurrentUser = quest.assignedTo?.id === currentUserId;
+
+  const handleTurnIn = () => {
+    // TODO: Implement turn in functionality
+  };
+
+  const handleAssignToMe = () => {
+    // TODO: Implement assign to me functionality
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={quest.title}>
       <div className="quest-details">
@@ -46,7 +58,7 @@ export function QuestDetailsModal({ isOpen, onClose, quest }: QuestDetailsModalP
           </div>
         </div>
 
-        {quest.assignedTo && (
+        {quest.assignedTo ? (
           <div className="quest-assignee">
             <h3>Assigned To</h3>
             <div className="assignee-info">
@@ -56,6 +68,27 @@ export function QuestDetailsModal({ isOpen, onClose, quest }: QuestDetailsModalP
                 className="w-8 h-8"
               />
               <span className="assignee-name">{quest.assignedTo.displayName}</span>
+            </div>
+            {isCurrentUser && (
+              <div className="modal-actions">
+                <button
+                  onClick={handleTurnIn}
+                  className="skill-button"
+                >
+                  Turn in Quest
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="quest-assignee">
+            <div className="modal-actions">
+              <button
+                onClick={handleAssignToMe}
+                className="skill-button"
+              >
+                Assign to Me
+              </button>
             </div>
           </div>
         )}

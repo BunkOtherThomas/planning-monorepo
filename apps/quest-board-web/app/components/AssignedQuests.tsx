@@ -1,30 +1,35 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getQuests } from '../lib/api';
+import { getQuests, getCurrentUser } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
-import { QuestResponse, QuestStatus } from '@quest-board/types';
+import { QuestResponse, QuestStatus, User } from '@quest-board/types';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 
 export default function AssignedQuests() {
   const [quests, setQuests] = useState<QuestResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchData = async () => {
       try {
-        const questsData = await getQuests('assigned');
+        const [questsData, userData] = await Promise.all([
+          getQuests('assigned'),
+          getCurrentUser()
+        ]);
         
         if (isMounted) {
           setQuests(questsData);
+          setCurrentUser(userData);
         }
       } catch (err) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Failed to fetch quests');
+          setError(err instanceof Error ? err.message : 'Failed to fetch data');
         }
       }
     };
@@ -85,10 +90,11 @@ export default function AssignedQuests() {
         )}
       </div>
 
-      {selectedQuest && (
+      {selectedQuest && currentUser && (
         <QuestDetailsModal
           isOpen={!!selectedQuest}
           onClose={() => setSelectedQuest(null)}
+          currentUserId={currentUser.id}
           quest={{
             title: selectedQuest.title,
             description: selectedQuest.description,
@@ -97,6 +103,7 @@ export default function AssignedQuests() {
               xp: xp
             })),
             assignedTo: selectedQuest.assignedTo ? {
+              id: selectedQuest.assignedTo.id,
               displayName: selectedQuest.assignedTo.displayName,
               avatarId: selectedQuest.assignedTo.avatarId
             } : undefined
