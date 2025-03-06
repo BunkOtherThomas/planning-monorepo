@@ -8,6 +8,7 @@ interface QuestDetailsModalProps {
   onClose: () => void;
   currentUserId: string;
   quest: {
+    id: string;
     title: string;
     description: string;
     skills: Array<{
@@ -20,17 +21,38 @@ interface QuestDetailsModalProps {
       avatarId: number;
     };
   };
+  onTurnIn: (questId: string) => Promise<void>;
+  onAssignToSelf: (questId: string) => Promise<void>;
 }
 
-export function QuestDetailsModal({ isOpen, onClose, quest, currentUserId }: QuestDetailsModalProps): JSX.Element {
+export function QuestDetailsModal({ 
+  isOpen, 
+  onClose, 
+  quest, 
+  currentUserId,
+  onTurnIn,
+  onAssignToSelf 
+}: QuestDetailsModalProps): JSX.Element {
   const isCurrentUser = quest.assignedTo?.id === currentUserId;
 
-  const handleTurnIn = () => {
-    // TODO: Implement turn in functionality
+  const handleTurnIn = async () => {
+    try {
+      await onTurnIn(quest.id);
+      onClose(); // Close the modal after successful turn in
+    } catch (error) {
+      console.error('Failed to turn in quest:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
-  const handleAssignToMe = () => {
-    // TODO: Implement assign to me functionality
+  const handleAssignToMe = async () => {
+    try {
+      await onAssignToSelf(quest.id);
+      onClose(); // Close the modal after successful assignment
+    } catch (error) {
+      console.error('Failed to assign quest:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   return (

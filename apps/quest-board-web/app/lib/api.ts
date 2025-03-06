@@ -344,3 +344,27 @@ export async function analyzeSkills(title: string, description: string | undefin
 
   return response.json();
 }
+
+export async function turnInQuest(questId: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/quests/${questId}/turn-in`, {
+    ...getDefaultOptions(true),
+    method: 'POST'
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to turn in quest');
+  }
+}
+
+export async function assignQuestToSelf(questId: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/quests/${questId}/assign-self`, {
+    ...getDefaultOptions(true),
+    method: 'POST'
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to assign quest');
+  }
+}

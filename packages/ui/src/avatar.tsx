@@ -1,3 +1,4 @@
+import { type JSX } from 'react';
 import { getAvatarStyle } from './avatar-sprites';
 
 interface AvatarProps {
@@ -6,7 +7,7 @@ interface AvatarProps {
   size?: number;
 }
 
-export function Avatar({ avatarId, className = '', size }: AvatarProps) {
+export function Avatar({ avatarId, className = '', size }: AvatarProps): JSX.Element {
   const style = {
     ...getAvatarStyle(avatarId, size),
   };

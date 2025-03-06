@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getQuests, getCurrentUser } from '../lib/api';
+import { getQuests, getCurrentUser, turnInQuest, assignQuestToSelf } from '../lib/api';
 import styles from './Dashboard.module.css';
 import { QuestResponse, User } from '@quest-board/types';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
@@ -80,7 +80,10 @@ export default function UnassignedQuests() {
           isOpen={!!selectedQuest}
           onClose={() => setSelectedQuest(null)}
           currentUserId={currentUser.id}
+          onTurnIn={turnInQuest}
+          onAssignToSelf={assignQuestToSelf}
           quest={{
+            id: selectedQuest.id,
             title: selectedQuest.title,
             description: selectedQuest.description,
             skills: Object.entries(selectedQuest.skills ?? {}).map(([skill, xp]) => ({
