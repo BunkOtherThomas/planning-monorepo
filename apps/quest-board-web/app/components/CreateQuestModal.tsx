@@ -4,6 +4,7 @@ import { getCurrentTeam, addTeamSkill, analyzeSkills, SkillProficiency } from '.
 import { sortCandidatesBySkills } from '../utils/sortCandidates';
 import { Avatar } from '../../components/Avatar';
 import { User } from '@quest-board/types';
+import { getLevel } from '@planning/common-utils';
 
 interface CreateQuestModalProps {
   isOpen: boolean;
@@ -339,8 +340,9 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                       </div>
                       <div className={styles.assigneeSkills}>
                         {selectedSkills.map((skill) => {
-                          const skillLevel = member.skills?.[skill.skill] || 0;
-                          return skillLevel > 0 ? (
+                          const xp = member.skills?.[skill.skill] || 0;
+                          const skillLevel = getLevel(xp).level;
+                          return xp > 0 ? (
                             <div key={skill.skill} className={styles.assigneeSkill}>
                               {`${skill.skill}: ${skillLevel}`}
                             </div>
