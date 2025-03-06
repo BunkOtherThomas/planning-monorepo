@@ -1,0 +1,30 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(25, 1fr);
+  gap: 1px;
+  width: 100%;
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+.pip {
+  aspect-ratio: 2;
+  background-color: #374151;
+  border-radius: 1px;
+  transition: background-color 0.2s ease;
+  max-width: 8px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.filled {
+  background-color: #fbbf24;
+}
+
+.partial {
+  background: linear-gradient(
+    to right,
+    #fbbf24 calc(var(--progress) * 100%),
+    #374151 calc(var(--progress) * 100%)
+  );
+} 
