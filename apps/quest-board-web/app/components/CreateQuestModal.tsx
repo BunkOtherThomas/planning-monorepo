@@ -34,15 +34,25 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
   const [showAllMembers, setShowAllMembers] = useState(false);
 
   useEffect(() => {
-    if (selectedSkills.length > 0 && team?.members) {
-      const requiredSkills = selectedSkills.reduce((acc, skill) => {
-        acc[skill.skill] = skill.proficiency;
-        return acc;
-      }, {} as Record<string, number>);
+    if (team?.members) {
+      if (team.members.length === 1) {
+        // If there's only one team member, always show them and pre-select them
+        setSuggestedAssignees(team.members);
+        setSelectedAssignee(team.members[0].id);
+      } else if (selectedSkills.length > 0) {
+        // Normal flow for multiple team members with selected skills
+        const requiredSkills = selectedSkills.reduce((acc, skill) => {
+          acc[skill.skill] = skill.proficiency;
+          return acc;
+        }, {} as Record<string, number>);
 
-      const sortedMembers = sortCandidatesBySkills(requiredSkills, team.members);
-      setSuggestedAssignees(sortedMembers.slice(0, 3));
-      setSelectedAssignee(null);
+        const sortedMembers = sortCandidatesBySkills(requiredSkills, team.members);
+        setSuggestedAssignees(sortedMembers.slice(0, 3));
+        setSelectedAssignee(null);
+      } else {
+        setSuggestedAssignees([]);
+        setSelectedAssignee(null);
+      }
     } else {
       setSuggestedAssignees([]);
       setSelectedAssignee(null);
@@ -320,7 +330,7 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
             </div>
           )}
 
-          {selectedSkills.length > 0 && team?.members && team.members.length > 1 && (
+          {selectedSkills.length > 0 && team?.members && (
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Suggested Assignees</label>
               <div className={styles.assigneesGrid}>
@@ -328,7 +338,7 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                   <div
                     key={member.id}
                     className={`${styles.assigneeCard} ${selectedAssignee === member.id ? styles.selected : ''}`}
-                    onClick={() => setSelectedAssignee(member.id)}
+                    onClick={() => setSelectedAssignee(selectedAssignee === member.id ? null : member.id)}
                   >
                     <Avatar avatarId={member.avatarId || 1} size={48} />
                     <div className={styles.assigneeInfo}>
@@ -371,7 +381,7 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                       <div
                         key={member.id}
                         className={`${styles.assigneeCard} ${selectedAssignee === member.id ? styles.selected : ''}`}
-                        onClick={() => setSelectedAssignee(member.id)}
+                        onClick={() => setSelectedAssignee(selectedAssignee === member.id ? null : member.id)}
                       >
                         <Avatar avatarId={member.avatarId || 1} size={48} />
                         <div className={styles.assigneeInfo}>
