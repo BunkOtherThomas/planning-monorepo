@@ -154,7 +154,7 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
     <div className={styles.container}>
       <div className={styles.mainContent}>
         <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Team Skills</h3>
+          <h3 className={styles.sectionTitle}>Skills</h3>
           {error ? (
             <div className={styles.error}>{error}</div>
           ) : team ? (
@@ -165,10 +165,13 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
                 return (
                   <div
                     key={skill}
-                    className={`${styles.skillTag} relative flex justify-between items-center`}
+                    className={`${styles.skillTag} relative flex justify-between items-center cursor-pointer ${
+                      user.skills?.[skill] === 0 ? 'opacity-10' : ''
+                    }`}
+                    onClick={() => !isNewSkill && handleSkillClick(skill)}
                   >
-                    <div className="flex items-center">
-                      {skill}
+                    <div className="flex items-center font-lora text-text-light">
+                      {getSkillName(skill)}
                     </div>
                     {isNewSkill ? (
                       <div className="flex items-center gap-2">
@@ -212,7 +215,7 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
                         </button>
                       </div>
                     ) : (
-                      <span className="ml-2">Lv. {getLevel(user.skills?.[skill] || 0).level}</span>
+                      <span className="ml-2 font-lora text-text-light">Lv. {getLevel(user.skills?.[skill] || 0).level}</span>
                     )}
                   </div>
                 );
@@ -279,39 +282,6 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
             </div>
           </div>
         </section>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sortedSkills.map((skillId) => {
-            const xp = user.skills?.[skillId] ?? 0;
-            const { level, xp: currentXP, remaining } = getLevel(xp);
-            return (
-              <div
-                key={skillId}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {getSkillName(skillId)}
-                </h3>
-                <div className="mt-2">
-                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-                    <span>Level</span>
-                    <span>{level || 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-                    <span>XP</span>
-                    <span>{currentXP || 0}</span>
-                  </div>
-                  {remaining > 0 && (
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-                      <span>Next Level</span>
-                      <span>{remaining || 0} XP</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );

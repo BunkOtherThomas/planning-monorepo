@@ -14,8 +14,8 @@ export function LevelProgress({ level, progress }: LevelProgressProps) {
   return (
     <div className={styles.container}>
       {Array.from({ length: 100 }).map((_, index) => {
-        const isFilled = index < clampedLevel;
-        const isPartial = index === clampedLevel && clampedProgress > 0;
+        const isFilled = index < Math.floor(clampedLevel);
+        const isPartial = index === Math.floor(clampedLevel) && clampedProgress > 0;
         
         return (
           <div

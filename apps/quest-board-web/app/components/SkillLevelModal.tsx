@@ -10,8 +10,8 @@ interface SkillLevelModalProps {
 }
 
 export function SkillLevelModal({ skillName, xp, onClose }: SkillLevelModalProps) {
-  const { level, remaining } = getLevel(xp);
-  const progress = remaining > 0 ? 1 - (remaining / 100) : 1;
+  const { level, remaining, xp: _xp } = getLevel(xp);
+  const progress = remaining > 0 ? (_xp / (_xp + remaining)) : 1;
 
   return (
     <Modal isOpen={true} onClose={onClose} title={skillName}>
