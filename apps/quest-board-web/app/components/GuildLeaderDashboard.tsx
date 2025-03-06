@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentTeam } from '../lib/api';
+import { getCurrentTeam, addTeamSkill } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
 
@@ -22,6 +22,9 @@ export default function GuildLeaderDashboard() {
   const [team, setTeam] = useState<Team | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [newSkill, setNewSkill] = useState('');
+  const [skillError, setSkillError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -45,6 +48,29 @@ export default function GuildLeaderDashboard() {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
+    }
+  };
+
+  const handleAddSkill = async () => {
+    if (!newSkill.trim()) {
+      setSkillError('Skill name cannot be empty');
+      return;
+    }
+
+    if (team?.skills.some(s => s.toLowerCase() === newSkill.toLowerCase())) {
+      setSkillError('This skill already exists in your team');
+      return;
+    }
+
+    try {
+      await addTeamSkill(newSkill.trim());
+      const updatedTeam = await getCurrentTeam();
+      setTeam(updatedTeam);
+      setIsAddingSkill(false);
+      setNewSkill('');
+      setSkillError(null);
+    } catch (err) {
+      setSkillError(err instanceof Error ? err.message : 'Failed to add skill');
     }
   };
 
@@ -167,12 +193,43 @@ export default function GuildLeaderDashboard() {
               <div className={styles.emptyState}>No skills defined yet</div>
             )}
           </div>
-          <div className={styles.stickyAddButton}>
-            <button className={styles.addButton}>
-              <span className={styles.statIcon}>➕</span>
-              Add Skill
-            </button>
-          </div>
+          {isAddingSkill ? (
+            <div className={styles.skillInputContainer}>
+              <input
+                type="text"
+                value={newSkill}
+                onChange={(e) => {
+                  setNewSkill(e.target.value);
+                  setSkillError(null);
+                }}
+                placeholder="Enter skill name"
+                className={styles.skillInput}
+              />
+              {skillError && <div className={styles.error}>{skillError}</div>}
+              <div className={styles.skillInputActions}>
+                <button onClick={() => {
+                  setIsAddingSkill(false);
+                  setNewSkill('');
+                  setSkillError(null);
+                }} className={styles.cancelButton}>
+                  Cancel
+                </button>
+                <button onClick={handleAddSkill} className={styles.submitButton}>
+                  Submit
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.stickyAddButton}>
+              <button 
+                className={styles.addButton}
+                onClick={() => setIsAddingSkill(true)}
+              >
+                <span className={styles.statIcon}>➕</span>
+                Add Skill
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </div>

@@ -292,3 +292,16 @@ export async function getCurrentTeam() {
 
   return response.json();
 }
+
+export async function addTeamSkill(skill: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/teams`, {
+    ...getDefaultOptions(true),
+    method: 'PATCH',
+    body: JSON.stringify({ skill }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to add skill to team');
+  }
+}

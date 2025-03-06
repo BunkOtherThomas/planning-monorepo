@@ -46,7 +46,6 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log({teamCode});
     // If team code is provided, validate and add user to team
     if (teamCode) {
       const team = await prisma.team.findUnique({
@@ -71,6 +70,37 @@ export async function POST(req: Request) {
           userId: user.id,
         },
       });
+
+      // Create UserSkill entries for each team skill
+      for (const skillName of team.skills) {
+        // Find or create the skill
+        let skill = await prisma.skill.findUnique({
+          where: { name: skillName },
+        });
+
+        if (!skill) {
+          skill = await prisma.skill.create({
+            data: {
+              name: skillName,
+              description: `Team skill for ${team.name}`,
+            },
+          });
+        }
+
+        // Create UserSkill entry
+        await prisma.userSkill.create({
+          data: {
+            userId: user.id,
+            skillId: skill.id,
+            level: -1,
+            currentXP: -1,
+            professionalExp: -1,
+            formalEducation: -1,
+            informalEducation: -1,
+            confidenceMultiplier: -1,
+          },
+        });
+      }
     }
 
     // Generate JWT token
