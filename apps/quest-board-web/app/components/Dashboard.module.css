@@ -649,4 +649,333 @@
   font-size: 0.875rem;
   color: var(--text-success);
   text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-lora);
+  font-size: 0.9rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--accent-brown);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-light);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 2px rgba(var(--accent-gold-rgb), 0.2);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.skillButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.skillButton {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--accent-brown);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+  font-family: var(--font-lora);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.skillButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-gold);
+}
+
+.skillButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.proficiencySelector {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.proficiencySlider {
+  width: 120px;
+  height: 8px;
+  -webkit-appearance: none;
+  background: var(--accent-brown);
+  border-radius: 4px;
+  outline: none;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.proficiencySlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid var(--accent-brown);
+  margin-top: -4px;
+}
+
+.proficiencySlider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  background: var(--accent-brown);
+  border-radius: 4px;
+}
+
+.proficiencySlider::-webkit-slider-thumb:hover,
+.proficiencySlider::-webkit-slider-thumb:focus {
+  background: var(--accent-gold-hover);
+  transform: scale(1.1);
+}
+
+.proficiencySlider:focus {
+  outline: none;
+}
+
+.proficiencySlider:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px rgba(var(--accent-gold-rgb), 0.2);
+}
+
+/* Firefox styles */
+.proficiencySlider {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-gold) var(--accent-brown);
+}
+
+.proficiencySlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid var(--accent-brown);
+}
+
+.proficiencySlider::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  background: var(--accent-brown);
+  border-radius: 4px;
+}
+
+.proficiencySlider::-moz-range-progress {
+  background: var(--accent-gold);
+  border-radius: 4px;
+  height: 8px;
+}
+
+.proficiencyLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.skillHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.skillCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.healthBarContainer {
+  position: relative;
+  width: 100px;
+  height: 8px;
+  background-color: var(--accent-brown);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.healthBar {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.healthBarFill {
+  position: absolute;
+  height: 100%;
+  background-color: var(--accent-gold);
+  transition: width 0.2s ease-in-out;
+  min-width: 0.33%;
+}
+
+.skillsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.skillItem {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--accent-brown);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+  user-select: none;
+  position: relative;
+  cursor: pointer;
+}
+
+.skillItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.skillItem.selected {
+  border-color: var(--accent-gold);
+  background: rgba(255, 215, 0, 0.1);
+  cursor: default;
+}
+
+.skillItem.selected:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 215, 0, 0.1);
+  transform: scale(1.1);
+}
+
+.closeIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.skillContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 60px;
+}
+
+.skillName {
+  color: var(--text-light);
+  font-family: var(--font-lora);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.sliderContainer {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.healthBarContainer {
+  position: relative;
+  width: 100%;
+  height: 16px;
+}
+
+.healthBar {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 16px;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.healthBar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--accent-brown);
+  box-shadow: var(--shadow-sm);
+}
+
+.healthBar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: var(--accent-brown);
+  border-radius: 2px;
+}
+
+.healthBarFill {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  height: 4px;
+  background: var(--accent-gold);
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .skillsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .skillsGrid {
+    grid-template-columns: 1fr;
+  }
 } 

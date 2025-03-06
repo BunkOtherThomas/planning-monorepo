@@ -190,17 +190,15 @@ export async function getOpenQuestsForUser(id: string) {
 export async function createQuest(
   title: string,
   description: string,
-  skills: Array<{ skillId: string; weight: number }>,
-  deadline?: Date
+  skills: Array<{ name: string; weight: number }>
 ) {
   const response = await fetch(`${API_BASE_URL}/quests`, {
-    ...defaultOptions,
+    ...getDefaultOptions(true),
     method: 'POST',
     body: JSON.stringify({
       title,
       description,
       skills,
-      deadline: deadline?.toISOString()
     } as QuestCreationRequest),
   });
 
@@ -300,4 +298,33 @@ export async function addTeamSkill(skill: string): Promise<void> {
     const error = await response.json();
     throw new Error(error.error || 'Failed to add skill to team');
   }
+}
+
+export interface SkillProficiency {
+  skill: string;
+  proficiency: number; // 0-3
+}
+
+export interface TaskAnalysisResponse {
+  skillProficiencies: SkillProficiency[];
+  error?: string;
+}
+
+export async function analyzeSkills(title: string, description: string | undefined, skills: string[]): Promise<TaskAnalysisResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/skills/analyze`, {
+    ...getDefaultOptions(true),
+    method: 'POST',
+    body: JSON.stringify({
+      title,
+      description,
+      skills,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to analyze skills');
+  }
+
+  return response.json();
 }

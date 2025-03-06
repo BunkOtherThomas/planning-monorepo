@@ -1,53 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentTeam, addTeamSkill, getQuests } from '../lib/api';
+import { getCurrentTeam, addTeamSkill, getQuests, createQuest } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
 import { QuestResponse } from '@quest-board/types';
-
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  title?: string;
-}
-
-function Modal({ isOpen, onClose, children, title }: ModalProps) {
-  if (!isOpen) return null;
-
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <button
-          className={styles.modalCloseButton}
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        {title && (
-          <h2 className={styles.modalTitle}>{title}</h2>
-        )}
-        <div className={styles.modalBody}>
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
+import { CreateQuestModal } from './CreateQuestModal';
 
 interface TeamMember {
   id: string;
@@ -138,6 +96,32 @@ export default function GuildLeaderDashboard() {
     // Then by creation date (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  const handleCreateQuest = async (title: string, description?: string, selectedSkills?: { skill: string; proficiency: number }[]) => {
+    try {
+      // Transform the skills data to match API format
+      const transformedSkills = selectedSkills?.map(skill => ({
+        name: skill.skill, // This should be the skill ID from the team's skills
+        weight: skill.proficiency // Using proficiency as weight
+      })) || [];
+
+      // Call the API to create the quest
+      const newQuest = await createQuest(
+        title,
+        description || '',
+        transformedSkills
+      );
+
+      // Refresh the quests list
+      const updatedQuests = await getQuests('created');
+      setQuests(updatedQuests);
+      
+      setIsCreateQuestModalOpen(false);
+    } catch (error) {
+      console.error('Failed to create quest:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create quest');
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -277,15 +261,12 @@ export default function GuildLeaderDashboard() {
         </section>
       </div>
 
-      <Modal
+      <CreateQuestModal
         isOpen={isCreateQuestModalOpen}
         onClose={() => setIsCreateQuestModalOpen(false)}
-        title="Create New Quest"
-      >
-        <div className={styles.modalContent}>
-          <p>Quest creation form will go here</p>
-        </div>
-      </Modal>
+        onSubmit={handleCreateQuest}
+        team={team}
+      />
     </div>
   );
 } 
