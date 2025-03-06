@@ -8,6 +8,7 @@ const questSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   skills: z.record(z.string(), z.number()),
+  assigneeId: z.string().optional(),
 });
 
 type QuestWithAssignedTo = Quest & {
@@ -130,6 +131,7 @@ export async function POST(req: Request) {
         createdById,
         status: 'OPEN',
         questSkills: validatedData.skills,
+        assignedToId: validatedData.assigneeId,
       },
       include: {
         assignedTo: {

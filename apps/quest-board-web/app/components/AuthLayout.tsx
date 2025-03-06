@@ -41,7 +41,7 @@ export default function AuthLayout({
       // If we have a token and we're not on a public route, fetch user data
       if (authToken && !isPublicRoute) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/me`, {
             headers: {
               'Authorization': `Bearer ${authToken}`
             },

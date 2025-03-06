@@ -1,5 +1,6 @@
 import { type JSX } from 'react';
 import { Modal } from './modal';
+import { Avatar } from './avatar';
 import './quest-details-modal.css';
 
 interface QuestDetailsModalProps {
@@ -49,10 +50,10 @@ export function QuestDetailsModal({ isOpen, onClose, quest }: QuestDetailsModalP
           <div className="quest-assignee">
             <h3>Assigned To</h3>
             <div className="assignee-info">
-              <img 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${quest.assignedTo.avatarId}`}
-                alt={quest.assignedTo.displayName}
-                className="assignee-avatar"
+              <Avatar 
+                avatarId={quest.assignedTo.avatarId}
+                size={32}
+                className="w-8 h-8"
               />
               <span className="assignee-name">{quest.assignedTo.displayName}</span>
             </div>

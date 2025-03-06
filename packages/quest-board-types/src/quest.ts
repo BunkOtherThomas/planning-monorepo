@@ -21,7 +21,11 @@ export interface QuestResponse {
   updatedAt: string;
   deadline?: string;
   createdBy: string;
-  assignedTo?: string;
+  assignedTo?: {
+    id: string;
+    displayName: string;
+    avatarId: number;
+  } | null;
   skills: Record<string, number>;
 }
 
@@ -49,7 +53,6 @@ export interface Quest {
   title: string;
   description: string;
   status: 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
-  difficulty: number;
   skills: {
     name: string;
     xp: number;

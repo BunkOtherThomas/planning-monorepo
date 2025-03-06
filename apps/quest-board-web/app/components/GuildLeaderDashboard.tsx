@@ -110,19 +110,19 @@ export default function GuildLeaderDashboard() {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  const handleCreateQuest = async (title: string, description?: string, selectedSkills?: { skill: string; proficiency: number }[]) => {
+  const handleCreateQuest = async (title: string, description?: string, selectedSkills?: { skill: string; proficiency: number }[], assigneeId?: string) => {
     try {
       const transformedSkills = {} as Record<string, number>;
       selectedSkills?.forEach(skill => {
         transformedSkills[skill.skill] = skill.proficiency;
       });
       
-
       // Call the API to create the quest
       const newQuest = await createQuest(
         title,
         description || '',
-        transformedSkills
+        transformedSkills,
+        assigneeId
       );
 
       // Refresh the quests list
@@ -258,8 +258,8 @@ export default function GuildLeaderDashboard() {
                   </div>
                   {quest.assignedTo && (
                     <div className={styles.assignedTo}>
-                      <Avatar avatarId={0} size={24} />
-                      <span>{quest.assignedTo}</span>
+                      <Avatar avatarId={quest.assignedTo.avatarId} size={24} />
+                      <span>{quest.assignedTo.displayName}</span>
                     </div>
                   )}
                 </div>
@@ -299,8 +299,8 @@ export default function GuildLeaderDashboard() {
               xp: xp
             })),
             assignedTo: selectedQuest.assignedTo ? {
-              displayName: selectedQuest.assignedTo,
-              avatarId: 0
+              displayName: selectedQuest.assignedTo.displayName,
+              avatarId: selectedQuest.assignedTo.avatarId
             } : undefined
           }}
         />

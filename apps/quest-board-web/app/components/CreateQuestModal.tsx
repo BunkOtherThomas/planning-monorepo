@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './Dashboard.module.css';
 import { getCurrentTeam, addTeamSkill, analyzeSkills, SkillProficiency } from '../lib/api';
+import { sortCandidatesBySkills } from '../utils/sortCandidates';
+import { Avatar } from '../../components/Avatar';
+import { User } from '@quest-board/types';
 
 interface CreateQuestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (title: string, description?: string, selectedSkills?: SkillProficiency[]) => void;
+  onSubmit: (title: string, description?: string, selectedSkills?: SkillProficiency[], assigneeId?: string) => void;
   team: Team | null;
 }
 
 interface Team {
   id: string;
   skills: string[];
+  members: User[];
 }
 
 export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQuestModalProps) {
@@ -24,13 +28,33 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
   const [newSkill, setNewSkill] = useState('');
   const [skillError, setSkillError] = useState<string | null>(null);
   const [showSkills, setShowSkills] = useState(false);
+  const [suggestedAssignees, setSuggestedAssignees] = useState<User[]>([]);
+  const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
+  const [showAllMembers, setShowAllMembers] = useState(false);
+
+  useEffect(() => {
+    if (selectedSkills.length > 0 && team?.members) {
+      const requiredSkills = selectedSkills.reduce((acc, skill) => {
+        acc[skill.skill] = skill.proficiency;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const sortedMembers = sortCandidatesBySkills(requiredSkills, team.members);
+      setSuggestedAssignees(sortedMembers.slice(0, 3));
+      setSelectedAssignee(null);
+    } else {
+      setSuggestedAssignees([]);
+      setSelectedAssignee(null);
+    }
+  }, [selectedSkills, team?.members]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(title, description, selectedSkills);
+    onSubmit(title, description, selectedSkills, selectedAssignee || undefined);
     setTitle('');
     setDescription('');
     setSelectedSkills([]);
+    setSelectedAssignee(null);
   };
 
   const handleGenerateSkills = async () => {
@@ -244,6 +268,7 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                   );
                 })}
               </div>
+
               {isAddingSkill ? (
                 <div className={styles.formGroup}>
                   <label htmlFor="newSkill" className={styles.formLabel}>New Skill</label>
@@ -290,6 +315,91 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                 >
                   Add New Skill
                 </button>
+              )}
+            </div>
+          )}
+
+          {selectedSkills.length > 0 && team?.members && team.members.length > 1 && (
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Suggested Assignees</label>
+              <div className={styles.assigneesGrid}>
+                {suggestedAssignees.map((member) => (
+                  <div
+                    key={member.id}
+                    className={`${styles.assigneeCard} ${selectedAssignee === member.id ? styles.selected : ''}`}
+                    onClick={() => setSelectedAssignee(member.id)}
+                  >
+                    <Avatar avatarId={member.avatarId || 1} size={48} />
+                    <div className={styles.assigneeInfo}>
+                      <div className={styles.assigneeName}>
+                        {member.displayName}
+                        {selectedAssignee === member.id && (
+                          <span className={styles.selectedIndicator}>Selected</span>
+                        )}
+                      </div>
+                      <div className={styles.assigneeSkills}>
+                        {selectedSkills.map((skill) => {
+                          const skillLevel = member.skills?.[skill.skill] || 0;
+                          return skillLevel > 0 ? (
+                            <div key={skill.skill} className={styles.assigneeSkill}>
+                              {`${skill.skill}: ${skillLevel}`}
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {team.members.length > 3 && !showAllMembers && (
+                  <div
+                    className={styles.assigneeCard}
+                    onClick={() => setShowAllMembers(true)}
+                  >
+                    <div className={styles.moreMembers}>
+                      +{team.members.length - 3} more
+                    </div>
+                  </div>
+                )}
+              </div>
+              {showAllMembers && (
+                <div className={styles.allMembersList}>
+                  {team.members
+                    .filter(member => !suggestedAssignees.find(s => s.id === member.id))
+                    .map((member) => (
+                      <div
+                        key={member.id}
+                        className={`${styles.assigneeCard} ${selectedAssignee === member.id ? styles.selected : ''}`}
+                        onClick={() => setSelectedAssignee(member.id)}
+                      >
+                        <Avatar avatarId={member.avatarId || 1} size={48} />
+                        <div className={styles.assigneeInfo}>
+                          <div className={styles.assigneeName}>
+                            {member.displayName}
+                            {selectedAssignee === member.id && (
+                              <span className={styles.selectedIndicator}>Selected</span>
+                            )}
+                          </div>
+                          <div className={styles.assigneeSkills}>
+                            {selectedSkills.map((skill) => {
+                              const skillLevel = member.skills?.[skill.skill] || 0;
+                              return skillLevel > 0 ? (
+                                <div key={skill.skill} className={styles.assigneeSkill}>
+                                  {`${skill.skill}: ${skillLevel}`}
+                                </div>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  <button
+                    type="button"
+                    className={styles.skillButton}
+                    onClick={() => setShowAllMembers(false)}
+                  >
+                    Show Less
+                  </button>
+                </div>
               )}
             </div>
           )}

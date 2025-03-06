@@ -136,7 +136,7 @@ export async function declareSkill(
   confidence: number,
 ): Promise<{ xp: number }> {
   const response = await fetch(`${API_BASE_URL}/api/skills/declare`, {
-    ...defaultOptions,
+    ...getDefaultOptions(true),
     method: 'POST',
     body: JSON.stringify({
       skillName,
@@ -190,7 +190,8 @@ export async function getOpenQuestsForUser(id: string) {
 export async function createQuest(
   title: string,
   description: string,
-  skills: Record<string, number>
+  skills: Record<string, number>,
+  assigneeId?: string
 ) {
   const response = await fetch(`${API_BASE_URL}/quests`, {
     ...getDefaultOptions(true),
@@ -199,6 +200,7 @@ export async function createQuest(
       title,
       description,
       skills,
+      assigneeId,
     }),
   });
 
