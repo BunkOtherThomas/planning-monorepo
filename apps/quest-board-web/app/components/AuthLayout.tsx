@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Header from './Header';
 import { checkTeamStatus } from '../lib/api';
 import { User } from '@quest-board/types';
+import { DashboardProvider } from '../contexts/DashboardContext';
 
 const publicRoutes = ['/login', '/signup'];
 
@@ -16,6 +17,7 @@ export default function AuthLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [currentView, setCurrentView] = useState<'adventurer' | 'guild_leader'>('guild_leader');
   const isPublicRoute = publicRoutes.includes(pathname);
 
   useEffect(() => {
@@ -52,6 +54,8 @@ export default function AuthLayout({
               ...userData,
               avatarId: userData.avatarId || 0 // Default to first avatar if none selected
             });
+            // Set initial view based on user role
+            setCurrentView(userData.isProjectManager ? 'guild_leader' : 'adventurer');
           } else {
             // If we can't get user data, clear the token and redirect to login
             document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
@@ -92,10 +96,18 @@ export default function AuthLayout({
 
   return (
     <>
-      {showHeader && <Header user={user} />}
-      <main className="main-content">
-        {children}
-      </main>
+      {showHeader && (
+        <Header 
+          user={user} 
+          currentView={currentView}
+          onViewChange={setCurrentView}
+        />
+      )}
+      <DashboardProvider currentView={currentView} setCurrentView={setCurrentView}>
+        <main className="main-content">
+          {children}
+        </main>
+      </DashboardProvider>
     </>
   );
 } 

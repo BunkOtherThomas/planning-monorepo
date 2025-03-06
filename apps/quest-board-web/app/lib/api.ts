@@ -134,7 +134,6 @@ export async function declareSkill(
   formalEducation: number,
   informalExperience: number,
   confidence: number,
-  userId: string
 ): Promise<{ xp: number }> {
   const response = await fetch(`${API_BASE_URL}/api/skills/declare`, {
     ...defaultOptions,
@@ -144,8 +143,7 @@ export async function declareSkill(
       professionalExperience,
       formalEducation,
       informalExperience,
-      confidence,
-      userId
+      confidence
     }),
   });
 
@@ -221,7 +219,7 @@ export async function getQuests(type: 'created' | 'assigned' | 'available', stat
 
   const response = await fetch(
     `${API_BASE_URL}/quests?${params.toString()}`,
-    defaultOptions
+    getDefaultOptions(true)
   );
 
   if (!response.ok) {

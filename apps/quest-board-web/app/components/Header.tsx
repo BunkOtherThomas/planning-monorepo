@@ -8,9 +8,11 @@ import { User } from '@quest-board/types';
 
 interface HeaderProps {
   user?: User;
+  currentView?: 'guild_leader' | 'adventurer';
+  onViewChange?: (view: 'guild_leader' | 'adventurer') => void;
 }
 
-export default function Header({ user }: HeaderProps) {
+export default function Header({ user, currentView, onViewChange }: HeaderProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -29,6 +31,11 @@ export default function Header({ user }: HeaderProps) {
     router.push('/dashboard');
   };
 
+  const handleViewToggle = () => {
+    if (!onViewChange) return;
+    onViewChange(currentView === 'guild_leader' ? 'adventurer' : 'guild_leader');
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.content}>
@@ -37,6 +44,14 @@ export default function Header({ user }: HeaderProps) {
         </div>
         {user && (
           <div className={styles.userSection}>
+            {user.isProjectManager && (
+              <button
+                className={styles.toggleButton}
+                onClick={handleViewToggle}
+              >
+                Switch to {currentView === 'guild_leader' ? 'Adventurer' : 'Guild Leader'} View
+              </button>
+            )}
             <div className={styles.userInfo}>
               <Avatar avatarId={user.avatarId ?? 0} size={40} className={styles.avatar} />
               <span className={styles.userName}>{user.displayName}</span>

@@ -3,7 +3,15 @@ import type { NextRequest } from 'next/server';
 
 const allowedHeaders = [
   'Content-Type',
-  'Authorization'
+  'Authorization',
+  'X-CSRF-Token',
+  'X-Requested-With',
+  'Accept',
+  'Accept-Version',
+  'Content-Length',
+  'Content-MD5',
+  'Date',
+  'X-Api-Version'
 ];
 
 const corsHeaders = {
@@ -35,5 +43,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/:path*'],
+  matcher: ['/:path*'],
 }; 

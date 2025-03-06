@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { z } from 'zod';
 import { UserSkills } from '@quest-board/types';
+import { verify } from 'jsonwebtoken';
 
 interface Skill {
   id: string;
@@ -12,7 +13,6 @@ interface Skill {
 
 const skillDeclarationSchema = z.object({
   skillName: z.string(),
-  userId: z.string(),
   professionalExperience: z.number().min(0).max(5),
   formalEducation: z.number().min(0).max(5),
   informalExperience: z.number().min(0).max(5),
@@ -32,8 +32,19 @@ export async function POST(req: Request) {
        validatedData.confidence * 0.1) * 165 // This will give us a max of 165 XP
     );
 
+    // Get the token from the Authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Missing token' }, { status: 401 });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    // Verify the token
+    const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
+
     const user = await prisma.$queryRaw<{ skills: UserSkills }[]>`
-      SELECT skills FROM "User" WHERE id = ${validatedData.userId}
+      SELECT skills FROM "User" WHERE id = ${decoded.userId}
     `;
 
     const currentSkills = user[0]?.skills || {};
@@ -45,7 +56,7 @@ export async function POST(req: Request) {
         ...currentSkills,
         [validatedData.skillName]: xp
       })}::jsonb
-      WHERE id = ${validatedData.userId}
+      WHERE id = ${decoded.userId}
     `;
 
     return NextResponse.json({ xp });

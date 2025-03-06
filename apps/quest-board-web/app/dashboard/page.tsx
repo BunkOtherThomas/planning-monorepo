@@ -5,11 +5,13 @@ import AdventurerDashboard from '../components/AdventurerDashboard';
 import GuildLeaderDashboard from '../components/GuildLeaderDashboard';
 import { getCurrentUser } from '../lib/api';
 import { User } from '@quest-board/types';
+import { useDashboard } from '../contexts/DashboardContext';
 
 export default function Dashboard() {
   const [userRole, setUserRole] = useState<'adventurer' | 'guild_leader' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const { currentView } = useDashboard();
 
   const handleSkillUpdate = (skill: string, xp: number) => {
     setUser(prev => {
@@ -48,7 +50,7 @@ export default function Dashboard() {
     return <div>Error loading user data</div>;
   }
 
-  return userRole === 'adventurer' ? (
+  return currentView === 'adventurer' ? (
     <AdventurerDashboard user={user} onSkillUpdate={handleSkillUpdate} />
   ) : (
     <GuildLeaderDashboard />

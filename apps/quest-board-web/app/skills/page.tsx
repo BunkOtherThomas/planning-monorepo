@@ -39,7 +39,7 @@ const SkillsPage: FC = () => {
          values.confidence * 0.1) * 100
       );
       
-      await declareSkill(selectedSkill, xp);
+      await declareSkill(selectedSkill, values.professionalExperience, values.formalEducation, values.informalExperience, values.confidence);
       // Refresh skills list
       const updatedSkills = await getSkills();
       setSkills(updatedSkills);
