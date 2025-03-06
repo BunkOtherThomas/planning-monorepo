@@ -175,7 +175,6 @@ export async function getOpenQuestsForUser(id: string) {
     title: 'Placeholder Quest',
     description: 'Placeholder Description',
     status: 'open',
-    difficulty: 1,
     skills: [],
     assignedTo: {
       id: '1',
@@ -185,6 +184,21 @@ export async function getOpenQuestsForUser(id: string) {
     suggestedAdventurers: [],
   };
   return {ok: true, json: () => Promise.resolve(placeholderQuest)};
+}
+
+export async function generateSkills(goals: string): Promise<{ skills: string[], error?: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/skills/generate`, {
+    ...getDefaultOptions(true),
+    method: 'POST',
+    body: JSON.stringify({ goals }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to generate skills');
+  }
+
+  return response.json();
 }
 
 export async function createQuest(

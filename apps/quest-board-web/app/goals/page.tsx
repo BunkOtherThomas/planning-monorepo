@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './goals.module.css';
 import { ProjectManagerGoals, SkillsResponse } from '@quest-board/types';
-import { createTeam } from '../lib/api';
+import { createTeam, generateSkills } from '../lib/api';
 
 export default function GoalsPage() {
   const router = useRouter();
@@ -32,23 +32,8 @@ export default function GoalsPage() {
     setLoading(true);
     setError(null);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      setError('API URL is not configured');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch(`${apiUrl}/api/skills/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ goals } as ProjectManagerGoals),
-      });
-
-      const data: SkillsResponse = await response.json();
+      const data = await generateSkills(goals);
 
       if (data.error) {
         setError(data.error);
