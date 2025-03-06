@@ -23,7 +23,7 @@ export function AvatarSelector({ onSelect, initialAvatarId = 0 }: AvatarSelector
   };
 
   return (
-    <div className="relative" style={{ height: '140px', width: '220px' }}>
+    <div className="relative flex items-center justify-center" style={{ height: '140px', width: '220px', margin: '0 auto' }}>
       <button
         type="button"
         onClick={handlePrevious}
@@ -45,7 +45,7 @@ export function AvatarSelector({ onSelect, initialAvatarId = 0 }: AvatarSelector
         </svg>
       </button>
 
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="flex items-center justify-center">
         <Avatar 
           avatarId={currentAvatarId} 
           size={140}

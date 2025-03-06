@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './signup.module.css';
 import { signup } from '../lib/api';
 import PasswordRequirements from '../components/PasswordRequirements';
-import { AvatarSelector } from '../components/AvatarSelector';
+import { AvatarSelector } from '../../components/AvatarSelector';
 
 function SignupForm() {
   const router = useRouter();
