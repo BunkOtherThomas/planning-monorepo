@@ -490,4 +490,42 @@
 
 .cancelButton:hover {
   background: var(--background-hover);
+}
+
+.skillLevelInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.levelDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.levelLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.levelValue {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.nextLevelText {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.maxLevelText {
+  font-size: 0.875rem;
+  color: var(--text-success);
+  text-align: center;
 } 

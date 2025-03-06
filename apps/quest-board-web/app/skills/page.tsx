@@ -16,7 +16,7 @@ interface Skill {
 interface SkillAssessmentValues {
   professionalExperience: number;
   formalEducation: number;
-  informalEducation: number;
+  informalExperience: number;
   confidence: number;
 }
 
@@ -35,7 +35,7 @@ const SkillsPage: FC = () => {
       const xp = Math.round(
         (values.professionalExperience * 0.4 +
          values.formalEducation * 0.3 +
-         values.informalEducation * 0.2 +
+         values.informalExperience * 0.2 +
          values.confidence * 0.1) * 100
       );
       

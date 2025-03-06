@@ -12,7 +12,7 @@ interface SkillAssessmentFormProps {
 interface SkillAssessmentValues {
   professionalExperience: number;
   formalEducation: number;
-  informalEducation: number;
+  informalExperience: number;
   confidence: number;
 }
 
@@ -20,7 +20,7 @@ export function SkillAssessmentModal({ skillName, onSubmit, onClose }: SkillAsse
   const [values, setValues] = useState<SkillAssessmentValues>({
     professionalExperience: 0,
     formalEducation: 0,
-    informalEducation: 0,
+    informalExperience: 0,
     confidence: 0,
   });
 
@@ -102,8 +102,8 @@ export function SkillAssessmentModal({ skillName, onSubmit, onClose }: SkillAsse
                 min="0"
                 max="1"
                 step="0.1"
-                value={values.informalEducation}
-                onChange={(e) => handleSliderChange('informalEducation', e.target.value)}
+                value={values.informalExperience}
+                onChange={(e) => handleSliderChange('informalExperience', e.target.value)}
                 className="w-full h-2 bg-primary-darker rounded-lg appearance-none cursor-pointer accent-accent-gold"
               />
               <div className="flex justify-between text-xs text-text-muted mt-1">

@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { getCurrentTeam, getSkills } from '../lib/api';
+import { getCurrentTeam, getSkills, declareSkill } from '../lib/api';
 import styles from './Dashboard.module.css';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
+import { SkillLevelModal } from './SkillLevelModal';
 import { Team, UserSkills, SkillAssessment, User } from '@quest-board/types';
 import { FC } from 'react';
 import { getLevel } from '@planning/common-utils';
@@ -18,21 +19,23 @@ interface Skill {
 interface SkillAssessmentValues {
   professionalExperience: number;
   formalEducation: number;
-  informalEducation: number;
+  informalExperience: number;
   confidence: number;
 }
 
 interface AdventurerDashboardProps {
   user: User;
+  onSkillUpdate?: (skill: string, xp: number) => void;
 }
 
-const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user }) => {
+const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate }) => {
   const [team, setTeam] = useState<Team | null>(null);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [skillAssessments, setSkillAssessments] = useState<SkillAssessment[]>([]);
+  const [viewingSkillLevel, setViewingSkillLevel] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,41 +59,91 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user }) => {
   }, []);
 
   const handleSkillClick = (skill: string) => {
-    setSelectedSkill(skill);
+    const isNewSkill = user.skills?.[skill] === -1;
+    if (isNewSkill) {
+      setSelectedSkill(skill);
+    } else {
+      setViewingSkillLevel(skill);
+    }
   };
 
-  const handleAssessmentSubmit = (values: SkillAssessmentValues) => {
+  const handleDeclineSkill = async (skill: string) => {
+    try {
+      const response = await declareSkill(
+        skill,
+        0, // professionalExperience
+        0, // formalEducation
+        0, // informalExperience
+        0, // confidence
+        user.id
+      );
+      
+      setSkillAssessments(prev => {
+        const existingIndex = prev.findIndex(a => a.skill === skill);
+        if (existingIndex >= 0) {
+          const newAssessments = [...prev];
+          newAssessments[existingIndex] = { skill, xp: response.xp };
+          return newAssessments;
+        }
+        return [...prev, { skill, xp: response.xp }];
+      });
+
+      // Update the parent component with the new skill XP
+      onSkillUpdate?.(skill, response.xp);
+    } catch (error) {
+      console.error('Error declining skill:', error);
+    }
+  };
+
+  const handleAssessmentSubmit = async (values: SkillAssessmentValues) => {
     if (!selectedSkill) return;
     
-    // Calculate XP based on the form values
-    const xp = Math.round(
-      (values.professionalExperience * 0.4 +
-       values.formalEducation * 0.3 +
-       values.informalEducation * 0.2 +
-       values.confidence * 0.1) * 100
-    );
-    
-    setSkillAssessments(prev => {
-      const existingIndex = prev.findIndex(a => a.skill === selectedSkill);
-      if (existingIndex >= 0) {
-        const newAssessments = [...prev];
-        newAssessments[existingIndex] = { skill: selectedSkill, xp };
-        return newAssessments;
-      }
-      return [...prev, { skill: selectedSkill, xp }];
-    });
-    setSelectedSkill(null);
+    try {
+      const response = await declareSkill(
+        selectedSkill,
+        values.professionalExperience,
+        values.formalEducation,
+        values.informalExperience,
+        values.confidence,
+        user.id
+      );
+      
+      setSkillAssessments(prev => {
+        const existingIndex = prev.findIndex(a => a.skill === selectedSkill);
+        if (existingIndex >= 0) {
+          const newAssessments = [...prev];
+          newAssessments[existingIndex] = { skill: selectedSkill, xp: response.xp };
+          return newAssessments;
+        }
+        return [...prev, { skill: selectedSkill, xp: response.xp }];
+      });
+
+      // Update the parent component with the new skill XP
+      onSkillUpdate?.(selectedSkill, response.xp);
+      
+      setSelectedSkill(null);
+    } catch (error) {
+      console.error('Error submitting skill assessment:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const sortedSkills = useMemo(() => {
     if (!team?.skills) return [];
     
-    return [...team.skills].sort((a, b) => {
+    // Split skills into new and existing
+    const newSkills = team.skills.filter(skill => user.skills?.[skill] === -1);
+    const existingSkills = team.skills.filter(skill => user.skills?.[skill] !== -1);
+    
+    // Sort existing skills by XP
+    const sortedExistingSkills = existingSkills.sort((a, b) => {
       const aXP = user.skills?.[a] || 0;
       const bXP = user.skills?.[b] || 0;
-      
       return bXP - aXP;
     });
+    
+    // Combine new skills at the top with sorted existing skills
+    return [...newSkills, ...sortedExistingSkills];
   }, [team?.skills, user.skills]);
 
   const getSkillName = (skillId: string) => {
@@ -112,16 +165,52 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user }) => {
                 return (
                   <div
                     key={skill}
-                    className={`${styles.skillTag} cursor-pointer hover:bg-blue-100 transition-colors relative flex justify-between items-center`}
-                    onClick={() => handleSkillClick(skill)}
+                    className={`${styles.skillTag} relative flex justify-between items-center`}
                   >
                     <div className="flex items-center">
                       {skill}
                     </div>
                     {isNewSkill ? (
-                      <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                        NEW
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleDeclineSkill(skill)}
+                          className="text-red-500 hover:text-red-600 transition-colors"
+                          aria-label="Decline skill"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleSkillClick(skill)}
+                          className="text-green-500 hover:text-green-600 transition-colors"
+                          aria-label="Assess skill"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     ) : (
                       <span className="ml-2">Lv. {getLevel(user.skills?.[skill] || 0).level}</span>
                     )}
@@ -139,6 +228,14 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user }) => {
             skillName={selectedSkill}
             onSubmit={handleAssessmentSubmit}
             onClose={() => setSelectedSkill(null)}
+          />
+        )}
+
+        {viewingSkillLevel && (
+          <SkillLevelModal
+            skillName={viewingSkillLevel}
+            xp={user.skills?.[viewingSkillLevel] || 0}
+            onClose={() => setViewingSkillLevel(null)}
           />
         )}
 

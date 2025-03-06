@@ -52,7 +52,7 @@ CREATE TABLE "UserSkill" (
     "currentXP" INTEGER NOT NULL DEFAULT 0,
     "professionalExp" INTEGER NOT NULL,
     "formalEducation" INTEGER NOT NULL,
-    "informalEducation" INTEGER NOT NULL,
+    "informalExperience" INTEGER NOT NULL,
     "confidenceMultiplier" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

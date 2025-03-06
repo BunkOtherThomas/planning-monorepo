@@ -128,20 +128,33 @@ export async function signup(data: SignupRequest): Promise<AuthResponse> {
   return response.json();
 }
 
-export async function declareSkill(skillName: string, xp: number): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/skills`, {
+export async function declareSkill(
+  skillName: string,
+  professionalExperience: number,
+  formalEducation: number,
+  informalExperience: number,
+  confidence: number,
+  userId: string
+): Promise<{ xp: number }> {
+  const response = await fetch(`${API_BASE_URL}/api/skills/declare`, {
     ...defaultOptions,
     method: 'POST',
     body: JSON.stringify({
       skillName,
-      xp
-    } as SkillDeclarationRequest),
+      professionalExperience,
+      formalEducation,
+      informalExperience,
+      confidence,
+      userId
+    }),
   });
 
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Failed to declare skill');
   }
+
+  return response.json();
 }
 
 export async function getSkills(includeGlobal = true) {

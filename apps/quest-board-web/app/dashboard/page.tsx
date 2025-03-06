@@ -11,6 +11,19 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
+  const handleSkillUpdate = (skill: string, xp: number) => {
+    setUser(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        skills: {
+          ...prev.skills,
+          [skill]: xp
+        }
+      };
+    });
+  };
+
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
@@ -35,5 +48,9 @@ export default function Dashboard() {
     return <div>Error loading user data</div>;
   }
 
-  return userRole === 'adventurer' ? <AdventurerDashboard user={user} /> : <GuildLeaderDashboard />;
+  return userRole === 'adventurer' ? (
+    <AdventurerDashboard user={user} onSkillUpdate={handleSkillUpdate} />
+  ) : (
+    <GuildLeaderDashboard />
+  );
 } 

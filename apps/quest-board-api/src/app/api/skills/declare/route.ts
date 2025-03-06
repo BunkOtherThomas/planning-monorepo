@@ -12,8 +12,11 @@ interface Skill {
 
 const skillDeclarationSchema = z.object({
   skillName: z.string(),
-  xp: z.number().min(0),
   userId: z.string(),
+  professionalExperience: z.number().min(0).max(5),
+  formalEducation: z.number().min(0).max(5),
+  informalExperience: z.number().min(0).max(5),
+  confidence: z.number().min(0).max(5),
 });
 
 export async function POST(req: Request) {
@@ -21,23 +24,14 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = skillDeclarationSchema.parse(body);
 
-    // Check if skill exists
-    const skills = await prisma.$queryRaw<Skill[]>`
-      SELECT * FROM Skill WHERE name = ${validatedData.skillName}
-    `;
-    let skill = skills[0];
+    // Calculate XP based on the form values
+    const xp = Math.round(
+      (validatedData.professionalExperience * 0.4 +
+       validatedData.formalEducation * 0.3 +
+       validatedData.informalExperience * 0.2 +
+       validatedData.confidence * 0.1) * 165 // This will give us a max of 165 XP
+    );
 
-    // If skill doesn't exist, create it
-    if (!skill) {
-      const newSkills = await prisma.$queryRaw<Skill[]>`
-        INSERT INTO Skill (name, description, isGlobal)
-        VALUES (${validatedData.skillName}, '', false)
-        RETURNING *
-      `;
-      skill = newSkills[0];
-    }
-
-    // Get current user skills
     const user = await prisma.$queryRaw<{ skills: UserSkills }[]>`
       SELECT skills FROM "User" WHERE id = ${validatedData.userId}
     `;
@@ -49,19 +43,12 @@ export async function POST(req: Request) {
       UPDATE "User"
       SET "skills" = ${JSON.stringify({
         ...currentSkills,
-        [validatedData.skillName]: validatedData.xp
+        [validatedData.skillName]: xp
       })}::jsonb
       WHERE id = ${validatedData.userId}
     `;
 
-    return NextResponse.json({
-      skill: {
-        id: skill.id,
-        name: skill.name,
-        description: skill.description
-      },
-      xp: validatedData.xp
-    });
+    return NextResponse.json({ xp });
   } catch (error) {
     console.error('Error declaring skill:', error);
     return NextResponse.json(
