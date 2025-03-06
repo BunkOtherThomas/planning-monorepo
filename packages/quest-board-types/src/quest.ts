@@ -48,28 +48,28 @@ export interface AssignQuestRequest {
 } 
 
 export interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  status: 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+  difficulty: number;
+  skills: {
+    name: string;
+    xp: number;
+  }[];
+  assignedTo?: {
     id: string;
-    title: string;
-    description: string;
-    status: 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
-    difficulty: number;
+    displayName: string;
+    avatarId: number;
+  };
+  suggestedAdventurers: {
+    id: string;
+    displayName: string;
+    avatarId: number;
     skills: {
       name: string;
-      level: number;
+      xp: number;
     }[];
-    assignedTo?: {
-      id: string;
-      displayName: string;
-      avatarId: number;
-    };
-    suggestedAdventurers: {
-      id: string;
-      displayName: string;
-      avatarId: number;
-      skillLevels: {
-        name: string;
-        level: number;
-      }[];
-      type: 'highest' | 'second' | 'underdog';
-    }[];
-  }
+    type: 'highest' | 'second' | 'underdog';
+  }[];
+}

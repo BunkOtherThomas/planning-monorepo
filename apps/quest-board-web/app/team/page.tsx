@@ -3,6 +3,8 @@
 import { FC, useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { getSkills } from '../lib/api';
+import { Skill } from '@quest-board/types';
 
 interface TeamMember {
   id: string;
@@ -29,20 +31,18 @@ const TeamPage: FC = () => {
     // Fetch team members and available skills
     const fetchData = async () => {
       try {
-        const [membersResponse, skillsResponse] = await Promise.all([
+        const [membersResponse, skills] = await Promise.all([
           fetch('/api/team'),
-          fetch('/api/skills'),
+          getSkills()
         ]);
 
-        if (!membersResponse.ok || !skillsResponse.ok) {
+        if (!membersResponse.ok) {
           throw new Error('Failed to fetch data');
         }
 
         const members = await membersResponse.json();
-        const skills = await skillsResponse.json();
-
         setTeamMembers(members);
-        setAvailableSkills(skills);
+        setAvailableSkills(skills.map((s: Skill) => s.name));
       } catch (error) {
         console.error('Error fetching data:', error);
       }

@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@quest-board/database";
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma: typeof prisma | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+export { prisma };
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;

@@ -44,44 +44,41 @@ export async function POST(request: Request) {
       }
     });
 
-    // Create UserSkill entries for all team members for each skill
+    // Initialize skills for all team members with -1 XP
     for (const member of team.members) {
+      const currentSkills = member.user.skills as Record<string, number> || {};
+      const updatedSkills = { ...currentSkills };
+      
       for (const skillName of skills) {
-        // Find or create the skill
-        let skill = await prisma.skill.findUnique({
-          where: { name: skillName },
-        });
-
-        if (!skill) {
-          skill = await prisma.skill.create({
-            data: {
-              name: skillName,
-              description: `Team skill for ${team.name}`,
-            },
-          });
+        if (!(skillName in updatedSkills)) {
+          updatedSkills[skillName] = -1;
         }
-
-        // Create UserSkill entry
-        await prisma.userSkill.create({
-          data: {
-            userId: member.userId,
-            skillId: skill.id,
-            level: -1,
-            currentXP: -1,
-            professionalExp: -1,
-            formalEducation: -1,
-            informalEducation: -1,
-            confidenceMultiplier: -1,
-          },
-        });
       }
+
+      await prisma.user.update({
+        where: { id: member.user.id },
+        data: { skills: updatedSkills }
+      });
+    }
+
+    // Create or update the skills in the skills table
+    for (const skillName of skills) {
+      await prisma.skill.upsert({
+        where: { name: skillName },
+        create: {
+          name: skillName,
+          description: `Team skill for ${team.name}`,
+        },
+        update: {}
+      });
     }
 
     return NextResponse.json({ team });
   } catch (error) {
+    console.error('Error creating team:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Invalid token' },
-      { status: 401 }
+      { error: error instanceof Error ? error.message : 'Failed to create team' },
+      { status: 500 }
     );
   }
 }
@@ -125,7 +122,7 @@ export async function GET(request: Request) {
     const teamResponse = {
       id: team.id,
       inviteCode: team.inviteCode,
-      members: team.members.map(member => member.user),
+      members: team.members.map((member: { user: any }) => member.user),
       skills: team.skills || []
     };
 
@@ -181,11 +178,33 @@ export async function PATCH(request: Request) {
         skills: {
           push: skill
         }
+      },
+      include: {
+        members: {
+          include: {
+            user: true
+          }
+        }
       }
     });
 
+    // Initialize the new skill for all team members with -1 XP
+    for (const member of updatedTeam.members) {
+      const currentSkills = member.user.skills as Record<string, number> || {};
+      const updatedSkills = { ...currentSkills };
+      
+      if (!(skill in updatedSkills)) {
+        updatedSkills[skill] = -1;
+      }
+
+      await prisma.user.update({
+        where: { id: member.user.id },
+        data: { skills: updatedSkills }
+      });
+    }
+
     // Create or update the skill in the skills table
-    const skillRecord = await prisma.skill.upsert({
+    await prisma.skill.upsert({
       where: { name: skill },
       create: {
         name: skill,
@@ -193,36 +212,6 @@ export async function PATCH(request: Request) {
       },
       update: {}
     });
-
-    // Create UserSkill entries for all team members
-    const teamMembers = await prisma.teamsOnUsers.findMany({
-      where: { teamId: updatedTeam.id },
-      include: { user: true }
-    });
-
-    await Promise.all(
-      teamMembers.map(member =>
-        prisma.userSkill.upsert({
-          where: {
-            userId_skillId: {
-              userId: member.userId,
-              skillId: skillRecord.id,
-            }
-          },
-          create: {
-            userId: member.userId,
-            skillId: skillRecord.id,
-            level: -1,
-            currentXP: -1,
-            professionalExp: -1,
-            formalEducation: -1,
-            informalEducation: -1,
-            confidenceMultiplier: -1,
-          },
-          update: {}
-        })
-      )
-    );
 
     return NextResponse.json({ team: updatedTeam });
   } catch (error) {

@@ -25,6 +25,7 @@ export async function GET(request: Request) {
         avatarId: true,
         isProjectManager: true,
         isTeamMember: true,
+        skills: true,
       },
     });
 

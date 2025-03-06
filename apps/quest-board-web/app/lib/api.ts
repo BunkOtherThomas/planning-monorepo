@@ -7,6 +7,7 @@ import {
   AuthResponse,
   Quest,
   User,
+  UserSkills,
 } from '@quest-board/types';
 
 // API routes are now running on port 3001
@@ -127,24 +128,13 @@ export async function signup(data: SignupRequest): Promise<AuthResponse> {
   return response.json();
 }
 
-export async function declareSkill(
-  skillId: string,
-  professionalExp: number,
-  formalEducation: number,
-  informalEducation: number,
-  confidenceMultiplier: number,
-  isTagged: boolean
-): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/skills`, {
+export async function declareSkill(skillName: string, xp: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/skills`, {
     ...defaultOptions,
     method: 'POST',
     body: JSON.stringify({
-      skillId,
-      professionalExp,
-      formalEducation,
-      informalEducation,
-      confidenceMultiplier,
-      isTagged
+      skillName,
+      xp
     } as SkillDeclarationRequest),
   });
 
@@ -156,8 +146,8 @@ export async function declareSkill(
 
 export async function getSkills(includeGlobal = true) {
   const response = await fetch(
-    `${API_BASE_URL}/skills?includeGlobal=${includeGlobal}`,
-    defaultOptions
+    `${API_BASE_URL}/api/skills?includeGlobal=${includeGlobal}`,
+    getDefaultOptions(true)
   );
 
   if (!response.ok) {
@@ -166,11 +156,6 @@ export async function getSkills(includeGlobal = true) {
   }
 
   return response.json();
-}
-
-export async function getSkillsForUser(id: string) {
-  const placeholderSkill = 'Playing tennis';
-  return {ok: true, json: () => Promise.resolve([placeholderSkill])};
 }
 
 export async function getOpenQuestsForUser(id: string) {

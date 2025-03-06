@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { z } from 'zod';
+import { UserSkills } from '@quest-board/types';
 
 interface Skill {
   id: string;
@@ -9,35 +10,9 @@ interface Skill {
   isGlobal: boolean;
 }
 
-interface UserSkill {
-  id: string;
-  userId: string;
-  skillId: string;
-  professionalExp: number;
-  formalEducation: number;
-  informalEducation: number;
-  confidenceMultiplier: number;
-  isTagged: boolean;
-  skill: {
-    id: string;
-    name: string;
-    description: string;
-  };
-  user: {
-    id: string;
-    displayName: string;
-    avatarId: number | null;
-  };
-}
-
 const skillDeclarationSchema = z.object({
   skillName: z.string(),
-  experience: z.object({
-    professional: z.number().min(0).max(10),
-    formalEducation: z.number().min(0).max(10),
-    informalEducation: z.number().min(0).max(10),
-    confidence: z.number().min(0.25).max(1),
-  }),
+  xp: z.number().min(0),
   userId: z.string(),
 });
 
@@ -62,69 +37,30 @@ export async function POST(req: Request) {
       skill = newSkills[0];
     }
 
-    // Calculate initial level based on experience
-    const professionalWeight = 2;
-    const formalEducationWeight = 1.5;
-    const informalEducationWeight = 1;
+    // Get current user skills
+    const user = await prisma.$queryRaw<{ skills: UserSkills }[]>`
+      SELECT skills FROM "User" WHERE id = ${validatedData.userId}
+    `;
 
-    const baseLevel = Math.round(
-      (validatedData.experience.professional * professionalWeight +
-        validatedData.experience.formalEducation * formalEducationWeight +
-        validatedData.experience.informalEducation * informalEducationWeight) /
-        (professionalWeight + formalEducationWeight + informalEducationWeight) *
-        validatedData.experience.confidence
-    );
+    const currentSkills = user[0]?.skills || {};
 
-    // Create or update user skill
-    const userSkills = await prisma.$queryRaw<UserSkill[]>`
-      INSERT INTO UserSkill (
-        userId,
-        skillId,
-        professionalExp,
-        formalEducation,
-        informalEducation,
-        confidenceMultiplier,
-        isTagged
-      )
-      VALUES (
-        ${validatedData.userId},
-        ${skill.id},
-        ${validatedData.experience.professional},
-        ${validatedData.experience.formalEducation},
-        ${validatedData.experience.informalEducation},
-        ${validatedData.experience.confidence},
-        false
-      )
-      ON CONFLICT (userId, skillId)
-      DO UPDATE SET
-        professionalExp = ${validatedData.experience.professional},
-        formalEducation = ${validatedData.experience.formalEducation},
-        informalEducation = ${validatedData.experience.informalEducation},
-        confidenceMultiplier = ${validatedData.experience.confidence}
-      RETURNING *,
-        (
-          SELECT json_build_object(
-            'id', s.id,
-            'name', s.name,
-            'description', s.description
-          )
-          FROM Skill s
-          WHERE s.id = UserSkill.skillId
-        ) as skill,
-        (
-          SELECT json_build_object(
-            'id', u.id,
-            'displayName', u.displayName,
-            'avatarId', u.avatarId
-          )
-          FROM "User" u
-          WHERE u.id = UserSkill.userId
-        ) as user
+    // Update user's skills
+    await prisma.$executeRaw`
+      UPDATE "User"
+      SET "skills" = ${JSON.stringify({
+        ...currentSkills,
+        [validatedData.skillName]: validatedData.xp
+      })}::jsonb
+      WHERE id = ${validatedData.userId}
     `;
 
     return NextResponse.json({
-      ...userSkills[0],
-      calculatedLevel: baseLevel,
+      skill: {
+        id: skill.id,
+        name: skill.name,
+        description: skill.description
+      },
+      xp: validatedData.xp
     });
   } catch (error) {
     console.error('Error declaring skill:', error);

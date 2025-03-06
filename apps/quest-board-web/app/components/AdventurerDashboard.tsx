@@ -1,65 +1,100 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getCurrentTeam } from '../lib/api';
+import { useEffect, useState, useMemo } from 'react';
+import { getCurrentTeam, getSkills } from '../lib/api';
 import styles from './Dashboard.module.css';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
+import { Team, UserSkills, SkillAssessment, User } from '@quest-board/types';
+import { FC } from 'react';
+import { getLevel } from '@planning/common-utils';
 
-interface Team {
+interface Skill {
   id: string;
-  inviteCode: string;
-  members: {
-    id: string;
-    displayName: string;
-    avatarId: number;
-  }[];
-  skills: string[];
+  name: string;
+  description: string;
+  isGlobal: boolean;
 }
 
-interface SkillAssessment {
-  skill: string;
+interface SkillAssessmentValues {
   professionalExperience: number;
   formalEducation: number;
   informalEducation: number;
   confidence: number;
 }
 
-export default function AdventurerDashboard() {
+interface AdventurerDashboardProps {
+  user: User;
+}
+
+const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user }) => {
   const [team, setTeam] = useState<Team | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [skillAssessments, setSkillAssessments] = useState<SkillAssessment[]>([]);
 
   useEffect(() => {
-    const fetchTeam = async () => {
+    const fetchData = async () => {
       try {
-        const teamData = await getCurrentTeam();
+        const [teamData, skillsData] = await Promise.all([
+          getCurrentTeam(),
+          getSkills(true)
+        ]);
+
         setTeam(teamData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch team');
+        setSkills(skillsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load data');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchTeam();
+    fetchData();
   }, []);
 
   const handleSkillClick = (skill: string) => {
     setSelectedSkill(skill);
   };
 
-  const handleAssessmentSubmit = (values: Omit<SkillAssessment, 'skill'>) => {
+  const handleAssessmentSubmit = (values: SkillAssessmentValues) => {
     if (!selectedSkill) return;
+    
+    // Calculate XP based on the form values
+    const xp = Math.round(
+      (values.professionalExperience * 0.4 +
+       values.formalEducation * 0.3 +
+       values.informalEducation * 0.2 +
+       values.confidence * 0.1) * 100
+    );
     
     setSkillAssessments(prev => {
       const existingIndex = prev.findIndex(a => a.skill === selectedSkill);
       if (existingIndex >= 0) {
         const newAssessments = [...prev];
-        newAssessments[existingIndex] = { ...values, skill: selectedSkill };
+        newAssessments[existingIndex] = { skill: selectedSkill, xp };
         return newAssessments;
       }
-      return [...prev, { ...values, skill: selectedSkill }];
+      return [...prev, { skill: selectedSkill, xp }];
     });
     setSelectedSkill(null);
+  };
+
+  const sortedSkills = useMemo(() => {
+    if (!team?.skills) return [];
+    
+    return [...team.skills].sort((a, b) => {
+      const aXP = user.skills?.[a] || 0;
+      const bXP = user.skills?.[b] || 0;
+      
+      return bXP - aXP;
+    });
+  }, [team?.skills, user.skills]);
+
+  const getSkillName = (skillId: string) => {
+    return skills.find(s => s.id === skillId)?.name || skillId;
   };
 
   return (
@@ -71,15 +106,28 @@ export default function AdventurerDashboard() {
             <div className={styles.error}>{error}</div>
           ) : team ? (
             <div className={styles.skillsList}>
-              {team.skills.map((skill) => (
-                <div
-                  key={skill}
-                  className={`${styles.skillTag} cursor-pointer hover:bg-blue-100 transition-colors`}
-                  onClick={() => handleSkillClick(skill)}
-                >
-                  {skill}
-                </div>
-              ))}
+              {sortedSkills.map((skill) => {
+                const isNewSkill = user.skills?.[skill] === -1;
+                
+                return (
+                  <div
+                    key={skill}
+                    className={`${styles.skillTag} cursor-pointer hover:bg-blue-100 transition-colors relative flex justify-between items-center`}
+                    onClick={() => handleSkillClick(skill)}
+                  >
+                    <div className="flex items-center">
+                      {skill}
+                    </div>
+                    {isNewSkill ? (
+                      <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                        NEW
+                      </span>
+                    ) : (
+                      <span className="ml-2">Lv. {getLevel(user.skills?.[skill] || 0).level}</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className={styles.loading}>Loading team skills...</div>
@@ -134,7 +182,42 @@ export default function AdventurerDashboard() {
             </div>
           </div>
         </section>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sortedSkills.map((skillId) => {
+            const xp = user.skills?.[skillId] ?? 0;
+            const { level, xp: currentXP, remaining } = getLevel(xp);
+            return (
+              <div
+                key={skillId}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {getSkillName(skillId)}
+                </h3>
+                <div className="mt-2">
+                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+                    <span>Level</span>
+                    <span>{level || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+                    <span>XP</span>
+                    <span>{currentXP || 0}</span>
+                  </div>
+                  {remaining > 0 && (
+                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+                      <span>Next Level</span>
+                      <span>{remaining || 0} XP</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
-} 
+};
+
+export default AdventurerDashboard; 

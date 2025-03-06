@@ -2,6 +2,7 @@
 
 import { FC, useState } from 'react';
 import styles from './page.module.css';
+import { getLevel } from '@planning/common-utils';
 
 interface QuestSuggestion {
   skills: string[];
@@ -9,7 +10,7 @@ interface QuestSuggestion {
   suggestedAdventurers: {
     id: string;
     name: string;
-    skillLevels: { skill: string; level: number }[];
+    skills: { name: string; xp: number }[];
     type: 'highest' | 'second' | 'underdog';
   }[];
 }
@@ -130,12 +131,15 @@ const NewQuest: FC = () => {
                   >
                     <h3>{adventurer.name}</h3>
                     <div className={styles.skillLevels}>
-                      {adventurer.skillLevels.map((skill) => (
-                        <div key={skill.skill} className={styles.skillLevel}>
-                          <span>{skill.skill}</span>
-                          <span>Lvl {skill.level}</span>
-                        </div>
-                      ))}
+                      {adventurer.skills.map((skill) => {
+                        const { level } = getLevel(skill.xp);
+                        return (
+                          <div key={skill.name} className={styles.skillLevel}>
+                            <span>{skill.name}</span>
+                            <span>Lvl {level}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                     <span className={styles.adventurerType}>
                       {adventurer.type === 'highest' && '🏆 Highest Level'}

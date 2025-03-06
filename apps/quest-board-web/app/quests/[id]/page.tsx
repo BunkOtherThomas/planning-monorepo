@@ -3,8 +3,9 @@
 import { FC, useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import styles from './page.module.css';
-import { getOpenQuestsForUser, getSkillsForUser } from '../../lib/api';
+import { getOpenQuestsForUser, getSkills } from '../../lib/api';
 import { Quest } from '@quest-board/types';
+import { getLevel } from '@planning/common-utils';
 
 const QuestPage: FC = () => {
   const params = useParams();
@@ -19,20 +20,20 @@ const QuestPage: FC = () => {
       try {
         const [questResponse, skillsResponse] = await Promise.all([
           getOpenQuestsForUser(params.id as string),
-          getSkillsForUser(params.id as string),
+          getSkills(true),
         ]);
 
-        if (!questResponse.ok || !skillsResponse.ok) {
-          throw new Error('Failed to fetch data');
+        if (!questResponse.ok) {
+          throw new Error('Failed to fetch quest');
         }
 
         const questData = await questResponse.json();
-        const skillsData = await skillsResponse.json();
+        const skillsData = await skillsResponse;
 
         setQuest(questData);
         setEditedSkills(questData.skills.map((s: any) => s.name));
         setEditedDifficulty(questData.difficulty);
-        setAvailableSkills(skillsData);
+        setAvailableSkills(skillsData.map((s: any) => s.name));
       } catch (error) {
         console.error('Error fetching quest:', error);
       }
@@ -169,12 +170,15 @@ const QuestPage: FC = () => {
               <div className={styles.skills}>
                 <h3>Required Skills</h3>
                 <div className={styles.skillsList}>
-                  {quest.skills.map((skill) => (
-                    <div key={skill.name} className={styles.skillBadge}>
-                      <span>{skill.name}</span>
-                      <span>Lvl {skill.level}</span>
-                    </div>
-                  ))}
+                  {quest.skills.map((skill) => {
+                    const { level } = getLevel(skill.xp);
+                    return (
+                      <div key={skill.name} className={styles.skillBadge}>
+                        <span>{skill.name}</span>
+                        <span>Lvl {level}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -211,11 +215,14 @@ const QuestPage: FC = () => {
                     <div className={styles.adventurerInfo}>
                       <h4>{adventurer.displayName}</h4>
                       <div className={styles.adventurerSkills}>
-                        {adventurer.skillLevels.map((skill) => (
-                          <span key={skill.name} className={styles.skillLevel}>
-                            {skill.name} Lvl {skill.level}
-                          </span>
-                        ))}
+                        {adventurer.skills.map((skill) => {
+                          const { level } = getLevel(skill.xp);
+                          return (
+                            <span key={skill.name} className={styles.skillLevel}>
+                              {skill.name} Lvl {level}
+                            </span>
+                          );
+                        })}
                       </div>
                       <span className={styles.adventurerType}>
                         {adventurer.type === 'highest' && '🏆 Highest Level'}

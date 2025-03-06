@@ -28,10 +28,10 @@ importers:
         version: 0.38.0
       '@auth/prisma-adapter':
         specifier: ^2.8.0
-        version: 2.8.0(@prisma/client@6.4.1)
+        version: 2.8.0(@prisma/client@5.22.0)
       '@prisma/client':
-        specifier: ^6.4.1
-        version: 6.4.1(typescript@5.7.3)
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
       '@quest-board/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -90,9 +90,15 @@ importers:
       '@auth/prisma-adapter':
         specifier: ^2.8.0
         version: 2.8.0(@prisma/client@6.4.1)
+      '@planning/common-utils':
+        specifier: workspace:*
+        version: link:../../packages/common-utils
       '@prisma/client':
         specifier: ^6.4.1
         version: 6.4.1(prisma@6.4.1)(typescript@5.3.3)
+      '@quest-board/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@quest-board/types':
         specifier: workspace:*
         version: link:../../packages/quest-board-types
@@ -372,13 +378,26 @@ packages:
       preact-render-to-string: 6.5.11(preact@10.24.3)
     dev: false
 
+  /@auth/prisma-adapter@2.8.0(@prisma/client@5.22.0):
+    resolution: {integrity: sha512-g0Bmq3l5xUDyBBiDgm/y3Zqb582CnRHzFqbloV7scrLia5AbVC0xy+ntn+CQCAWW9ibpwiqJrQKKboIWN1oGqw==}
+    peerDependencies:
+      '@prisma/client': '>=2.26.0 || >=3 || >=4 || >=5 || >=6'
+    dependencies:
+      '@auth/core': 0.38.0
+      '@prisma/client': 5.22.0(prisma@5.22.0)
+    transitivePeerDependencies:
+      - '@simplewebauthn/browser'
+      - '@simplewebauthn/server'
+      - nodemailer
+    dev: false
+
   /@auth/prisma-adapter@2.8.0(@prisma/client@6.4.1):
     resolution: {integrity: sha512-g0Bmq3l5xUDyBBiDgm/y3Zqb582CnRHzFqbloV7scrLia5AbVC0xy+ntn+CQCAWW9ibpwiqJrQKKboIWN1oGqw==}
     peerDependencies:
       '@prisma/client': '>=2.26.0 || >=3 || >=4 || >=5 || >=6'
     dependencies:
       '@auth/core': 0.38.0
-      '@prisma/client': 6.4.1(typescript@5.7.3)
+      '@prisma/client': 6.4.1(prisma@6.4.1)(typescript@5.3.3)
     transitivePeerDependencies:
       - '@simplewebauthn/browser'
       - '@simplewebauthn/server'
@@ -1525,22 +1544,6 @@ packages:
     dependencies:
       prisma: 6.4.1(typescript@5.3.3)
       typescript: 5.3.3
-    dev: false
-
-  /@prisma/client@6.4.1(typescript@5.7.3):
-    resolution: {integrity: sha512-A7Mwx44+GVZVexT5e2GF/WcKkEkNNKbgr059xpr5mn+oUm2ZW1svhe+0TRNBwCdzhfIZ+q23jEgsNPvKD9u+6g==}
-    engines: {node: '>=18.18'}
-    requiresBuild: true
-    peerDependencies:
-      prisma: '*'
-      typescript: '>=5.1.0'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
-      typescript:
-        optional: true
-    dependencies:
-      typescript: 5.7.3
     dev: false
 
   /@prisma/debug@5.22.0:
@@ -8205,6 +8208,7 @@ packages:
     resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
     engines: {node: '>=14.17'}
     hasBin: true
+    dev: true
 
   /uglify-js@3.19.3:
     resolution: {integrity: sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==}

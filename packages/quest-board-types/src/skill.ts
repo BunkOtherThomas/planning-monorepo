@@ -1,8 +1,20 @@
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  isGlobal: boolean;
+}
+
+export interface UserSkills {
+  [skillName: string]: number; // XP value for each skill
+}
+
 export interface SkillDeclarationRequest {
-  skillId: string;
-  professionalExp: number;
-  formalEducation: number;
-  informalEducation: number;
-  confidenceMultiplier: number;
-  isTagged: boolean;
+  skillName: string;
+  xp: number;
+}
+
+export interface SkillAssessment {
+  skill: string;
+  xp: number;
 } 

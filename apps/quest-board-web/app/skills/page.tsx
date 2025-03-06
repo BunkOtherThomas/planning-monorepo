@@ -2,66 +2,49 @@
 
 import { FC, useState } from 'react';
 import styles from './page.module.css';
+import { SkillAssessmentModal } from '../components/SkillAssessmentModal';
+import { getSkills, declareSkill } from '../lib/api';
 
 interface Skill {
   id: string;
   name: string;
-  level: number;
-  isTagged: boolean;
-  experience: {
-    professional: number;
-    formalEducation: number;
-    informalEducation: number;
-    confidence: number;
-  };
+  description: string;
+  isGlobal: boolean;
+  xp: number;
+}
+
+interface SkillAssessmentValues {
+  professionalExperience: number;
+  formalEducation: number;
+  informalEducation: number;
+  confidence: number;
 }
 
 const SkillsPage: FC = () => {
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
-  const [declaredSkills, setDeclaredSkills] = useState<Skill[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<string>('');
-  const [experience, setExperience] = useState({
-    professional: 5,
-    formalEducation: 5,
-    informalEducation: 5,
-    confidence: 0.75,
-  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [experience, setExperience] = useState<number>(0);
 
-  const handleDeclareSkill = async () => {
+  const handleSkillSubmit = async (values: SkillAssessmentValues) => {
+    if (!selectedSkill) return;
+    
     try {
-      const response = await fetch('/api/skills/declare', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          skillName: selectedSkill,
-          experience,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to declare skill');
-
-      const newSkill = await response.json();
-      setDeclaredSkills([...declaredSkills, newSkill]);
-      setAvailableSkills(availableSkills.filter(s => s !== selectedSkill));
-      setSelectedSkill('');
+      // Calculate XP based on the form values
+      const xp = Math.round(
+        (values.professionalExperience * 0.4 +
+         values.formalEducation * 0.3 +
+         values.informalEducation * 0.2 +
+         values.confidence * 0.1) * 100
+      );
+      
+      await declareSkill(selectedSkill, xp);
+      // Refresh skills list
+      const updatedSkills = await getSkills();
+      setSkills(updatedSkills);
     } catch (error) {
-      console.error('Error declaring skill:', error);
-    }
-  };
-
-  const handleToggleTag = async (skillId: string) => {
-    try {
-      const response = await fetch(`/api/skills/${skillId}/tag`, {
-        method: 'PUT',
-      });
-
-      if (!response.ok) throw new Error('Failed to toggle tag');
-
-      setDeclaredSkills(declaredSkills.map(skill => 
-        skill.id === skillId ? { ...skill, isTagged: !skill.isTagged } : skill
-      ));
-    } catch (error) {
-      console.error('Error toggling tag:', error);
+      console.error('Failed to declare skill:', error);
     }
   };
 
@@ -85,141 +68,40 @@ const SkillsPage: FC = () => {
           </select>
 
           {selectedSkill && (
-            <div className={styles.experienceForm}>
-              <div className={styles.sliderGroup}>
-                <label>
-                  Professional Experience
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    value={experience.professional}
-                    onChange={(e) => setExperience({
-                      ...experience,
-                      professional: Number(e.target.value),
-                    })}
-                  />
-                  <span>{experience.professional}</span>
-                </label>
-              </div>
-
-              <div className={styles.sliderGroup}>
-                <label>
-                  Formal Education
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    value={experience.formalEducation}
-                    onChange={(e) => setExperience({
-                      ...experience,
-                      formalEducation: Number(e.target.value),
-                    })}
-                  />
-                  <span>{experience.formalEducation}</span>
-                </label>
-              </div>
-
-              <div className={styles.sliderGroup}>
-                <label>
-                  Informal Education
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    value={experience.informalEducation}
-                    onChange={(e) => setExperience({
-                      ...experience,
-                      informalEducation: Number(e.target.value),
-                    })}
-                  />
-                  <span>{experience.informalEducation}</span>
-                </label>
-              </div>
-
-              <div className={styles.sliderGroup}>
-                <label>
-                  Confidence Level
-                  <input
-                    type="range"
-                    min="25"
-                    max="100"
-                    value={experience.confidence * 100}
-                    onChange={(e) => setExperience({
-                      ...experience,
-                      confidence: Number(e.target.value) / 100,
-                    })}
-                  />
-                  <span>{Math.round(experience.confidence * 100)}%</span>
-                </label>
-              </div>
-
-              <button
-                className={styles.declareButton}
-                onClick={handleDeclareSkill}
-              >
-                Declare Skill
-              </button>
-            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className={styles.declareButton}
+            >
+              Declare Skill
+            </button>
           )}
         </section>
 
-        <section className={styles.declaredSkills}>
+        <section className={styles.currentSkills}>
           <h2>Your Skills</h2>
           <div className={styles.skillsList}>
-            {declaredSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className={`${styles.skillCard} ${skill.isTagged ? styles.tagged : ''}`}
-              >
-                <div className={styles.skillHeader}>
-                  <h3>{skill.name}</h3>
-                  <span className={styles.level}>Level {skill.level}</span>
+            {skills.map((skill) => (
+              <div key={skill.id} className={styles.skillCard}>
+                <h3>{skill.name}</h3>
+                <p>{skill.description}</p>
+                <div className={styles.xpBar}>
+                  <div
+                    className={styles.xpFill}
+                    style={{ width: `${skill.xp}%` }}
+                  />
                 </div>
-
-                <div className={styles.skillStats}>
-                  <div className={styles.statBar}>
-                    <span>Professional</span>
-                    <div className={styles.barWrapper}>
-                      <div
-                        className={styles.bar}
-                        style={{ width: `${skill.experience.professional * 10}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.statBar}>
-                    <span>Formal Education</span>
-                    <div className={styles.barWrapper}>
-                      <div
-                        className={styles.bar}
-                        style={{ width: `${skill.experience.formalEducation * 10}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.statBar}>
-                    <span>Informal Education</span>
-                    <div className={styles.barWrapper}>
-                      <div
-                        className={styles.bar}
-                        style={{ width: `${skill.experience.informalEducation * 10}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  className={`${styles.tagButton} ${skill.isTagged ? styles.tagged : ''}`}
-                  onClick={() => handleToggleTag(skill.id)}
-                >
-                  {skill.isTagged ? 'Tagged ★' : 'Tag Skill'}
-                </button>
+                <span className={styles.xpText}>{skill.xp} XP</span>
               </div>
             ))}
           </div>
         </section>
       </div>
+
+      <SkillAssessmentModal
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSkillSubmit}
+        skillName={selectedSkill}
+      />
     </div>
   );
 };

@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  transpilePackages: ["@repo/ui"],
+  transpilePackages: ["@repo/ui", "@planning/common-utils"],
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

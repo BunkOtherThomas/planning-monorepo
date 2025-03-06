@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
-import { SkillDeclarationRequest } from '@quest-board/types';
+import { SkillDeclarationRequest, UserSkills } from '@quest-board/types';
 import { z } from 'zod';
+import { verify } from 'jsonwebtoken';
 
 interface Skill {
   id: string;
@@ -10,24 +11,9 @@ interface Skill {
   isGlobal: boolean;
 }
 
-interface UserSkill {
-  id: string;
-  userId: string;
-  skillId: string;
-  professionalExp: number;
-  formalEducation: number;
-  informalEducation: number;
-  confidenceMultiplier: number;
-  isTagged: boolean;
-}
-
 const skillDeclarationSchema = z.object({
-  skillId: z.string(),
-  professionalExp: z.number().min(0).max(10),
-  formalEducation: z.number().min(0).max(10),
-  informalEducation: z.number().min(0).max(10),
-  confidenceMultiplier: z.number().min(0.1).max(2.0),
-  isTagged: z.boolean()
+  skillName: z.string(),
+  xp: z.number().min(0)
 });
 
 export async function POST(request: Request) {
@@ -40,7 +26,7 @@ export async function POST(request: Request) {
 
     // Check if skill exists
     const skills = await prisma.$queryRaw<Skill[]>`
-      SELECT * FROM Skill WHERE id = ${validatedData.skillId}
+      SELECT * FROM "Skill" WHERE name = ${validatedData.skillName}
     `;
 
     if (!skills[0]) {
@@ -50,37 +36,27 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create or update user skill
-    const userSkills = await prisma.$queryRaw<UserSkill[]>`
-      INSERT INTO UserSkill (
-        userId,
-        skillId,
-        professionalExp,
-        formalEducation,
-        informalEducation,
-        confidenceMultiplier,
-        isTagged
-      )
-      VALUES (
-        ${userId},
-        ${validatedData.skillId},
-        ${validatedData.professionalExp},
-        ${validatedData.formalEducation},
-        ${validatedData.informalEducation},
-        ${validatedData.confidenceMultiplier},
-        ${validatedData.isTagged}
-      )
-      ON CONFLICT (userId, skillId)
-      DO UPDATE SET
-        professionalExp = ${validatedData.professionalExp},
-        formalEducation = ${validatedData.formalEducation},
-        informalEducation = ${validatedData.informalEducation},
-        confidenceMultiplier = ${validatedData.confidenceMultiplier},
-        isTagged = ${validatedData.isTagged}
-      RETURNING *
-    `;
+    // Get current user skills
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { skills: true }
+    });
 
-    return NextResponse.json(userSkills[0], { status: 201 });
+    const currentSkills = user?.skills as UserSkills || {};
+    
+    // Update user's skills
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        skills: {
+          ...currentSkills,
+          [validatedData.skillName]: validatedData.xp
+        }
+      },
+      select: { skills: true }
+    });
+
+    return NextResponse.json(updatedUser, { status: 201 });
   } catch (error) {
     console.error('Skill declaration error:', error);
     return NextResponse.json(
@@ -92,85 +68,51 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // Get the token from the Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Missing token' }, { status: 401 });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    // Verify the token
+    const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
+    const userId = decoded.userId;
+
     const { searchParams } = new URL(request.url);
     const includeGlobal = searchParams.get('includeGlobal') !== 'false';
     const getAll = searchParams.get('all') === 'true';
 
     // If getAll is true, return all global skills
     if (getAll) {
-      const skills = await prisma.$queryRaw<(Skill & { users: UserSkill[] })[]>`
-        SELECT s.*,
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'id', us.id,
-                'userId', us.userId,
-                'skillId', us.skillId,
-                'professionalExp', us.professionalExp,
-                'formalEducation', us.formalEducation,
-                'informalEducation', us.informalEducation,
-                'confidenceMultiplier', us.confidenceMultiplier,
-                'isTagged', us.isTagged,
-                'user', json_build_object(
-                  'id', u.id,
-                  'displayName', u.displayName,
-                  'avatarId', u.avatarId
-                )
-              )
-            ) FILTER (WHERE us.id IS NOT NULL),
-            '[]'
-          ) as users
-        FROM Skill s
-        LEFT JOIN UserSkill us ON s.id = us.skillId
-        LEFT JOIN "User" u ON us.userId = u.id
-        WHERE s.isGlobal = true
-        GROUP BY s.id
+      const skills = await prisma.$queryRaw<Skill[]>`
+        SELECT * FROM "Skill"
+        WHERE "businessId" IS NULL
       `;
 
       return NextResponse.json(skills);
     }
 
-    // TODO: Get user ID from auth session
-    const userId = 'user-id';
+    // Get user's skills
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { skills: true }
+    });
 
-    // Check if user exists
-    const users = await prisma.$queryRaw<{ id: string }[]>`
-      SELECT id FROM "User" WHERE id = ${userId}
-    `;
-
-    if (!users[0]) {
+    if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Get user's skills and optionally include global skills
-    const skills = await prisma.$queryRaw<(Skill & { users: UserSkill[] })[]>`
-      SELECT s.*,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', us.id,
-              'userId', us.userId,
-              'skillId', us.skillId,
-              'professionalExp', us.professionalExp,
-              'formalEducation', us.formalEducation,
-              'informalEducation', us.informalEducation,
-              'confidenceMultiplier', us.confidenceMultiplier,
-              'isTagged', us.isTagged
-            )
-          ) FILTER (WHERE us.id IS NOT NULL),
-          '[]'
-        ) as users
-      FROM Skill s
-      LEFT JOIN UserSkill us ON s.id = us.skillId AND us.userId = ${userId}
-      WHERE s.isGlobal = ${includeGlobal}
-        OR EXISTS (
-          SELECT 1 FROM UserSkill us2
-          WHERE us2.skillId = s.id AND us2.userId = ${userId}
-        )
-      GROUP BY s.id
+    // Get all skills (global and user's)
+    const skills = await prisma.$queryRaw<Skill[]>`
+      SELECT s.*
+      FROM "Skill" s
+      WHERE (${includeGlobal} AND s."businessId" IS NULL)
+        OR s.name = ANY(${Object.keys(user.skills as UserSkills)})
     `;
 
     return NextResponse.json(skills);

@@ -28,6 +28,6 @@ export function getLevel(totalXp: number): LevelInfo {
   return {
     level,
     xp,
-    remaining,
+    remaining
   };
 } 

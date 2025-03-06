@@ -3,6 +3,7 @@ import { hash } from 'bcryptjs';
 import { prisma } from '@quest-board/database';
 import { z } from 'zod';
 import { sign } from 'jsonwebtoken';
+import { UserSkills } from '@quest-board/types';
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -71,7 +72,8 @@ export async function POST(req: Request) {
         },
       });
 
-      // Create UserSkill entries for each team skill
+      // Initialize user's skills with -1 XP for each team skill
+      const userSkills: UserSkills = {};
       for (const skillName of team.skills) {
         // Find or create the skill
         let skill = await prisma.skill.findUnique({
@@ -87,20 +89,15 @@ export async function POST(req: Request) {
           });
         }
 
-        // Create UserSkill entry
-        await prisma.userSkill.create({
-          data: {
-            userId: user.id,
-            skillId: skill.id,
-            level: -1,
-            currentXP: -1,
-            professionalExp: -1,
-            formalEducation: -1,
-            informalEducation: -1,
-            confidenceMultiplier: -1,
-          },
-        });
+        userSkills[skillName] = -1;
       }
+
+      // Update user with initial skills using a raw query
+      await prisma.$executeRaw`
+        UPDATE "User"
+        SET "skills" = ${JSON.stringify(userSkills)}::jsonb
+        WHERE id = ${user.id}
+      `;
     }
 
     // Generate JWT token

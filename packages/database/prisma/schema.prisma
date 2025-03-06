@@ -22,12 +22,11 @@ model User {
   businessDetails   BusinessDetails?
   managedTeams      TeamMembership[]    @relation("ManagedTeams")
   createdQuests     Quest[]             @relation("CreatedQuests")
-  userSkills        UserSkill[]
   assignedQuests    Quest[]             @relation("AssignedQuests")
   teamMemberships   TeamMembership[]    @relation("TeamMemberships")
   notifications     Notification[]
-  taggedSkills      TaggedSkill[]
   teams             TeamsOnUsers[]
+  skills            Json                @default("{}") // Object with skill names as keys and XP as values
 }
 
 model BusinessDetails {
@@ -47,41 +46,7 @@ model Skill {
   businessId      String?       // null means it's a global skill
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  userSkills      UserSkill[]
   questSkills     QuestSkill[]
-  taggedSkills    TaggedSkill[]
-}
-
-model UserSkill {
-  id                    String    @id @default(cuid())
-  userId                String
-  skillId               String
-  level                 Int       @default(0)
-  currentXP             Int       @default(0)
-  professionalExp       Int       // 0-10 slider
-  formalEducation      Int       // 0-10 slider
-  informalEducation    Int       // 0-10 slider
-  confidenceMultiplier Float     // 0.25-1.0
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skill                Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, skillId])
-}
-
-model TaggedSkill {
-  id        String   @id @default(cuid())
-  userId    String
-  skillId   String
-  priority  Int      // 1-3 for ordering
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, skillId])
-  @@unique([userId, priority]) // Ensures no duplicate priorities per user
 }
 
 model Quest {
@@ -139,7 +104,7 @@ model Team {
   id          String   @id @default(cuid())
   name        String?
   inviteCode  String   @unique @default(dbgenerated("substring(md5(random()::text) from 1 for 4)"))
-  skills      String[]
+  skills      String[] // Array of skill names
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   members     TeamsOnUsers[]

@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
+    "@planning/common-utils": "workspace:*",
     "@prisma/client": "^6.4.1",
+    "@quest-board/database": "workspace:*",
     "@quest-board/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "bcryptjs": "^3.0.2",
