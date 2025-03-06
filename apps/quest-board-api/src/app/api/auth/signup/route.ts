@@ -75,29 +75,14 @@ export async function POST(req: Request) {
       // Initialize user's skills with -1 XP for each team skill
       const userSkills: UserSkills = {};
       for (const skillName of team.skills) {
-        // Find or create the skill
-        let skill = await prisma.skill.findUnique({
-          where: { name: skillName },
-        });
-
-        if (!skill) {
-          skill = await prisma.skill.create({
-            data: {
-              name: skillName,
-              description: `Team skill for ${team.name}`,
-            },
-          });
-        }
-
         userSkills[skillName] = -1;
       }
 
-      // Update user with initial skills using a raw query
-      await prisma.$executeRaw`
-        UPDATE "User"
-        SET "skills" = ${JSON.stringify(userSkills)}::jsonb
-        WHERE id = ${user.id}
-      `;
+      // Update user with initial skills
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { skills: userSkills }
+      });
     }
 
     // Generate JWT token

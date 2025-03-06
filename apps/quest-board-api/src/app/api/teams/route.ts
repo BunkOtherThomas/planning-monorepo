@@ -61,18 +61,6 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create or update the skills in the skills table
-    for (const skillName of skills) {
-      await prisma.skill.upsert({
-        where: { name: skillName },
-        create: {
-          name: skillName,
-          description: `Team skill for ${team.name}`,
-        },
-        update: {}
-      });
-    }
-
     return NextResponse.json({ team });
   } catch (error) {
     console.error('Error creating team:', error);
@@ -202,16 +190,6 @@ export async function PATCH(request: Request) {
         data: { skills: updatedSkills }
       });
     }
-
-    // Create or update the skill in the skills table
-    await prisma.skill.upsert({
-      where: { name: skill },
-      create: {
-        name: skill,
-        description: `Team skill for ${updatedTeam.name}`,
-      },
-      update: {}
-    });
 
     return NextResponse.json({ team: updatedTeam });
   } catch (error) {

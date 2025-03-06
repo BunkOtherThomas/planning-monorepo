@@ -2,15 +2,22 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@quest-board/database';
 import { z } from 'zod';
 import { verify } from 'jsonwebtoken';
+import { Quest, QuestStatus, Prisma } from '@prisma/client';
 
 const questSchema = z.object({
   title: z.string(),
-  description: z.string(),
-  skills: z.array(z.object({
-    name: z.string(),
-    weight: z.number().min(0.1).max(10).default(1.0),
-  })),
+  description: z.string().optional(),
+  skills: z.record(z.string(), z.number()),
 });
+
+type QuestWithAssignedTo = Quest & {
+  assignedTo: {
+    id: string;
+    displayName: string;
+    avatarId: number;
+  } | null;
+  questSkills: Record<string, number>;
+};
 
 export async function GET(request: Request) {
   try {
@@ -32,7 +39,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
 
     // Build the query based on type
-    let whereClause = {};
+    let whereClause: Prisma.QuestWhereInput = {};
     if (type === 'created') {
       whereClause = {
         createdById: userId
@@ -50,7 +57,7 @@ export async function GET(request: Request) {
     if (status) {
       whereClause = {
         ...whereClause,
-        status
+        status: status as QuestStatus
       };
     }
 
@@ -58,23 +65,18 @@ export async function GET(request: Request) {
     const quests = await prisma.quest.findMany({
       where: whereClause,
       include: {
-        questSkills: {
-          include: {
-            skill: true
-          }
-        },
         assignedTo: {
           select: {
             id: true,
             displayName: true,
             avatarId: true
           }
-        }
+        },
       },
       orderBy: {
         createdAt: 'desc'
       }
-    });
+    }) as QuestWithAssignedTo[];
 
     // Transform the response to match the expected format
     const transformedQuests = quests.map(quest => ({
@@ -84,17 +86,13 @@ export async function GET(request: Request) {
       status: quest.status,
       createdAt: quest.createdAt,
       updatedAt: quest.updatedAt,
-      deadline: quest.deadline,
       createdBy: quest.createdById,
       assignedTo: quest.assignedTo ? {
         id: quest.assignedTo.id,
         displayName: quest.assignedTo.displayName,
         avatarId: quest.assignedTo.avatarId
       } : null,
-      skills: quest.questSkills.map(qs => ({
-        skillId: qs.skill.id,
-        weight: qs.weight
-      }))
+      skills: quest.questSkills as Record<string, number>
     }));
 
     return NextResponse.json(transformedQuests);
@@ -124,38 +122,16 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = questSchema.parse(body);
 
-    // Find or create skills
-    const questSkillsData = await Promise.all(
-      validatedData.skills.map(async (skillData) => {
-        const skill = await prisma.skill.upsert({
-          where: { name: skillData.name },
-          create: { name: skillData.name },
-          update: {},
-        });
-        return {
-          skillId: skill.id,
-          weight: skillData.weight,
-        };
-      })
-    );
 
     const quest = await prisma.quest.create({
       data: {
         title: validatedData.title,
-        description: validatedData.description,
+        description: validatedData.description || '',
         createdById,
-        difficulty: 0,
-        deadline: new Date(), 
-        questSkills: {
-          create: questSkillsData,
-        },
+        status: 'OPEN',
+        questSkills: validatedData.skills,
       },
       include: {
-        questSkills: {
-          include: {
-            skill: true,
-          },
-        },
         assignedTo: {
           select: {
             id: true,
@@ -164,7 +140,7 @@ export async function POST(req: Request) {
           }
         }
       },
-    });
+    }) as QuestWithAssignedTo;
 
     // Transform the response to match the expected format
     const transformedQuest = {
@@ -174,17 +150,13 @@ export async function POST(req: Request) {
       status: quest.status,
       createdAt: quest.createdAt,
       updatedAt: quest.updatedAt,
-      deadline: quest.deadline,
       createdBy: quest.createdById,
       assignedTo: quest.assignedTo ? {
         id: quest.assignedTo.id,
         displayName: quest.assignedTo.displayName,
         avatarId: quest.assignedTo.avatarId
       } : null,
-      skills: quest.questSkills.map(qs => ({
-        skillId: qs.skill.id,
-        weight: qs.weight
-      }))
+      skills: quest.questSkills as Record<string, number>
     };
 
     return NextResponse.json(transformedQuest);

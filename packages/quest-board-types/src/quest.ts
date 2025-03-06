@@ -8,10 +8,7 @@ export enum QuestStatus {
 export interface QuestCreationRequest {
   title: string;
   description: string;
-  skills: Array<{
-    skillId: string;
-    weight: number;
-  }>;
+  skills: Record<string, number>;
   deadline?: string;
 }
 
@@ -25,7 +22,7 @@ export interface QuestResponse {
   deadline?: string;
   createdBy: string;
   assignedTo?: string;
-  skills: Array<{ skillId: string; weight: number }>;
+  skills: Record<string, number>;
 }
 
 export interface QuestListResponse {

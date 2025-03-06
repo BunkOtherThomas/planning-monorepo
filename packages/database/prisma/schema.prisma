@@ -10,23 +10,23 @@ datasource db {
 }
 
 model User {
-  id                String              @id @default(cuid())
-  email             String              @unique
-  password          String
-  displayName       String
-  avatarId          Int                @default(0)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  isProjectManager   Boolean            @default(false)
-  isTeamMember      Boolean            @default(false)
-  businessDetails   BusinessDetails?
-  managedTeams      TeamMembership[]    @relation("ManagedTeams")
-  createdQuests     Quest[]             @relation("CreatedQuests")
-  assignedQuests    Quest[]             @relation("AssignedQuests")
-  teamMemberships   TeamMembership[]    @relation("TeamMemberships")
-  notifications     Notification[]
-  teams             TeamsOnUsers[]
-  skills            Json                @default("{}") // Object with skill names as keys and XP as values
+  id               String           @id @default(cuid())
+  email            String           @unique
+  password         String
+  displayName      String
+  avatarId         Int              @default(0)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  isProjectManager Boolean          @default(false)
+  isTeamMember     Boolean          @default(false)
+  businessDetails  BusinessDetails?
+  managedTeams     TeamMembership[] @relation("ManagedTeams")
+  createdQuests    Quest[]          @relation("CreatedQuests")
+  assignedQuests   Quest[]          @relation("AssignedQuests")
+  teamMemberships  TeamMembership[] @relation("TeamMemberships")
+  notifications    Notification[]
+  teams            TeamsOnUsers[]
+  skills           Json             @default("{}") // Object with skill names as keys and XP as values
 }
 
 model BusinessDetails {
@@ -40,52 +40,38 @@ model BusinessDetails {
 }
 
 model Skill {
-  id              String        @id @default(cuid())
-  name            String        @unique
-  description     String?
-  businessId      String?       // null means it's a global skill
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  questSkills     QuestSkill[]
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  businessId  String? // null means it's a global skill
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Quest {
-  id              String        @id @default(cuid())
-  title           String
-  description     String
-  difficulty      Int          // 1-10
-  status          QuestStatus  @default(OPEN)
-  createdById     String
-  assignedToId    String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  deadline        DateTime?
-  createdBy       User         @relation("CreatedQuests", fields: [createdById], references: [id])
-  assignedTo      User?        @relation("AssignedQuests", fields: [assignedToId], references: [id])
-  questSkills     QuestSkill[]
-  completedAt     DateTime?
-}
-
-model QuestSkill {
-  id        String   @id @default(cuid())
-  questId   String
-  skillId   String
-  weight    Float    @default(1.0) // Importance multiplier for XP calculation
-  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
-  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@unique([questId, skillId])
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  status       QuestStatus  @default(OPEN)
+  createdById  String
+  assignedToId String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  questSkills  Json         @default("{}") // Object with skill names as keys and numbers as values
+  createdBy    User         @relation("CreatedQuests", fields: [createdById], references: [id])
+  assignedTo   User?        @relation("AssignedQuests", fields: [assignedToId], references: [id])
+  completedAt  DateTime?
 }
 
 model TeamMembership {
-  id                String    @id @default(cuid())
-  teamMemberId      String
-  projectManagerId  String
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  teamMember        User      @relation("TeamMemberships", fields: [teamMemberId], references: [id], onDelete: Cascade)
-  projectManager    User      @relation("ManagedTeams", fields: [projectManagerId], references: [id], onDelete: Cascade)
+  id               String   @id @default(cuid())
+  teamMemberId     String
+  projectManagerId String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  teamMember     User @relation("TeamMemberships", fields: [teamMemberId], references: [id], onDelete: Cascade)
+  projectManager User @relation("ManagedTeams", fields: [projectManagerId], references: [id], onDelete: Cascade)
 
   @@unique([teamMemberId, projectManagerId])
 }
@@ -95,27 +81,27 @@ model Notification {
   userId    String
   type      NotificationType
   message   String
-  read      Boolean         @default(false)
-  createdAt DateTime        @default(now())
-  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Team {
-  id          String   @id @default(cuid())
-  name        String?
-  inviteCode  String   @unique @default(dbgenerated("substring(md5(random()::text) from 1 for 4)"))
-  skills      String[] // Array of skill names
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  members     TeamsOnUsers[]
+  id         String         @id @default(cuid())
+  name       String?
+  inviteCode String         @unique @default(dbgenerated("substring(md5(random()::text) from 1 for 4)"))
+  skills     String[] // Array of skill names
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  members    TeamsOnUsers[]
 }
 
 model TeamsOnUsers {
-  team      Team     @relation(fields: [teamId], references: [id])
-  teamId    String
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  joinedAt  DateTime @default(now())
+  team     Team     @relation(fields: [teamId], references: [id])
+  teamId   String
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+  joinedAt DateTime @default(now())
 
   @@id([teamId, userId])
 }
@@ -134,4 +120,4 @@ enum NotificationType {
   SKILL_LEVELED_UP
   TEAM_INVITATION
   GENERAL
-} 
+}

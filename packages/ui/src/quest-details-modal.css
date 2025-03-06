@@ -1,0 +1,91 @@
+.quest-details {
+  padding: 1rem;
+  color: var(--text-light);
+}
+
+.quest-details h3 {
+  font-family: var(--font-cinzel);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--accent-gold);
+}
+
+.quest-description {
+  margin-bottom: 2rem;
+}
+
+.quest-description p {
+  line-height: 1.6;
+  color: var(--text-light);
+  font-family: var(--font-lora);
+}
+
+.quest-skills {
+  margin-bottom: 2rem;
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skill-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.skill-name {
+  min-width: 120px;
+  font-weight: 500;
+  color: var(--text-light);
+  font-family: var(--font-lora);
+}
+
+.skill-bar-container {
+  flex: 1;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.skill-bar {
+  height: 100%;
+  background-color: var(--accent-gold);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.skill-value {
+  min-width: 60px;
+  text-align: right;
+  color: var(--text-light);
+  font-family: var(--font-lora);
+}
+
+.quest-assignee {
+  margin-top: 2rem;
+}
+
+.assignee-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.assignee-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--accent-brown);
+}
+
+.assignee-name {
+  font-weight: 500;
+  color: var(--text-light);
+  font-family: var(--font-lora);
+} 

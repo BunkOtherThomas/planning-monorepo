@@ -89,6 +89,7 @@
   border-radius: var(--radius-sm);
   padding: 1.5rem;
   margin-bottom: 1rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
@@ -98,11 +99,23 @@
   box-shadow: var(--shadow-md);
 }
 
+.quest:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-gold);
+}
+
 .questHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.questTitle {
+  font-family: var(--font-cinzel);
+  font-size: 1.2rem;
+  color: var(--accent-gold);
+  margin: 0;
 }
 
 .questStatus {
@@ -116,11 +129,6 @@
 .questStatus.open {
   background: rgba(52, 152, 219, 0.2);
   color: #3498db;
-}
-
-.questStatus.assigned {
-  background: rgba(241, 196, 15, 0.2);
-  color: #f1c40f;
 }
 
 .questStatus.in_progress {
@@ -216,13 +224,6 @@
   color: var(--text-light);
   font-family: var(--font-lora);
   line-height: 1.6;
-}
-
-.questTitle {
-  font-family: var(--font-cinzel);
-  font-size: 1.2rem;
-  color: var(--accent-gold);
-  margin-bottom: 0.5rem;
 }
 
 .questDescription {

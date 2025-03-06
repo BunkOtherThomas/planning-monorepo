@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { getCurrentTeam, addTeamSkill, getQuests, createQuest } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
-import { QuestResponse } from '@quest-board/types';
+import { QuestResponse, QuestStatus } from '@quest-board/types';
 import { CreateQuestModal } from './CreateQuestModal';
+import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 
 interface TeamMember {
   id: string;
@@ -29,22 +30,34 @@ export default function GuildLeaderDashboard() {
   const [skillError, setSkillError] = useState<string | null>(null);
   const [quests, setQuests] = useState<QuestResponse[]>([]);
   const [isCreateQuestModalOpen, setIsCreateQuestModalOpen] = useState(false);
+  const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
       try {
         const [teamData, questsData] = await Promise.all([
           getCurrentTeam(),
           getQuests('created')
         ]);
-        setTeam(teamData);
-        setQuests(questsData);
+        
+        if (isMounted) {
+          setTeam(teamData);
+          setQuests(questsData);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch data');
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleCopyInvite = async () => {
@@ -84,11 +97,11 @@ export default function GuildLeaderDashboard() {
 
   const sortedQuests = [...quests].sort((a, b) => {
     // First sort by status
-    const statusOrder = {
-      'OPEN': 0,
-      'IN_PROGRESS': 1,
-      'COMPLETED': 2,
-      'CANCELLED': 3
+    const statusOrder: Record<QuestStatus, number> = {
+      [QuestStatus.OPEN]: 0,
+      [QuestStatus.IN_PROGRESS]: 1,
+      [QuestStatus.COMPLETED]: 2,
+      [QuestStatus.CANCELLED]: 3
     };
     const statusDiff = statusOrder[a.status] - statusOrder[b.status];
     if (statusDiff !== 0) return statusDiff;
@@ -99,11 +112,11 @@ export default function GuildLeaderDashboard() {
 
   const handleCreateQuest = async (title: string, description?: string, selectedSkills?: { skill: string; proficiency: number }[]) => {
     try {
-      // Transform the skills data to match API format
-      const transformedSkills = selectedSkills?.map(skill => ({
-        name: skill.skill, // This should be the skill ID from the team's skills
-        weight: skill.proficiency // Using proficiency as weight
-      })) || [];
+      const transformedSkills = {} as Record<string, number>;
+      selectedSkills?.forEach(skill => {
+        transformedSkills[skill.skill] = skill.proficiency;
+      });
+      
 
       // Call the API to create the quest
       const newQuest = await createQuest(
@@ -230,7 +243,13 @@ export default function GuildLeaderDashboard() {
               <div className={styles.error}>{error}</div>
             ) : quests.length > 0 ? (
               sortedQuests.map((quest) => (
-                <div key={quest.id} className={styles.quest}>
+                <div 
+                  key={quest.id} 
+                  className={styles.quest}
+                  onClick={() => setSelectedQuest(quest)}
+                  role="button"
+                  tabIndex={0}
+                >
                   <div className={styles.questHeader}>
                     <h4 className={styles.questTitle}>{quest.title}</h4>
                     <span className={`${styles.questStatus} ${styles[quest.status.toLowerCase()]}`}>
@@ -267,6 +286,25 @@ export default function GuildLeaderDashboard() {
         onSubmit={handleCreateQuest}
         team={team}
       />
+
+      {selectedQuest && (
+        <QuestDetailsModal
+          isOpen={!!selectedQuest}
+          onClose={() => setSelectedQuest(null)}
+          quest={{
+            title: selectedQuest.title,
+            description: selectedQuest.description,
+            skills: Object.entries(selectedQuest.skills ?? {}).map(([skill, xp]) => ({
+              name: skill,
+              xp: xp
+            })),
+            assignedTo: selectedQuest.assignedTo ? {
+              displayName: selectedQuest.assignedTo,
+              avatarId: 0
+            } : undefined
+          }}
+        />
+      )}
     </div>
   );
 } 

@@ -190,7 +190,7 @@ export async function getOpenQuestsForUser(id: string) {
 export async function createQuest(
   title: string,
   description: string,
-  skills: Array<{ name: string; weight: number }>
+  skills: Record<string, number>
 ) {
   const response = await fetch(`${API_BASE_URL}/quests`, {
     ...getDefaultOptions(true),
@@ -199,7 +199,7 @@ export async function createQuest(
       title,
       description,
       skills,
-    } as QuestCreationRequest),
+    }),
   });
 
   if (!response.ok) {
