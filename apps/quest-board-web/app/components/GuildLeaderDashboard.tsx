@@ -1,37 +1,41 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser } from '../lib/api';
+import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser, declareSkill } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
-import { QuestResponse, QuestStatus, User } from '@quest-board/types';
+import { QuestResponse, QuestStatus, User, SkillAssessment } from '@quest-board/types';
 import { CreateQuestModal } from './CreateQuestModal';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
-
-interface TeamMember {
-  id: string;
-  displayName: string;
-  avatarId: number;
-}
+import TeamSkills from './TeamSkills';
+import { SkillAssessmentModal } from './SkillAssessmentModal';
+import { SkillLevelModal } from './SkillLevelModal';
 
 interface Team {
   id: string;
   inviteCode: string;
-  members: TeamMember[];
+  members: User[];
   skills: string[];
+}
+
+interface SkillAssessmentValues {
+  professionalExperience: number;
+  formalEducation: number;
+  informalExperience: number;
+  confidence: number;
 }
 
 export default function GuildLeaderDashboard() {
   const [team, setTeam] = useState<Team | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [isAddingSkill, setIsAddingSkill] = useState(false);
-  const [newSkill, setNewSkill] = useState('');
-  const [skillError, setSkillError] = useState<string | null>(null);
   const [quests, setQuests] = useState<QuestResponse[]>([]);
   const [isCreateQuestModalOpen, setIsCreateQuestModalOpen] = useState(false);
   const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [viewingSkillLevel, setViewingSkillLevel] = useState<string | null>(null);
+  const [skillAssessments, setSkillAssessments] = useState<SkillAssessment[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -75,26 +79,73 @@ export default function GuildLeaderDashboard() {
     }
   };
 
-  const handleAddSkill = async () => {
-    if (!newSkill.trim()) {
-      setSkillError('Skill name cannot be empty');
-      return;
+  const handleSkillClick = (skill: string) => {
+    if (!currentUser) return;
+    const isNewSkill = currentUser.skills?.[skill] === -1;
+    if (isNewSkill) {
+      setSelectedSkill(skill);
+    } else {
+      setViewingSkillLevel(skill);
     }
+  };
 
-    if (team?.skills.some(s => s.toLowerCase() === newSkill.toLowerCase())) {
-      setSkillError('This skill already exists in your team');
-      return;
-    }
-
+  const handleDeclineSkill = async (skill: string) => {
     try {
-      await addTeamSkill(newSkill.trim());
-      const updatedTeam = await getCurrentTeam();
-      setTeam(updatedTeam);
-      setIsAddingSkill(false);
-      setNewSkill('');
-      setSkillError(null);
-    } catch (err) {
-      setSkillError(err instanceof Error ? err.message : 'Failed to add skill');
+      const response = await declareSkill(
+        skill,
+        0, // professionalExperience
+        0, // formalEducation
+        0, // informalExperience
+        0, // confidence
+      );
+      
+      setSkillAssessments(prev => {
+        const existingIndex = prev.findIndex(a => a.skill === skill);
+        if (existingIndex >= 0) {
+          const newAssessments = [...prev];
+          newAssessments[existingIndex] = { skill, xp: response.xp };
+          return newAssessments;
+        }
+        return [...prev, { skill, xp: response.xp }];
+      });
+
+      // Refresh user data to get updated skills
+      const updatedUser = await getCurrentUser();
+      setCurrentUser(updatedUser);
+    } catch (error) {
+      console.error('Error declining skill:', error);
+    }
+  };
+
+  const handleAssessmentSubmit = async (values: SkillAssessmentValues) => {
+    if (!selectedSkill) return;
+    
+    try {
+      const response = await declareSkill(
+        selectedSkill,
+        values.professionalExperience,
+        values.formalEducation,
+        values.informalExperience,
+        values.confidence
+      );
+      
+      setSkillAssessments(prev => {
+        const existingIndex = prev.findIndex(a => a.skill === selectedSkill);
+        if (existingIndex >= 0) {
+          const newAssessments = [...prev];
+          newAssessments[existingIndex] = { skill: selectedSkill, xp: response.xp };
+          return newAssessments;
+        }
+        return [...prev, { skill: selectedSkill, xp: response.xp }];
+      });
+
+      // Refresh user data to get updated skills
+      const updatedUser = await getCurrentUser();
+      setCurrentUser(updatedUser);
+      
+      setSelectedSkill(null);
+    } catch (error) {
+      console.error('Error submitting skill assessment:', error);
     }
   };
 
@@ -143,18 +194,17 @@ export default function GuildLeaderDashboard() {
     <div className={styles.container}>
       <div className={styles.mainContent}>
         <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Team Information</h3>
+          <h3 className={styles.sectionTitle}>Team</h3>
           {error ? (
             <div className={styles.error}>{error}</div>
           ) : team ? (
             <div className={styles.teamInfo}>
               <div className={styles.teamMembers}>
-                <h4 className={styles.questTitle}>Team Members</h4>
                 <div className={styles.questList}>
                   {team.members.map((member) => (
                     <div key={member.id} className={styles.quest}>
                       <div className={styles.applicantInfo}>
-                        <Avatar avatarId={member.avatarId} size={32} />
+                        <Avatar avatarId={member.avatarId || 0} size={32} />
                         <span className={styles.memberName}>{member.displayName}</span>
                       </div>
                     </div>
@@ -184,63 +234,17 @@ export default function GuildLeaderDashboard() {
           )}
         </section>
 
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Team Skills</h3>
-          <div className={styles.questList}>
-            {team?.skills && team.skills.length > 0 ? (
-              team.skills.map((skill, index) => (
-                <div key={index} className={styles.quest}>
-                  <div className={styles.applicantInfo}>
-                    <span className={styles.statIcon}>⚔️</span>
-                    <span>{skill}</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className={styles.emptyState}>No skills defined yet</div>
-            )}
-          </div>
-          {isAddingSkill ? (
-            <div className={styles.skillInputContainer}>
-              <input
-                type="text"
-                value={newSkill}
-                onChange={(e) => {
-                  setNewSkill(e.target.value);
-                  setSkillError(null);
-                }}
-                placeholder="Enter skill name"
-                className={styles.skillInput}
-              />
-              {skillError && <div className={styles.error}>{skillError}</div>}
-              <div className={styles.skillInputActions}>
-                <button onClick={() => {
-                  setIsAddingSkill(false);
-                  setNewSkill('');
-                  setSkillError(null);
-                }} className={styles.cancelButton}>
-                  Cancel
-                </button>
-                <button onClick={handleAddSkill} className={styles.submitButton}>
-                  Submit
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.stickyAddButton}>
-              <button 
-                className={styles.addButton}
-                onClick={() => setIsAddingSkill(true)}
-              >
-                <span className={styles.statIcon}>➕</span>
-                Add Skill
-              </button>
-            </div>
-          )}
-        </section>
+        <TeamSkills
+          team={team}
+          user={currentUser}
+          error={error}
+          onSkillClick={handleSkillClick}
+          onDeclineSkill={handleDeclineSkill}
+          isGuildLeader={true}
+        />
 
         <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Team Quests</h3>
+          <h3 className={styles.sectionTitle}>Quests</h3>
           <div className={styles.questListContainer}>
             {error ? (
               <div className={styles.error}>{error}</div>
@@ -296,6 +300,7 @@ export default function GuildLeaderDashboard() {
           onClose={() => setSelectedQuest(null)}
           currentUserId={currentUser.id}
           quest={{
+            id: selectedQuest.id,
             title: selectedQuest.title,
             description: selectedQuest.description,
             skills: Object.entries(selectedQuest.skills ?? {}).map(([skill, xp]) => ({
@@ -308,6 +313,32 @@ export default function GuildLeaderDashboard() {
               avatarId: selectedQuest.assignedTo.avatarId
             } : undefined
           }}
+          onTurnIn={async () => {
+            // Refresh quests after turn in
+            const updatedQuests = await getQuests('created');
+            setQuests(updatedQuests);
+          }}
+          onAssignToSelf={async () => {
+            // Refresh quests after assignment
+            const updatedQuests = await getQuests('created');
+            setQuests(updatedQuests);
+          }}
+        />
+      )}
+
+      {selectedSkill && (
+        <SkillAssessmentModal
+          skillName={selectedSkill}
+          onSubmit={handleAssessmentSubmit}
+          onClose={() => setSelectedSkill(null)}
+        />
+      )}
+
+      {viewingSkillLevel && currentUser && (
+        <SkillLevelModal
+          skillName={viewingSkillLevel}
+          xp={currentUser.skills?.[viewingSkillLevel] || 0}
+          onClose={() => setViewingSkillLevel(null)}
         />
       )}
     </div>

@@ -10,6 +10,7 @@ import { FC } from 'react';
 import { getLevel } from '@planning/common-utils';
 import AssignedQuests from './AssignedQuests';
 import UnassignedQuests from './UnassignedQuests';
+import TeamSkills from './TeamSkills';
 
 interface Skill {
   id: string;
@@ -153,78 +154,13 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Skills</h3>
-          {error ? (
-            <div className={styles.error}>{error}</div>
-          ) : team ? (
-            <div className={styles.skillsList}>
-              {sortedSkills.map((skill) => {
-                const isNewSkill = user.skills?.[skill] === -1;
-                
-                return (
-                  <div
-                    key={skill}
-                    className={`${styles.skillTag} relative flex justify-between items-center cursor-pointer ${
-                      user.skills?.[skill] === 0 ? 'opacity-10' : ''
-                    }`}
-                    onClick={() => !isNewSkill && handleSkillClick(skill)}
-                  >
-                    <div className="flex items-center font-lora text-text-light">
-                      {getSkillName(skill)}
-                    </div>
-                    {isNewSkill ? (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleDeclineSkill(skill)}
-                          className="text-red-500 hover:text-red-600 transition-colors"
-                          aria-label="Decline skill"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleSkillClick(skill)}
-                          className="text-green-500 hover:text-green-600 transition-colors"
-                          aria-label="Assess skill"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="ml-2 font-lora text-text-light">Lv. {getLevel(user.skills?.[skill] || 0).level}</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className={styles.loading}>Loading team skills...</div>
-          )}
-        </section>
+        <TeamSkills
+          team={team}
+          user={user}
+          error={error}
+          onSkillClick={handleSkillClick}
+          onDeclineSkill={handleDeclineSkill}
+        />
 
         <AssignedQuests />
         <UnassignedQuests />
