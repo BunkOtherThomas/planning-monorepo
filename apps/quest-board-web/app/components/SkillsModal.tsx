@@ -6,6 +6,7 @@ import { Modal } from '@repo/ui/modal';
 import { useState, useEffect } from 'react';
 import { updateFavoriteSkills, addTeamSkill } from '../lib/api';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
+import { Button } from '../../components/Button';
 
 interface SkillsModalProps {
   isOpen: boolean;
@@ -209,19 +210,17 @@ export function SkillsModal({
             )}
           </div>
           <div className={styles.modalFooter}>
-            <button
-              className={styles.cancelButton}
+            <Button
+              label="Cancel"
               onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              className={styles.confirmButton}
+              buttonStyle="cancel"
+            />
+            <Button
+              label={isSaving ? 'Saving...' : 'Confirm'}
               onClick={handleSave}
               disabled={isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Confirm'}
-            </button>
+              buttonStyle="submit"
+            />
           </div>
         </div>
       </Modal>

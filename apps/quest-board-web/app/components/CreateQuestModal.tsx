@@ -3,6 +3,7 @@ import styles from './Dashboard.module.css';
 import { getCurrentTeam, addTeamSkill, analyzeSkills, SkillProficiency } from '../lib/api';
 import { sortCandidatesBySkills } from '../utils/sortCandidates';
 import { Avatar } from '../../components/Avatar';
+import { Button } from '../../components/Button';
 import { User } from '@quest-board/types';
 import { getLevel } from '@planning/common-utils';
 
@@ -202,22 +203,16 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
             <div className={styles.skillButtons}>
               {!showSkills && (
                 <>
-                  <button
-                    type="button"
+                  <Button
+                    label={isLoading ? 'Generating...' : 'Generate Skills'}
                     onClick={handleGenerateSkills}
-                    className={styles.skillButton}
                     disabled={!title.trim() || isLoading}
-                  >
-                    {isLoading ? 'Generating...' : 'Generate Skills'}
-                  </button>
-                  <button
-                    type="button"
+                  />
+                  <Button
+                    label="Manually Select Skills"
                     onClick={() => setShowSkills(true)}
-                    className={styles.skillButton}
                     disabled={!title.trim() || isLoading}
-                  >
-                    Manually Select Skills
-                  </button>
+                  />
                 </>
               )}
               {error && <div className={styles.error}>{error}</div>}
@@ -308,35 +303,28 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                     />
                     {skillError && <div className={styles.error}>{skillError}</div>}
                     <div className={styles.modalActions}>
-                      <button
-                        type="button"
+                      <Button
+                        label="Cancel"
                         onClick={() => {
                           setIsAddingSkill(false);
                           setNewSkill('');
                           setSkillError(null);
                         }}
-                        className={styles.skillButton}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
+                        buttonStyle="cancel"
+                      />
+                      <Button
+                        label="Add Skill"
                         onClick={handleAddSkill}
-                        className={styles.skillButton}
-                      >
-                        Add Skill
-                      </button>
+                        buttonStyle="submit"
+                      />
                     </div>
                   </div>
                 </div>
               ) : (
-                <button
-                  type="button"
+                <Button
+                  label="Add New Skill"
                   onClick={() => setIsAddingSkill(true)}
-                  className={styles.skillButton}
-                >
-                  Add New Skill
-                </button>
+                />
               )}
             </div>
           )}
@@ -415,29 +403,27 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                         </div>
                       </div>
                     ))}
-                  <button
-                    type="button"
-                    className={styles.skillButton}
+                  <Button
+                    label="Show Less"
                     onClick={() => setShowAllMembers(false)}
-                  >
-                    Show Less
-                  </button>
+                  />
                 </div>
               )}
             </div>
           )}
 
           <div className={styles.modalActions}>
-            <button type="button" onClick={handleClose} className={styles.skillButton}>
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              className={styles.skillButton}
+            <Button 
+              label="Cancel" 
+              onClick={handleClose} 
+              buttonStyle="cancel"
+            />
+            <Button 
+              label="Create Quest" 
+              type="submit"
+              buttonStyle="submit"
               disabled={selectedSkills.length === 0}
-            >
-              Create Quest
-            </button>
+            />
           </div>
         </form>
       </div>

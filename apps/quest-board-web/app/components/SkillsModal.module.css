@@ -32,6 +32,7 @@
 
 .modalHeader h2 {
   margin: 0;
+  font-family: var(--font-cinzel);
 }
 
 .closeButton {
@@ -46,11 +47,13 @@
   font-size: 1.1em;
   font-weight: 500;
   color: var(--text);
+  font-family: var(--font-cinzel);
 }
 
 .remainingTags {
   color: var(--text-secondary);
   font-size: 0.9em;
+  font-family: var(--font-lora);
 }
 
 .modalNote {
@@ -60,6 +63,7 @@
   line-height: 1.4;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 16px;
+  font-family: var(--font-lora);
 }
 
 .skillsList {
@@ -76,7 +80,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(var(--primary-rgb), 0.2);
   border-radius: 4px;
   align-items: center;
   text-align: center;
@@ -86,16 +90,16 @@
 }
 
 .skillItem:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(var(--primary-rgb), 0.3);
 }
 
 .taggedSkill {
-  background: rgba(var(--primary-rgb), 0.2);
+  background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(var(--primary-rgb), 0.3);
 }
 
 .taggedSkill:hover {
-  background: rgba(var(--primary-rgb), 0.3);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .tagIndicator {
@@ -127,6 +131,7 @@
   font-weight: 500;
   color: var(--text);
   font-size: 0.9em;
+  font-family: var(--font-cinzel);
 }
 
 .skillStatus {
@@ -139,22 +144,23 @@
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  font-weight: bold;
 }
 
 .accept {
-  color: var(--success);
+  color: rgb(34, 197, 94);
 }
 
 .accept:hover {
-  background: rgba(var(--success-rgb), 0.1);
+  background: rgba(34, 197, 94, 0.1);
 }
 
 .decline {
-  color: var(--error);
+  color: rgb(239, 68, 68);
 }
 
 .decline:hover {
-  background: rgba(var(--error-rgb), 0.1);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .levelProgress {
@@ -216,17 +222,23 @@
 .skillInput {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   font-size: 14px;
-  background: white;
+  background: rgba(0, 0, 0, 0.2);
   margin-right: 8px;
+  font-family: var(--font-lora);
+  color: var(--text);
 }
 
 .skillInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
+.skillInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .skillActions {
@@ -245,6 +257,7 @@
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 8px;
+  font-family: var(--font-cinzel);
 }
 
 .addSkillButton:hover {
