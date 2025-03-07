@@ -1,7 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
-  "buildCommand": "turbo run build",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./apps/quest-board-web/",
-  "outputDirectory": "apps/quest-board-web/.next"
-} 
