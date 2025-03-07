@@ -4,6 +4,8 @@ import { Modal } from '@repo/ui/modal';
 import styles from './LevelUpModal.module.css';
 import { getLevel } from '@planning/common-utils';
 import { Avatar } from '../../components/Avatar';
+import { LevelProgress } from './LevelProgress';
+import { useEffect, useState } from 'react';
 
 interface LevelUpModalProps {
   isOpen: boolean;
@@ -21,6 +23,17 @@ interface LevelUpModalProps {
 }
 
 export function LevelUpModal({ isOpen, onClose, avatarId, leveledUpSkills, otherSkills }: LevelUpModalProps) {
+  const [showBouncingAvatar, setShowBouncingAvatar] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        setShowBouncingAvatar(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Level Up!">
       <div className={styles.content}>
@@ -28,15 +41,41 @@ export function LevelUpModal({ isOpen, onClose, avatarId, leveledUpSkills, other
           <Avatar 
             avatarId={avatarId} 
             size={136} 
-            className={styles.celebratingAvatar} 
-            spritesheet="/images/level-up.jpg"
+            className={showBouncingAvatar ? styles.celebratingAvatar : ''} 
+            spritesheet={showBouncingAvatar ? "/images/level-up.jpg" : undefined}
           />
         </div>
-        {leveledUpSkills.map(({ skill, before, after }) => (
-          <div key={skill} className={styles.levelUpMessage}>
-            {skill} level up! {getLevel(before).level} → {getLevel(after).level}
-          </div>
-        ))}
+        <div className={styles.levelUpGrid}>
+          {leveledUpSkills.map(({ skill, before, after }) => {
+            const beforeLevel = getLevel(before);
+            const afterLevel = getLevel(after);
+            
+            // Calculate progress within the level
+            const beforeProgress = beforeLevel.remaining > 0 
+              ? (beforeLevel.xp / (beforeLevel.xp + beforeLevel.remaining)) 
+              : 1;
+            const afterProgress = afterLevel.remaining > 0 
+              ? (afterLevel.xp / (afterLevel.xp + afterLevel.remaining)) 
+              : 1;
+
+            return (
+              <div key={skill} className={styles.levelUpMessage}>
+                <div className={styles.skillName}>{skill}</div>
+                <div className={styles.levelProgressContainer}>
+                  <div className={styles.levelText}>
+                    Level {beforeLevel.level} → Level {afterLevel.level}
+                  </div>
+                  <LevelProgress
+                    level={afterLevel.level}
+                    progress={afterProgress}
+                    previousLevel={beforeLevel.level}
+                    previousProgress={beforeProgress}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
         
         {otherSkills.length > 0 && (
           <div className={styles.otherSkills}>
