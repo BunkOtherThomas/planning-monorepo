@@ -174,10 +174,10 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
           title="Skills"
           footer={
             <button
-              className={`${styles.manageSkillsButton} ${favoriteSkills.length < 3 ? styles.manageSkillsButtonHighlight : ''}`}
+              className={`${styles.manageSkillsButton} ${favoriteSkills.length < Math.min(3, team?.skills?.length || 0) ? styles.manageSkillsButtonHighlight : ''}`}
               onClick={() => setIsSkillsModalOpen(true)}
             >
-              {favoriteSkills.length < 3 ? '✨ Manage Skills ✨' : 'Manage Skills'}
+              {favoriteSkills.length < Math.min(3, team?.skills?.length || 0) ? '✨ Manage Skills ✨' : 'Manage Skills'}
             </button>
           }
         >
