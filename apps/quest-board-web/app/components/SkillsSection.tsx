@@ -48,7 +48,6 @@ export const SkillsSection: FC<SkillsSectionProps> = ({
     } else {
       setViewingSkillLevel(skill);
     }
-    onSkillClick(skill);
   };
 
   const handleAssessmentSubmit = async (values: SkillAssessmentValues) => {
