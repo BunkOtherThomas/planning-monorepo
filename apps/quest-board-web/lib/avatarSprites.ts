@@ -28,7 +28,7 @@ export function getAvatarById(id: number): AvatarSprite | undefined {
 }
 
 // Helper function to generate CSS for displaying a specific avatar
-export function getAvatarStyle(id: number, elementSize?: number): React.CSSProperties {
+export function getAvatarStyle(id: number, elementSize?: number, spritesheet?: string): React.CSSProperties {
   const sprite = getAvatarById(id);
   if (!sprite) return {};
   
@@ -38,7 +38,7 @@ export function getAvatarStyle(id: number, elementSize?: number): React.CSSPrope
   return {
     width: elementSize || sprite.width,
     height: elementSize || sprite.height,
-    backgroundImage: `url('/images/avatars.jpeg')`,
+    backgroundImage: `url('${spritesheet || '/images/avatars.jpeg'}')`,
     backgroundPosition: `-${sprite.x * scale}px -${sprite.y * scale}px`,
     backgroundSize: `${totalSize * scale}px ${totalSize * scale}px`,
     backgroundRepeat: 'no-repeat'

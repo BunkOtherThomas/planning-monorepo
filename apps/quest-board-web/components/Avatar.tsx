@@ -4,11 +4,12 @@ interface AvatarProps {
   avatarId: number;
   className?: string;
   size?: number;
+  spritesheet?: string;
 }
 
-export function Avatar({ avatarId, className = '', size }: AvatarProps) {
+export function Avatar({ avatarId, className = '', size, spritesheet }: AvatarProps) {
   const style = {
-    ...getAvatarStyle(avatarId, size),
+    ...getAvatarStyle(avatarId, size, spritesheet),
   };
 
   return (

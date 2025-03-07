@@ -440,6 +440,7 @@ export default function GuildLeaderDashboard() {
         <LevelUpModal
           isOpen={!!levelUpData}
           onClose={() => setLevelUpData(null)}
+          avatarId={currentUser?.avatarId || 0}
           leveledUpSkills={levelUpData.leveledUpSkills}
           otherSkills={levelUpData.otherSkills}
         />

@@ -3,10 +3,12 @@
 import { Modal } from '@repo/ui/modal';
 import styles from './LevelUpModal.module.css';
 import { getLevel } from '@planning/common-utils';
+import { Avatar } from '../../components/Avatar';
 
 interface LevelUpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  avatarId: number;
   leveledUpSkills: Array<{
     skill: string;
     before: number;
@@ -18,13 +20,21 @@ interface LevelUpModalProps {
   }>;
 }
 
-export function LevelUpModal({ isOpen, onClose, leveledUpSkills, otherSkills }: LevelUpModalProps) {
+export function LevelUpModal({ isOpen, onClose, avatarId, leveledUpSkills, otherSkills }: LevelUpModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Level Up!">
       <div className={styles.content}>
+        <div className={styles.avatarContainer}>
+          <Avatar 
+            avatarId={avatarId} 
+            size={136} 
+            className={styles.celebratingAvatar} 
+            spritesheet="/images/level-up.jpg"
+          />
+        </div>
         {leveledUpSkills.map(({ skill, before, after }) => (
           <div key={skill} className={styles.levelUpMessage}>
-            {skill} level up! {getLevel(before).level} → {getLevel(after).level }
+            {skill} level up! {getLevel(before).level} → {getLevel(after).level}
           </div>
         ))}
         
