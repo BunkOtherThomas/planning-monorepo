@@ -3,7 +3,7 @@ import styles from './Dashboard.module.css';
 import { getCurrentTeam, addTeamSkill, analyzeSkills, SkillProficiency } from '../lib/api';
 import { sortCandidatesBySkills } from '../utils/sortCandidates';
 import { Avatar } from '../../components/Avatar';
-import { Button } from '../../components/Button';
+import { Button } from '@repo/ui/button';
 import { User } from '@quest-board/types';
 import { getLevel } from '@planning/common-utils';
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser, declareSkill, turnInQuest, assignQuestToSelf } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
-import { QuestResponse, QuestStatus, User, SkillAssessment } from '@quest-board/types';
+import { QuestResponse, QuestStatus, User, SkillAssessment, Team as TeamType } from '@quest-board/types';
 import { CreateQuestModal } from './CreateQuestModal';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 import TeamSkills from './TeamSkills';
@@ -15,13 +15,7 @@ import { SkillsModal } from './SkillsModal';
 import { Toast } from './Toast';
 import { LevelUpModal } from './LevelUpModal';
 import { checkLevelUp } from '../utils/checkLevelUp';
-
-interface Team {
-  id: string;
-  inviteCode: string;
-  members: User[];
-  skills: string[];
-}
+import { SkillsSection } from './SkillsSection';
 
 interface SkillAssessmentValues {
   professionalExperience: number;
@@ -31,7 +25,7 @@ interface SkillAssessmentValues {
 }
 
 export default function GuildLeaderDashboard() {
-  const [team, setTeam] = useState<Team | null>(null);
+  const [team, setTeam] = useState<TeamType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [quests, setQuests] = useState<QuestResponse[]>([]);
@@ -229,7 +223,7 @@ export default function GuildLeaderDashboard() {
                 {team.members.map((member) => (
                   <div key={member.id} className={styles.quest} style={{ maxHeight: '60px' }}>
                     <div className={styles.applicantInfo}>
-                      <Avatar avatarId={member.avatarId || 0} size={32} />
+                      <Avatar avatarId={member.avatarId} size={32} />
                       <span className={styles.memberName}>{member.displayName}</span>
                     </div>
                   </div>
@@ -257,26 +251,16 @@ export default function GuildLeaderDashboard() {
           )}
         </ScrollableSection>
 
-        <ScrollableSection 
-          title="Skills"
-          footer={
-            <button
-              className={`${styles.manageSkillsButton} ${favoriteSkills.length < Math.min(3, team?.skills?.length || 0) ? styles.manageSkillsButtonHighlight : ''}`}
-              onClick={() => setIsSkillsModalOpen(true)}
-            >
-              {favoriteSkills.length < Math.min(3, team?.skills?.length || 0) ? '✨ Manage Skills ✨' : 'Manage Skills'}
-            </button>
-          }
-        >
-          <TeamSkills
-            team={team}
-            user={currentUser}
-            error={error}
-            onSkillClick={handleSkillClick}
-            onDeclineSkill={handleDeclineSkill}
-            isGuildLeader={true}
-          />
-        </ScrollableSection>
+        <SkillsSection
+          team={team}
+          user={currentUser}
+          error={error}
+          favoriteSkills={favoriteSkills}
+          isGuildLeader={true}
+          onSkillClick={handleSkillClick}
+          onDeclineSkill={handleDeclineSkill}
+          onTagSkill={handleTagSkill}
+        />
 
         <ScrollableSection
           title="Quests"
@@ -285,7 +269,6 @@ export default function GuildLeaderDashboard() {
               className={styles.addButton}
               onClick={() => setIsCreateQuestModalOpen(true)}
             >
-              <span className={styles.statIcon}>➕</span>
               Create New Quest
             </button>
           }

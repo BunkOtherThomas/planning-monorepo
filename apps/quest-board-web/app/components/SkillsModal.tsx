@@ -3,10 +3,10 @@ import { LevelProgress } from './LevelProgress';
 import styles from './SkillsModal.module.css';
 import { getLevel } from '@planning/common-utils';
 import { Modal } from '@repo/ui/modal';
+import { Button } from '@repo/ui/button';
 import { useState, useEffect } from 'react';
 import { updateFavoriteSkills, addTeamSkill } from '../lib/api';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
-import { Button } from '../../components/Button';
 
 interface SkillsModalProps {
   isOpen: boolean;

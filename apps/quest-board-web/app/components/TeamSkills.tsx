@@ -18,7 +18,7 @@ interface Skill {
 }
 
 interface TeamSkillsProps {
-  team: LocalTeam | TeamType | null;
+  team: TeamType | null;
   user: User | null;
   error: string | null;
   onSkillClick: (skill: string) => void;

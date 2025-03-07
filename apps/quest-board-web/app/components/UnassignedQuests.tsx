@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getQuests, getCurrentUser, turnInQuest, assignQuestToSelf, getCurrentTeam } from '../lib/api';
-import { QuestResponse, QuestStatus, User, Team } from '@quest-board/types';
+import { QuestResponse, QuestStatus, User, Team as TeamType } from '@quest-board/types';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 import { Toast } from './Toast';
 import { LevelUpModal } from './LevelUpModal';
@@ -14,7 +14,7 @@ export default function UnassignedQuests() {
   const [error, setError] = useState<string | null>(null);
   const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [team, setTeam] = useState<Team | null>(null);
+  const [team, setTeam] = useState<TeamType | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [levelUpData, setLevelUpData] = useState<{
     leveledUpSkills: Array<{ skill: string; before: number; after: number }>;

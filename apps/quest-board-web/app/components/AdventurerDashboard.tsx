@@ -5,7 +5,7 @@ import { getCurrentTeam, getSkills, declareSkill } from '../lib/api';
 import styles from './Dashboard.module.css';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
 import { SkillLevelModal } from './SkillLevelModal';
-import { Team, UserSkills, SkillAssessment, User } from '@quest-board/types';
+import { Team as TeamType, UserSkills, SkillAssessment, User } from '@quest-board/types';
 import { FC } from 'react';
 import { getLevel } from '@planning/common-utils';
 import AssignedQuests from './AssignedQuests';
@@ -13,6 +13,7 @@ import UnassignedQuests from './UnassignedQuests';
 import TeamSkills from './TeamSkills';
 import { ScrollableSection } from './ScrollableSection';
 import { SkillsModal } from './SkillsModal';
+import { SkillsSection } from './SkillsSection';
 
 interface Skill {
   id: string;
@@ -34,7 +35,7 @@ interface AdventurerDashboardProps {
 }
 
 const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate }) => {
-  const [team, setTeam] = useState<Team | null>(null);
+  const [team, setTeam] = useState<TeamType | null>(null);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,25 +171,15 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <ScrollableSection 
-          title="Skills"
-          footer={
-            <button
-              className={`${styles.manageSkillsButton} ${favoriteSkills.length < Math.min(3, team?.skills?.length || 0) ? styles.manageSkillsButtonHighlight : ''}`}
-              onClick={() => setIsSkillsModalOpen(true)}
-            >
-              {favoriteSkills.length < Math.min(3, team?.skills?.length || 0) ? '✨ Manage Skills ✨' : 'Manage Skills'}
-            </button>
-          }
-        >
-          <TeamSkills
-            team={team}
-            user={user}
-            error={error}
-            onSkillClick={handleSkillClick}
-            onDeclineSkill={handleDeclineSkill}
-          />
-        </ScrollableSection>
+        <SkillsSection
+          team={team}
+          user={user}
+          error={error}
+          favoriteSkills={favoriteSkills}
+          onSkillClick={handleSkillClick}
+          onDeclineSkill={handleDeclineSkill}
+          onTagSkill={handleTagSkill}
+        />
 
         <ScrollableSection title="My Quests">
           <AssignedQuests />

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import styles from './goals.module.css';
 import { ProjectManagerGoals, SkillsResponse } from '@quest-board/types';
 import { createTeam, generateSkills } from '../lib/api';
+import { Button } from '@repo/ui/button';
 
 export default function GoalsPage() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function GoalsPage() {
       } else {
         setSkills(data.skills);
         setHasStartedSkillsSelection(true);
+        setShowGoalsSection(false);
       }
     } catch (err) {
       setError('Failed to generate skills. Please try again.');
@@ -102,22 +104,18 @@ export default function GoalsPage() {
             </p>
 
             <div className={styles.buttonContainer}>
-              <button
-                type='button'
-                className={styles.skipButton}
+              <Button
+                label="Skip and add skills manually"
+                buttonStyle="default"
                 onClick={handleSkipGoals}
-              >
-                Skip and add skills manually
-              </button>
+              />
 
-              <button
-                type='submit'
-                className={styles.button}
+              <Button
+                label={loading ? 'Generating Skills...' : 'Generate Skills'}
+                buttonStyle="submit"
                 onClick={handleSubmitGoals}
                 disabled={loading || !goals.trim()}
-              >
-                {loading ? 'Generating Skills...' : 'Generate Skills'}
-              </button>
+              />
             </div>
 
             {error && <p className={styles.error}>{error}</p>}
@@ -128,6 +126,7 @@ export default function GoalsPage() {
       {hasStartedSkillsSelection && (
         <div className={styles.skillsSection}>
           <h2 className={styles.subtitle}>Required Skills</h2>
+          <p className={styles.description}>Select the skills you want to track</p>
 
           {skills.length > 0 && (
             <>
@@ -159,13 +158,12 @@ export default function GoalsPage() {
                     onChange={e => setCustomSkill(e.target.value)}
                     placeholder='Enter a custom skill...'
                   />
-                  <button
-                    className={styles.addButton}
+                  <Button
+                    label="Add Skill"
+                    buttonStyle="default"
                     onClick={handleAddCustomSkill}
                     disabled={!customSkill.trim()}
-                  >
-                    Add Skill
-                  </button>
+                  />
                 </div>
 
                 {customSkills.length > 0 && (
@@ -200,13 +198,12 @@ export default function GoalsPage() {
                   onChange={e => setCustomSkill(e.target.value)}
                   placeholder='Enter a custom skill...'
                 />
-                <button
-                  className={styles.addButton}
+                <Button
+                  label="Add Skill"
+                  buttonStyle="default"
                   onClick={handleAddCustomSkill}
                   disabled={!customSkill.trim()}
-                >
-                  Add Skill
-                </button>
+                />
               </div>
 
               {customSkills.length > 0 && (
@@ -227,13 +224,12 @@ export default function GoalsPage() {
             </div>
           )}
 
-          <button
-            className={styles.button}
+          <Button
+            label="Complete Setup"
+            buttonStyle="submit"
             onClick={handleComplete}
             disabled={selectedSkills.length === 0 && customSkills.length === 0}
-          >
-            Complete Setup
-          </button>
+          />
         </div>
       )}
     </div>

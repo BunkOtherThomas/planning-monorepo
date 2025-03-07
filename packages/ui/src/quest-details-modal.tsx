@@ -1,6 +1,7 @@
 import { type JSX } from 'react';
 import { Modal } from './modal';
 import { Avatar } from './avatar';
+import { Button } from './button';
 import './quest-details-modal.css';
 
 interface QuestDetailsModalProps {
@@ -93,24 +94,21 @@ export function QuestDetailsModal({
             </div>
             {isCurrentUser && (
               <div className="modal-actions">
-                <button
+                <Button
+                  label="Turn in Quest"
                   onClick={handleTurnIn}
-                  className="skill-button"
-                >
-                  Turn in Quest
-                </button>
+                  buttonStyle="submit"
+                />
               </div>
             )}
           </div>
         ) : (
           <div className="quest-assignee">
             <div className="modal-actions">
-              <button
+              <Button
+                label="Assign to Me"
                 onClick={handleAssignToMe}
-                className="skill-button"
-              >
-                Assign to Me
-              </button>
+              />
             </div>
           </div>
         )}
