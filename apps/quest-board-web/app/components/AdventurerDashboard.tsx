@@ -174,10 +174,10 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
           title="Skills"
           footer={
             <button
-              className={styles.manageSkillsButton}
+              className={`${styles.manageSkillsButton} ${favoriteSkills.length < 3 ? styles.manageSkillsButtonHighlight : ''}`}
               onClick={() => setIsSkillsModalOpen(true)}
             >
-              Manage Skills
+              {favoriteSkills.length < 3 ? '✨ Manage Skills ✨' : 'Manage Skills'}
             </button>
           }
         >

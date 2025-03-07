@@ -1129,9 +1129,39 @@
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .manageSkillsButton:hover {
   background: var(--primary-dark);
+}
+
+.manageSkillsButtonHighlight {
+  background: #2c5282;
+  animation: bounce 2s infinite;
+}
+
+.manageSkillsButtonHighlight:hover {
+  background: #2a4365;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  5%, 10% {
+    transform: translateY(-4px);
+  }
+  15%, 20% {
+    transform: translateY(0);
+  }
+  25%, 30% {
+    transform: translateY(-4px);
+  }
+  35%, 40% {
+    transform: translateY(0);
+  }
+  45%, 100% {
+    transform: translateY(0);
+  }
 } 
