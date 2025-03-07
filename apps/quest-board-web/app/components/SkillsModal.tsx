@@ -22,12 +22,12 @@ interface SkillsModalProps {
 
 const MAX_TAG_SKILLS = 3;
 
-export function SkillsModal({ 
-  isOpen, 
-  onClose, 
-  user, 
-  teamSkills, 
-  onSkillClick, 
+export function SkillsModal({
+  isOpen,
+  onClose,
+  user,
+  teamSkills,
+  onSkillClick,
   onDeclineSkill,
   onTagSkill,
   onUntagSkill,
@@ -120,27 +120,16 @@ export function SkillsModal({
               const isTagged = taggedSkills.includes(skill);
 
               return (
-                <div 
-                  key={skill} 
+                <div
+                  key={skill}
                   className={`${styles.skillItem} ${isTagged ? styles.taggedSkill : ''}`}
                   onClick={() => !isNewSkill && handleTagSkill(skill)}
                 >
                   <div className={styles.skillName}>{skill}</div>
                   {isNewSkill ? (
                     <div className={styles.skillStatus}>
-                      <span 
-                        className={styles.accept} 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSkillToAssess(skill);
-                        }}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        ✓
-                      </span>
-                      <span 
-                        className={styles.decline} 
+                      <span
+                        className={styles.decline}
                         onClick={(e) => {
                           e.stopPropagation();
                           onDeclineSkill(skill);
@@ -150,12 +139,24 @@ export function SkillsModal({
                       >
                         ✕
                       </span>
+
+                      <span
+                        className={styles.accept}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSkillToAssess(skill);
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        ✓
+                      </span>
                     </div>
                   ) : (
                     <div className={styles.levelProgress}>
-                      <LevelProgress 
-                        level={levelInfo.level} 
-                        progress={levelInfo.xp / (levelInfo.xp + levelInfo.remaining)} 
+                      <LevelProgress
+                        level={levelInfo.level}
+                        progress={levelInfo.xp / (levelInfo.xp + levelInfo.remaining)}
                       />
                       {isTagged && <div className={styles.tagIndicator}>★</div>}
                     </div>
@@ -208,14 +209,14 @@ export function SkillsModal({
             )}
           </div>
           <div className={styles.modalFooter}>
-            <button 
-              className={styles.cancelButton} 
+            <button
+              className={styles.cancelButton}
               onClick={onClose}
             >
               Cancel
             </button>
-            <button 
-              className={styles.confirmButton} 
+            <button
+              className={styles.confirmButton}
               onClick={handleSave}
               disabled={isSaving}
             >
