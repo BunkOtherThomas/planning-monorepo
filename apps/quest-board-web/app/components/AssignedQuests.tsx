@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getQuests, getCurrentUser } from '../lib/api';
+import { getQuests, getCurrentUser, turnInQuest, assignQuestToSelf } from '../lib/api';
 import { QuestResponse, QuestStatus, User } from '@quest-board/types';
 import { Avatar } from '../../components/Avatar';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
@@ -46,16 +46,22 @@ export default function AssignedQuests() {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  const turnInQuest = async () => {
-    // Refresh quests after turn in
-    const updatedQuests = await getQuests('assigned');
-    setQuests(updatedQuests);
+  const handleTurnInQuest = async () => {
+    if (selectedQuest) {
+      await turnInQuest(selectedQuest.id);
+      // Refresh quests after turn in
+      const updatedQuests = await getQuests('assigned');
+      setQuests(updatedQuests);
+    }
   };
 
-  const assignQuestToSelf = async () => {
-    // Refresh quests after assignment
-    const updatedQuests = await getQuests('assigned');
-    setQuests(updatedQuests);
+  const handleAssignQuestToSelf = async () => {
+    if (selectedQuest) {
+      await assignQuestToSelf(selectedQuest.id);
+      // Refresh quests after assignment
+      const updatedQuests = await getQuests('assigned');
+      setQuests(updatedQuests);
+    }
   };
 
   return (
@@ -94,8 +100,8 @@ export default function AssignedQuests() {
           isOpen={!!selectedQuest}
           onClose={() => setSelectedQuest(null)}
           currentUserId={currentUser.id}
-          onTurnIn={turnInQuest}
-          onAssignToSelf={assignQuestToSelf}
+          onTurnIn={handleTurnInQuest}
+          onAssignToSelf={handleAssignQuestToSelf}
           quest={{
             id: selectedQuest.id,
             title: selectedQuest.title,

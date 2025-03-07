@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser, declareSkill } from '../lib/api';
+import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser, declareSkill, turnInQuest, assignQuestToSelf } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
 import { QuestResponse, QuestStatus, User, SkillAssessment } from '@quest-board/types';
@@ -342,14 +342,20 @@ export default function GuildLeaderDashboard() {
             } : undefined
           }}
           onTurnIn={async () => {
-            // Refresh quests after turn in
-            const updatedQuests = await getQuests('created');
-            setQuests(updatedQuests);
+            if (selectedQuest) {
+              await turnInQuest(selectedQuest.id);
+              // Refresh quests after turn in
+              const updatedQuests = await getQuests('created');
+              setQuests(updatedQuests);
+            }
           }}
           onAssignToSelf={async () => {
-            // Refresh quests after assignment
-            const updatedQuests = await getQuests('created');
-            setQuests(updatedQuests);
+            if (selectedQuest) {
+              await assignQuestToSelf(selectedQuest.id);
+              // Refresh quests after assignment
+              const updatedQuests = await getQuests('created');
+              setQuests(updatedQuests);
+            }
           }}
         />
       )}
