@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getQuests, getCurrentUser, turnInQuest, assignQuestToSelf } from '../lib/api';
-import { QuestResponse, QuestStatus, User } from '@quest-board/types';
+import { getQuests, getCurrentUser, turnInQuest, assignQuestToSelf, getCurrentTeam } from '../lib/api';
+import { QuestResponse, QuestStatus, User, Team } from '@quest-board/types';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 import { Toast } from './Toast';
 import { LevelUpModal } from './LevelUpModal';
@@ -14,6 +14,7 @@ export default function UnassignedQuests() {
   const [error, setError] = useState<string | null>(null);
   const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [levelUpData, setLevelUpData] = useState<{
     leveledUpSkills: Array<{ skill: string; before: number; after: number }>;
@@ -23,12 +24,14 @@ export default function UnassignedQuests() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [questsData, userData] = await Promise.all([
+        const [questsData, userData, teamData] = await Promise.all([
           getQuests('available'),
-          getCurrentUser()
+          getCurrentUser(),
+          getCurrentTeam()
         ]);
         setQuests(questsData);
         setCurrentUser(userData);
+        setTeam(teamData);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to load quests');
@@ -38,20 +41,22 @@ export default function UnassignedQuests() {
     fetchData();
   }, []);
 
-  const sortedQuests = [...quests].sort((a, b) => {
-    // First sort by status
-    const statusOrder: Record<QuestStatus, number> = {
-      [QuestStatus.OPEN]: 0,
-      [QuestStatus.IN_PROGRESS]: 1,
-      [QuestStatus.COMPLETED]: 2,
-      [QuestStatus.CANCELLED]: 3
-    };
-    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
-    if (statusDiff !== 0) return statusDiff;
-    
-    // Then by creation date (newest first)
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  const sortedQuests = [...quests]
+    .filter(quest => team?.members.some(member => member.id === quest.createdBy))
+    .sort((a, b) => {
+      // First sort by status
+      const statusOrder: Record<QuestStatus, number> = {
+        [QuestStatus.OPEN]: 0,
+        [QuestStatus.IN_PROGRESS]: 1,
+        [QuestStatus.COMPLETED]: 2,
+        [QuestStatus.CANCELLED]: 3
+      };
+      const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+      if (statusDiff !== 0) return statusDiff;
+      
+      // Then by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   const handleTurnInQuest = async () => {
     if (selectedQuest) {

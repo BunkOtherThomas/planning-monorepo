@@ -59,6 +59,12 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
     }
   }, [selectedSkills, team?.members]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setShowSkills(false);
+    }
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(title, description, selectedSkills, selectedAssignee || undefined);
@@ -140,14 +146,19 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
     });
   };
 
+  const handleClose = () => {
+    setShowSkills(false);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button
           className="modal-close-button"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Close modal"
         >
           <svg
@@ -417,7 +428,7 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
           )}
 
           <div className={styles.modalActions}>
-            <button type="button" onClick={onClose} className={styles.skillButton}>
+            <button type="button" onClick={handleClose} className={styles.skillButton}>
               Cancel
             </button>
             <button 
