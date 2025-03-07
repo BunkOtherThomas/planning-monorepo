@@ -7,7 +7,7 @@ import { checkTeamStatus } from '../lib/api';
 import { User } from '@quest-board/types';
 import { DashboardProvider } from '../contexts/DashboardContext';
 
-const publicRoutes = ['/login', '/signup'];
+const publicRoutes = ['/login', '/signup', '/playground'];
 
 export default function AuthLayout({
   children,
