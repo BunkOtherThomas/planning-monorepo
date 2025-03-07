@@ -8,6 +8,7 @@ import {
   Quest,
   User,
   UserSkills,
+  QuestResponse,
 } from '@quest-board/types';
 
 // API routes are now running on port 3001
@@ -345,7 +346,18 @@ export async function analyzeSkills(title: string, description: string | undefin
   return response.json();
 }
 
-export async function turnInQuest(questId: string): Promise<void> {
+interface SkillXPChange {
+  before: number;
+  after: number;
+  gained: number;
+  isFavorite: boolean;
+}
+
+interface TurnInQuestResponse extends QuestResponse {
+  skillChanges: Record<string, SkillXPChange>;
+}
+
+export async function turnInQuest(questId: string): Promise<TurnInQuestResponse> {
   const response = await fetch(`${API_BASE_URL}/quests/${questId}/turn-in`, {
     ...getDefaultOptions(true),
     method: 'POST'
@@ -355,6 +367,8 @@ export async function turnInQuest(questId: string): Promise<void> {
     const error = await response.json();
     throw new Error(error.error || 'Failed to turn in quest');
   }
+
+  return response.json();
 }
 
 export async function assignQuestToSelf(questId: string): Promise<void> {

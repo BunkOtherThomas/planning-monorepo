@@ -12,6 +12,8 @@ import { SkillAssessmentModal } from './SkillAssessmentModal';
 import { SkillLevelModal } from './SkillLevelModal';
 import { ScrollableSection } from './ScrollableSection';
 import { SkillsModal } from './SkillsModal';
+import { Toast } from './Toast';
+import { checkLevelUp } from '../utils/checkLevelUp';
 
 interface Team {
   id: string;
@@ -41,6 +43,7 @@ export default function GuildLeaderDashboard() {
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
   const [favoriteSkills, setFavoriteSkills] = useState<string[]>([]);
   const [skills, setSkills] = useState<Record<string, number>>({});
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -343,7 +346,33 @@ export default function GuildLeaderDashboard() {
           }}
           onTurnIn={async () => {
             if (selectedQuest) {
-              await turnInQuest(selectedQuest.id);
+              const response = await turnInQuest(selectedQuest.id);
+              
+              // Check for level ups in skill changes
+              if (response.skillChanges) {
+                const leveledUpSkills: string[] = [];
+                const xpGains: string[] = [];
+
+                Object.entries(response.skillChanges).forEach(([skill, changes]) => {
+                  const leveledUp = checkLevelUp(changes.before, changes.after);
+                  if (leveledUp) {
+                    leveledUpSkills.push(skill);
+                  }
+                  xpGains.push(`${changes.gained} ${skill}`);
+                });
+
+                // If any skills leveled up, log them
+                if (leveledUpSkills.length > 0) {
+                  console.debug('Leveled up skills:', leveledUpSkills);
+                  console.debug('Skills that did not level up:', 
+                    Object.keys(response.skillChanges).filter(skill => !leveledUpSkills.includes(skill))
+                  );
+                } else {
+                  // Only show toast if no skills leveled up
+                  setToastMessage(`Gained ${xpGains.join(' XP and ')} XP`);
+                }
+              }
+
               // Refresh quests after turn in
               const updatedQuests = await getQuests('created');
               setQuests(updatedQuests);
@@ -387,6 +416,13 @@ export default function GuildLeaderDashboard() {
           onTagSkill={handleTagSkill}
           onUntagSkill={handleTagSkill}
           taggedSkills={favoriteSkills}
+        />
+      )}
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setToastMessage(null)}
         />
       )}
     </div>

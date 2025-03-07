@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import { getQuests, getCurrentUser, turnInQuest, assignQuestToSelf } from '../lib/api';
 import { QuestResponse, QuestStatus, User } from '@quest-board/types';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
+import { Toast } from './Toast';
 import styles from './Dashboard.module.css';
+import { checkLevelUp } from '../utils/checkLevelUp';
 
 export default function UnassignedQuests() {
   const [quests, setQuests] = useState<QuestResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,7 +50,33 @@ export default function UnassignedQuests() {
 
   const handleTurnInQuest = async () => {
     if (selectedQuest) {
-      await turnInQuest(selectedQuest.id);
+      const response = await turnInQuest(selectedQuest.id);
+      
+      // Check for level ups in skill changes
+      if (response.skillChanges) {
+        const leveledUpSkills: string[] = [];
+        const xpGains: string[] = [];
+
+        Object.entries(response.skillChanges).forEach(([skill, changes]) => {
+          const leveledUp = checkLevelUp(changes.before, changes.after);
+          if (leveledUp) {
+            leveledUpSkills.push(skill);
+          }
+          xpGains.push(`${changes.gained} ${skill}`);
+        });
+
+        // If any skills leveled up, log them
+        if (leveledUpSkills.length > 0) {
+          console.debug('Leveled up skills:', leveledUpSkills);
+          console.debug('Skills that did not level up:', 
+            Object.keys(response.skillChanges).filter(skill => !leveledUpSkills.includes(skill))
+          );
+        } else {
+          // Only show toast if no skills leveled up
+          setToastMessage(`Gained ${xpGains.join(' XP and ')} XP`);
+        }
+      }
+
       // Refresh quests after turn in
       const updatedQuests = await getQuests('available');
       setQuests(updatedQuests);
@@ -109,6 +138,13 @@ export default function UnassignedQuests() {
               avatarId: selectedQuest.assignedTo.avatarId
             } : undefined
           }}
+        />
+      )}
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setToastMessage(null)}
         />
       )}
     </>
