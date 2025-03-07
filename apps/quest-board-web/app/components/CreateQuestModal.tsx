@@ -262,11 +262,11 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                       )}
                       <div className={styles.skillContent}>
                         <div className={styles.skillName}>{skill}</div>
-                        <div 
-                          className={styles.sliderContainer}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {selected && (
+                        {selected && (
+                          <div 
+                            className={styles.sliderContainer}
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <div className={styles.healthBarContainer}>
                               <input
                                 type="range"
@@ -283,8 +283,8 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                                 }}
                               />
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
