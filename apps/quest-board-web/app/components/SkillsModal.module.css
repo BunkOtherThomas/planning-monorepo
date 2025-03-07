@@ -211,4 +211,51 @@
 .confirmButton:disabled {
   background: var(--text-secondary);
   cursor: not-allowed;
+}
+
+.skillInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  margin-right: 8px;
+}
+
+.skillInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.skillActions {
+  display: flex;
+  gap: 8px;
+}
+
+.addSkillButton {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed #e2e8f0;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.addSkillButton:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 12px;
 } 
