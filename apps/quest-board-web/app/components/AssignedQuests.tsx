@@ -6,6 +6,7 @@ import { QuestResponse, QuestStatus, User } from '@quest-board/types';
 import { Avatar } from '../../components/Avatar';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 import { Toast } from './Toast';
+import { LevelUpModal } from './LevelUpModal';
 import styles from './Dashboard.module.css';
 import { checkLevelUp } from '../utils/checkLevelUp';
 
@@ -15,6 +16,10 @@ export default function AssignedQuests() {
   const [selectedQuest, setSelectedQuest] = useState<QuestResponse | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [levelUpData, setLevelUpData] = useState<{
+    leveledUpSkills: Array<{ skill: string; before: number; after: number }>;
+    otherSkills: Array<{ skill: string; gained: number }>;
+  } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,26 +60,31 @@ export default function AssignedQuests() {
       
       // Check for level ups in skill changes
       if (response.skillChanges) {
-        const leveledUpSkills: string[] = [];
-        const xpGains: string[] = [];
+        const leveledUpSkills: Array<{ skill: string; before: number; after: number }> = [];
+        const otherSkills: Array<{ skill: string; gained: number }> = [];
 
         Object.entries(response.skillChanges).forEach(([skill, changes]) => {
           const leveledUp = checkLevelUp(changes.before, changes.after);
           if (leveledUp) {
-            leveledUpSkills.push(skill);
+            leveledUpSkills.push({
+              skill,
+              before: changes.before,
+              after: changes.after
+            });
+          } else {
+            otherSkills.push({
+              skill,
+              gained: changes.gained
+            });
           }
-          xpGains.push(`${changes.gained} ${skill}`);
         });
 
-        // If any skills leveled up, log them
+        // If any skills leveled up, show the modal
         if (leveledUpSkills.length > 0) {
-          console.debug('Leveled up skills:', leveledUpSkills);
-          console.debug('Skills that did not level up:', 
-            Object.keys(response.skillChanges).filter(skill => !leveledUpSkills.includes(skill))
-          );
+          setLevelUpData({ leveledUpSkills, otherSkills });
         } else {
           // Only show toast if no skills leveled up
-          setToastMessage(`Gained ${xpGains.join(' XP and ')} XP`);
+          setToastMessage(`Gained ${otherSkills.map(s => `${s.gained} ${s.skill}`).join(' XP and ')} XP`);
         }
       }
 
@@ -152,6 +162,15 @@ export default function AssignedQuests() {
         <Toast
           message={toastMessage}
           onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      {levelUpData && (
+        <LevelUpModal
+          isOpen={!!levelUpData}
+          onClose={() => setLevelUpData(null)}
+          leveledUpSkills={levelUpData.leveledUpSkills}
+          otherSkills={levelUpData.otherSkills}
         />
       )}
     </>
