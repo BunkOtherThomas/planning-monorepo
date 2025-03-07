@@ -214,54 +214,6 @@ export default function GuildLeaderDashboard() {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <ScrollableSection title="Team">
-          {error ? (
-            <div className={styles.error}>{error}</div>
-          ) : team ? (
-            <div className={styles.teamInfo}>
-              <div className={styles.teamMembers}>
-                {team.members.map((member) => (
-                  <div key={member.id} className={styles.quest} style={{ maxHeight: '60px' }}>
-                    <div className={styles.applicantInfo}>
-                      <Avatar avatarId={member.avatarId} size={32} />
-                      <span className={styles.memberName}>{member.displayName}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className={styles.teamCode}>
-                <code
-                  className={`${styles.inviteCode} ${copied ? styles.copied : ''}`}
-                  onClick={handleCopyInvite}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className={styles.inviteHeader}>Dangerous to go alone!</div>
-                  <div className={styles.inviteUrl}>Use this url to invite your team members: {`${window.location.origin}/signup/?team=${team.inviteCode}`}</div>
-                </code>
-                {copied && (
-                  <div className={styles.copyMessage}>
-                    URL copied to clipboard!
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className={styles.loading}>Loading team information...</div>
-          )}
-        </ScrollableSection>
-
-        <SkillsSection
-          team={team}
-          user={currentUser}
-          error={error}
-          favoriteSkills={favoriteSkills}
-          isGuildLeader={true}
-          onSkillClick={handleSkillClick}
-          onDeclineSkill={handleDeclineSkill}
-          onTagSkill={handleTagSkill}
-        />
-
         <ScrollableSection
           title="Quests"
           footer={
@@ -303,6 +255,54 @@ export default function GuildLeaderDashboard() {
               <div className={styles.emptyState}>No quests created yet</div>
             )}
           </div>
+        </ScrollableSection>
+
+        <SkillsSection
+          team={team}
+          user={currentUser}
+          error={error}
+          favoriteSkills={favoriteSkills}
+          isGuildLeader={true}
+          onSkillClick={handleSkillClick}
+          onDeclineSkill={handleDeclineSkill}
+          onTagSkill={handleTagSkill}
+        />
+
+        <ScrollableSection title="Team">
+          {error ? (
+            <div className={styles.error}>{error}</div>
+          ) : team ? (
+            <div className={styles.teamInfo}>
+              <div className={styles.teamMembers}>
+                {team.members.map((member) => (
+                  <div key={member.id} className={styles.quest} style={{ maxHeight: '60px' }}>
+                    <div className={styles.applicantInfo}>
+                      <Avatar avatarId={member.avatarId} size={32} />
+                      <span className={styles.memberName}>{member.displayName}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.teamCode}>
+                <code
+                  className={`${styles.inviteCode} ${copied ? styles.copied : ''}`}
+                  onClick={handleCopyInvite}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className={styles.inviteHeader}>Dangerous to go alone!</div>
+                  <div className={styles.inviteUrl}>Use this url to invite your team members: {`${window.location.origin}/signup/?team=${team.inviteCode}`}</div>
+                </code>
+                {copied && (
+                  <div className={styles.copyMessage}>
+                    URL copied to clipboard!
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.loading}>Loading team information...</div>
+          )}
         </ScrollableSection>
       </div>
 

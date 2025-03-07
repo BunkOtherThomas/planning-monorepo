@@ -171,6 +171,14 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
+        <ScrollableSection title="My Quests">
+          <AssignedQuests />
+        </ScrollableSection>
+
+        <ScrollableSection title="Available Quests">
+          <UnassignedQuests />
+        </ScrollableSection>
+
         <SkillsSection
           team={team}
           user={user}
@@ -180,14 +188,6 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
           onDeclineSkill={handleDeclineSkill}
           onTagSkill={handleTagSkill}
         />
-
-        <ScrollableSection title="My Quests">
-          <AssignedQuests />
-        </ScrollableSection>
-
-        <ScrollableSection title="Available Quests">
-          <UnassignedQuests />
-        </ScrollableSection>
 
         {selectedSkill && (
           <SkillAssessmentModal

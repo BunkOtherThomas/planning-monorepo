@@ -458,8 +458,8 @@
   }
 
   .applicantInfo {
-    flex-direction: column;
-    text-align: center;
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .applicantStats {

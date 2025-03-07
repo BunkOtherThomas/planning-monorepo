@@ -19,12 +19,12 @@ export function ScrollableSection({
       <h3 className={styles.sectionTitle}>{title}</h3>
       <div className={styles.questListContainer}>
         {children}
-        {footer && (
+      </div>
+      {footer && (
           <div className={styles.stickyAddButton}>
             {footer}
           </div>
         )}
-      </div>
     </div>
   );
 } 
