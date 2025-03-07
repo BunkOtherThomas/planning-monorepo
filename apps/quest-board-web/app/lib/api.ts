@@ -395,3 +395,16 @@ export async function updateFavoriteSkills(favoriteSkills: string[]): Promise<vo
     throw new Error(error.error || 'Failed to update favorite skills');
   }
 }
+
+export async function getUserSkills(userId: string): Promise<UserSkills> {
+  const response = await fetch(`${API_BASE_URL}/api/skills/get?userId=${userId}`, {
+    ...getDefaultOptions(true),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch user skills');
+  }
+
+  return response.json();
+}
