@@ -163,46 +163,48 @@ export function SkillsModal({
                 </div>
               );
             })}
-            {isAddingSkill ? (
-              <div className={styles.skillItem}>
-                <input
-                  type="text"
-                  value={newSkill}
-                  onChange={(e) => {
-                    setNewSkill(e.target.value);
-                    setSkillError(null);
-                  }}
-                  placeholder="Enter new skill"
-                  className={styles.skillInput}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                {skillError && <div className={styles.error}>{skillError}</div>}
-                <div className={styles.skillActions}>
-                  <button
-                    onClick={() => {
-                      setIsAddingSkill(false);
-                      setNewSkill('');
+            {user.isProjectManager && (
+              isAddingSkill ? (
+                <div className={styles.skillItem}>
+                  <input
+                    type="text"
+                    value={newSkill}
+                    onChange={(e) => {
+                      setNewSkill(e.target.value);
                       setSkillError(null);
                     }}
-                    className={styles.decline}
-                  >
-                    ✕
-                  </button>
-                  <button
-                    onClick={handleAddSkill}
-                    className={styles.accept}
-                  >
-                    ✓
-                  </button>
+                    placeholder="Enter new skill"
+                    className={styles.skillInput}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  {skillError && <div className={styles.error}>{skillError}</div>}
+                  <div className={styles.skillActions}>
+                    <button
+                      onClick={() => {
+                        setIsAddingSkill(false);
+                        setNewSkill('');
+                        setSkillError(null);
+                      }}
+                      className={styles.decline}
+                    >
+                      ✕
+                    </button>
+                    <button
+                      onClick={handleAddSkill}
+                      className={styles.accept}
+                    >
+                      ✓
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsAddingSkill(true)}
-                className={styles.addSkillButton}
-              >
-                + Add New Skill
-              </button>
+              ) : (
+                <button
+                  onClick={() => setIsAddingSkill(true)}
+                  className={styles.addSkillButton}
+                >
+                  + Add New Skill
+                </button>
+              )
             )}
           </div>
           <div className={styles.modalFooter}>
