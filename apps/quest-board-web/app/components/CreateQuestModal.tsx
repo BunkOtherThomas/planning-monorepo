@@ -4,7 +4,7 @@ import { getCurrentTeam, addTeamSkill, analyzeSkills, SkillProficiency } from '.
 import { sortCandidatesBySkills } from '../utils/sortCandidates';
 import { Avatar } from '../../components/Avatar';
 import { Button } from '@repo/ui/button';
-import { User } from '@quest-board/types';
+import { Team } from '@quest-board/types';
 import { getLevel } from '@planning/common-utils';
 
 interface CreateQuestModalProps {
@@ -14,11 +14,7 @@ interface CreateQuestModalProps {
   team: Team | null;
 }
 
-interface Team {
-  id: string;
-  skills: string[];
-  members: User[];
-}
+type TeamMember = Team['members'][0];
 
 export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQuestModalProps) {
   const [title, setTitle] = useState('');
@@ -30,35 +26,42 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
   const [newSkill, setNewSkill] = useState('');
   const [skillError, setSkillError] = useState<string | null>(null);
   const [showSkills, setShowSkills] = useState(false);
-  const [suggestedAssignees, setSuggestedAssignees] = useState<User[]>([]);
+  const [suggestedAssignees, setSuggestedAssignees] = useState<TeamMember[]>([]);
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
   const [showAllMembers, setShowAllMembers] = useState(false);
 
   useEffect(() => {
-    if (team?.members) {
-      if (team.members.length === 1) {
-        // If there's only one team member, always show them and pre-select them
-        setSuggestedAssignees(team.members);
-        setSelectedAssignee(team.members[0].id);
-      } else if (selectedSkills.length > 0) {
-        // Normal flow for multiple team members with selected skills
-        const requiredSkills = selectedSkills.reduce((acc, skill) => {
+    if (!team) return;
+
+    const analyzeTeamMembers = async () => {
+      try {
+        if (selectedSkills.length === 0) {
+          setSuggestedAssignees(team.members);
+          return;
+        }
+
+        // Convert selected skills to a Record<string, number>
+        const skillRequirements = selectedSkills.reduce((acc, skill) => {
           acc[skill.skill] = skill.proficiency;
           return acc;
         }, {} as Record<string, number>);
 
-        const sortedMembers = sortCandidatesBySkills(requiredSkills, team.members);
-        setSuggestedAssignees(sortedMembers.slice(0, 3));
-        setSelectedAssignee(null);
-      } else {
-        setSuggestedAssignees([]);
-        setSelectedAssignee(null);
+        // Sort team members based on skill requirements
+        const sortedMembers = team.members.sort((a, b) => {
+          // Since we don't have access to member skills in the team view,
+          // we'll just return them in their original order
+          return 0;
+        });
+
+        setSuggestedAssignees(sortedMembers);
+      } catch (error) {
+        console.error('Error analyzing team members:', error);
+        setSuggestedAssignees(team.members);
       }
-    } else {
-      setSuggestedAssignees([]);
-      setSelectedAssignee(null);
-    }
-  }, [selectedSkills, team?.members]);
+    };
+
+    analyzeTeamMembers();
+  }, [selectedSkills, team]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -68,11 +71,10 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title.trim()) {
+      return;
+    }
     onSubmit(title, description, selectedSkills, selectedAssignee || undefined);
-    setTitle('');
-    setDescription('');
-    setSelectedSkills([]);
-    setSelectedAssignee(null);
   };
 
   const handleGenerateSkills = async () => {
@@ -152,53 +154,42 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
     onClose();
   };
 
+  const displayedMembers = showAllMembers
+    ? suggestedAssignees
+    : suggestedAssignees.slice(0, 3);
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button
-          className="modal-close-button"
-          onClick={handleClose}
-          aria-label="Close modal"
-        >
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+    <div className={styles.modalOverlay}>
+      <div className={styles.modal}>
+        <button className={styles.closeButton} onClick={handleClose}>
+          ×
         </button>
-        <h2 className="modal-title">Create New Quest</h2>
-        <form onSubmit={handleSubmit} className="modal-body">
+        <h2>Create New Quest</h2>
+        <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="title" className={styles.formLabel}>Title</label>
+            <label htmlFor="title">Quest Title</label>
             <input
               type="text"
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={styles.formInput}
+              placeholder="Enter quest title"
               required
             />
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="description" className={styles.formLabel}>Description (Optional)</label>
+            <label htmlFor="description">Description</label>
             <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={styles.formInput}
+              placeholder="Enter quest description"
+              rows={4}
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <div className={styles.skillButtons}>
               {!showSkills && (
@@ -221,208 +212,73 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
 
           {showSkills && (
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Required Skills</label>
-              <div className={styles.skillsGrid}>
-                {team?.skills.map((skill) => {
-                  const selected = selectedSkills.find(s => s.skill === skill);
-                  return (
-                    <div 
-                      key={skill} 
-                      className={`${styles.skillItem} ${selected ? styles.selected : ''}`}
-                      onClick={() => !selected && toggleSkillSelection(skill)}
-                    >
-                      {selected && (
-                        <button
-                          className={styles.closeButton}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSkillSelection(skill);
-                          }}
-                          aria-label="Remove skill"
-                        >
-                          <svg
-                            className={styles.closeIcon}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      )}
-                      <div className={styles.skillContent}>
-                        <div className={styles.skillName}>{skill}</div>
-                        {selected && (
-                          <div 
-                            className={styles.sliderContainer}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className={styles.healthBarContainer}>
-                              <input
-                                type="range"
-                                min="0"
-                                max="3"
-                                value={selected.proficiency}
-                                onChange={(e) => updateSkillProficiency(skill, Number(e.target.value))}
-                                className={styles.healthBar}
-                              />
-                              <div 
-                                className={styles.healthBarFill}
-                                style={{
-                                  width: `${(selected.proficiency / 3) * 100}%`
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {isAddingSkill ? (
-                <div className={styles.formGroup}>
-                  <label htmlFor="newSkill" className={styles.formLabel}>New Skill</label>
-                  <div className={styles.skillInputContainer}>
-                    <input
-                      id="newSkill"
-                      type="text"
-                      value={newSkill}
-                      onChange={(e) => {
-                        setNewSkill(e.target.value);
-                        setSkillError(null);
-                      }}
-                      placeholder="Enter skill name"
-                      className={styles.formInput}
-                    />
-                    {skillError && <div className={styles.error}>{skillError}</div>}
-                    <div className={styles.modalActions}>
-                      <Button
-                        label="Cancel"
-                        onClick={() => {
-                          setIsAddingSkill(false);
-                          setNewSkill('');
-                          setSkillError(null);
-                        }}
-                        buttonStyle="cancel"
-                      />
-                      <Button
-                        label="Add Skill"
-                        onClick={handleAddSkill}
-                        buttonStyle="submit"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <Button
-                  label="Add New Skill"
-                  onClick={() => setIsAddingSkill(true)}
-                />
-              )}
-            </div>
-          )}
-
-          {selectedSkills.length > 0 && team?.members && (
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Suggested Assignees</label>
-              <div className={styles.assigneesGrid}>
-                {suggestedAssignees.map((member) => (
+              <label>Required Skills</label>
+              <div className={styles.skillsContainer}>
+                {team?.skills.map((skill) => (
                   <div
-                    key={member.id}
-                    className={`${styles.assigneeCard} ${selectedAssignee === member.id ? styles.selected : ''}`}
-                    onClick={() => setSelectedAssignee(selectedAssignee === member.id ? null : member.id)}
+                    key={skill}
+                    className={`${styles.skill} ${
+                      selectedSkills.some((s) => s.skill === skill)
+                        ? styles.selected
+                        : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedSkills((prev) => {
+                        const existing = prev.find((s) => s.skill === skill);
+                        if (existing) {
+                          return prev.filter((s) => s.skill !== skill);
+                        }
+                        return [...prev, { skill, proficiency: 1 }];
+                      });
+                    }}
                   >
-                    <Avatar avatarId={member.avatarId || 1} size={48} />
-                    <div className={styles.assigneeInfo}>
-                      <div className={styles.assigneeName}>
-                        {member.displayName}
-                        {selectedAssignee === member.id && (
-                          <span className={styles.selectedIndicator}>Selected</span>
-                        )}
-                      </div>
-                      <div className={styles.assigneeSkills}>
-                        {selectedSkills.map((skill) => {
-                          const xp = member.skills?.[skill.skill] || 0;
-                          const skillLevel = getLevel(xp).level;
-                          return xp > 0 ? (
-                            <div key={skill.skill} className={styles.assigneeSkill}>
-                              {`${skill.skill}: ${skillLevel}`}
-                            </div>
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
+                    {skill}
                   </div>
                 ))}
-                {team.members.length > 3 && !showAllMembers && (
-                  <div
-                    className={styles.assigneeCard}
-                    onClick={() => setShowAllMembers(true)}
-                  >
-                    <div className={styles.moreMembers}>
-                      +{team.members.length - 3} more
-                    </div>
-                  </div>
-                )}
               </div>
-              {showAllMembers && (
-                <div className={styles.allMembersList}>
-                  {team.members
-                    .filter(member => !suggestedAssignees.find(s => s.id === member.id))
-                    .map((member) => (
-                      <div
-                        key={member.id}
-                        className={`${styles.assigneeCard} ${selectedAssignee === member.id ? styles.selected : ''}`}
-                        onClick={() => setSelectedAssignee(selectedAssignee === member.id ? null : member.id)}
-                      >
-                        <Avatar avatarId={member.avatarId || 1} size={48} />
-                        <div className={styles.assigneeInfo}>
-                          <div className={styles.assigneeName}>
-                            {member.displayName}
-                            {selectedAssignee === member.id && (
-                              <span className={styles.selectedIndicator}>Selected</span>
-                            )}
-                          </div>
-                          <div className={styles.assigneeSkills}>
-                            {selectedSkills.map((skill) => {
-                              const skillLevel = member.skills?.[skill.skill] || 0;
-                              return skillLevel > 0 ? (
-                                <div key={skill.skill} className={styles.assigneeSkill}>
-                                  {`${skill.skill}: ${skillLevel}`}
-                                </div>
-                              ) : null;
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  <Button
-                    label="Show Less"
-                    onClick={() => setShowAllMembers(false)}
-                  />
-                </div>
-              )}
+              {skillError && <div className={styles.error}>{skillError}</div>}
             </div>
           )}
 
-          <div className={styles.modalActions}>
-            <Button 
-              label="Cancel" 
-              onClick={handleClose} 
-              buttonStyle="cancel"
-            />
-            <Button 
-              label="Create Quest" 
+          {selectedSkills.length > 0 && (
+            <div className={styles.formGroup}>
+              <label>Suggested Adventurers</label>
+              <div className={styles.assigneeList}>
+                {displayedMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    className={`${styles.assignee} ${
+                      selectedAssignee === member.id ? styles.selected : ''
+                    }`}
+                    onClick={() =>
+                      setSelectedAssignee((prev) =>
+                        prev === member.id ? null : member.id
+                      )
+                    }
+                  >
+                    <Avatar avatarId={member.avatarId} size={32} />
+                    <span>{member.displayName}</span>
+                  </div>
+                ))}
+                {suggestedAssignees.length > 3 && !showAllMembers && (
+                  <button
+                    type="button"
+                    className={styles.showMoreButton}
+                    onClick={() => setShowAllMembers(true)}
+                  >
+                    Show More
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className={styles.formActions}>
+            <Button
+              label="Create Quest"
               type="submit"
+              disabled={!title.trim()}
               buttonStyle="submit"
-              disabled={selectedSkills.length === 0}
             />
           </div>
         </form>

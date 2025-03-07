@@ -1,0 +1,64 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.avatarSection {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.skillsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skillsSection h3 {
+  font-family: var(--font-cinzel);
+  font-size: 1.5rem;
+  color: var(--accent-gold);
+  margin: 0;
+  text-shadow: var(--text-shadow);
+}
+
+.skillsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skillItem {
+  background: var(--background-secondary);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.skillHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.skillName {
+  font-weight: 500;
+}
+
+.skillLevel {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.noSkills {
+  font-family: var(--font-lora);
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+} 

@@ -6,6 +6,7 @@ import { SkillAssessmentModal } from './SkillAssessmentModal';
 import { SkillLevelModal } from './SkillLevelModal';
 import { SkillsModal } from './SkillsModal';
 import styles from './Dashboard.module.css';
+import { declareSkill } from '../lib/api';
 
 interface SkillsSectionProps {
   team: TeamType | null;
@@ -52,7 +53,31 @@ export const SkillsSection: FC<SkillsSectionProps> = ({
 
   const handleAssessmentSubmit = async (values: SkillAssessmentValues) => {
     if (!selectedSkill) return;
-    setSelectedSkill(null);
+    
+    try {
+      const response = await declareSkill(
+        selectedSkill,
+        values.professionalExperience,
+        values.formalEducation,
+        values.informalExperience,
+        values.confidence
+      );
+      
+      setSkillAssessments(prev => {
+        const existingIndex = prev.findIndex(a => a.skill === selectedSkill);
+        if (existingIndex >= 0) {
+          const newAssessments = [...prev];
+          newAssessments[existingIndex] = { skill: selectedSkill, xp: response.xp };
+          return newAssessments;
+        }
+        return [...prev, { skill: selectedSkill, xp: response.xp }];
+      });
+
+      setSelectedSkill(null);
+    } catch (error) {
+      console.error('Error submitting skill assessment:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   return (

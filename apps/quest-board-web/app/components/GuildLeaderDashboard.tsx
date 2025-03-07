@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser, declareSkill, turnInQuest, assignQuestToSelf } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
-import { QuestResponse, QuestStatus, User, SkillAssessment, Team as TeamType } from '@quest-board/types';
+import { QuestResponse, QuestStatus, User, SkillAssessment, Team as TeamType, Team } from '@quest-board/types';
 import { CreateQuestModal } from './CreateQuestModal';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 import TeamSkills from './TeamSkills';
@@ -16,6 +16,7 @@ import { Toast } from './Toast';
 import { LevelUpModal } from './LevelUpModal';
 import { checkLevelUp } from '../utils/checkLevelUp';
 import { SkillsSection } from './SkillsSection';
+import { TeamMemberModal } from './TeamMemberModal';
 
 interface SkillAssessmentValues {
   professionalExperience: number;
@@ -23,6 +24,8 @@ interface SkillAssessmentValues {
   informalExperience: number;
   confidence: number;
 }
+
+type TeamMember = TeamType['members'][0];
 
 export default function GuildLeaderDashboard() {
   const [team, setTeam] = useState<TeamType | null>(null);
@@ -43,6 +46,7 @@ export default function GuildLeaderDashboard() {
     leveledUpSkills: Array<{ skill: string; before: number; after: number }>;
     otherSkills: Array<{ skill: string; gained: number }>;
   } | null>(null);
+  const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -275,7 +279,12 @@ export default function GuildLeaderDashboard() {
             <div className={styles.teamInfo}>
               <div className={styles.teamMembers}>
                 {team.members.map((member) => (
-                  <div key={member.id} className={styles.quest} style={{ maxHeight: '60px' }}>
+                  <div 
+                    key={member.id} 
+                    className={styles.quest} 
+                    style={{ maxHeight: '60px', cursor: 'pointer' }}
+                    onClick={() => setSelectedTeamMember(member)}
+                  >
                     <div className={styles.applicantInfo}>
                       <Avatar avatarId={member.avatarId} size={32} />
                       <span className={styles.memberName}>{member.displayName}</span>
@@ -310,7 +319,7 @@ export default function GuildLeaderDashboard() {
         isOpen={isCreateQuestModalOpen}
         onClose={() => setIsCreateQuestModalOpen(false)}
         onSubmit={handleCreateQuest}
-        team={team}
+        team={team as unknown as Team}
       />
 
       {selectedQuest && currentUser && (
@@ -426,6 +435,14 @@ export default function GuildLeaderDashboard() {
           avatarId={currentUser?.avatarId || 0}
           leveledUpSkills={levelUpData.leveledUpSkills}
           otherSkills={levelUpData.otherSkills}
+        />
+      )}
+
+      {selectedTeamMember && (
+        <TeamMemberModal
+          isOpen={!!selectedTeamMember}
+          onClose={() => setSelectedTeamMember(null)}
+          member={selectedTeamMember}
         />
       )}
     </div>
