@@ -13,7 +13,7 @@ interface TeamMember {
   topSkills: {
     name: string;
     level: number;
-    isTagged: boolean;
+    isFavorite: boolean;
   }[];
   activeQuests: {
     id: string;
@@ -99,11 +99,11 @@ const TeamPage: FC = () => {
                 {member.topSkills.map((skill) => (
                   <div
                     key={skill.name}
-                    className={`${styles.skillBadge} ${skill.isTagged ? styles.tagged : ''}`}
+                    className={`${styles.skillBadge} ${skill.isFavorite ? styles.favorite : ''}`}
                   >
                     <span className={styles.skillName}>{skill.name}</span>
                     <span className={styles.skillLevel}>Lvl {skill.level}</span>
-                    {skill.isTagged && <span className={styles.tagIcon}>★</span>}
+                    {skill.isFavorite && <span className={styles.favoriteIcon}>★</span>}
                   </div>
                 ))}
               </div>

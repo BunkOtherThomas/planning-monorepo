@@ -36,5 +36,6 @@ export interface User {
   avatarId?: number;
   isProjectManager: boolean;
   isTeamMember: boolean;
-  skills: Record<string, number>;
+  skills?: Record<string, number>;
+  favoriteSkills?: string[];
 } 

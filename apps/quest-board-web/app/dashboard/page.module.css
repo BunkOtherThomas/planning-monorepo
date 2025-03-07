@@ -44,13 +44,15 @@
   background: #2980b9;
 }
 
-.taggedSkills,
-.otherSkills {
+.skills,
+.favoriteSkills,
+.quests {
   margin-bottom: 1.5rem;
 }
 
-.taggedSkills h3,
-.otherSkills h3 {
+.skills h3,
+.favoriteSkills h3,
+.quests h3 {
   color: #34495e;
   margin-bottom: 1rem;
 }

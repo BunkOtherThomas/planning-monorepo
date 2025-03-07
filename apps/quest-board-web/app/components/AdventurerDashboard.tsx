@@ -12,6 +12,7 @@ import AssignedQuests from './AssignedQuests';
 import UnassignedQuests from './UnassignedQuests';
 import TeamSkills from './TeamSkills';
 import { ScrollableSection } from './ScrollableSection';
+import { SkillsModal } from './SkillsModal';
 
 interface Skill {
   id: string;
@@ -40,6 +41,8 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [skillAssessments, setSkillAssessments] = useState<SkillAssessment[]>([]);
   const [viewingSkillLevel, setViewingSkillLevel] = useState<string | null>(null);
+  const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
+  const [favoriteSkills, setFavoriteSkills] = useState<string[]>(user.favoriteSkills || []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -130,6 +133,18 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
     }
   };
 
+  const handleTagSkill = (skill: string) => {
+    setFavoriteSkills(prev => {
+      if (prev.includes(skill)) {
+        return prev.filter(s => s !== skill);
+      }
+      if (prev.length >= 3) {
+        return prev;
+      }
+      return [...prev, skill];
+    });
+  };
+
   const sortedSkills = useMemo(() => {
     if (!team?.skills) return [];
     
@@ -155,7 +170,17 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <ScrollableSection title="Skills">
+        <ScrollableSection 
+          title="Skills"
+          footer={
+            <button
+              className={styles.manageSkillsButton}
+              onClick={() => setIsSkillsModalOpen(true)}
+            >
+              Manage Skills
+            </button>
+          }
+        >
           <TeamSkills
             team={team}
             user={user}
@@ -188,6 +213,18 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
             onClose={() => setViewingSkillLevel(null)}
           />
         )}
+
+        <SkillsModal
+          isOpen={isSkillsModalOpen}
+          onClose={() => setIsSkillsModalOpen(false)}
+          user={user}
+          teamSkills={team?.skills || []}
+          onSkillClick={handleSkillClick}
+          onDeclineSkill={handleDeclineSkill}
+          onTagSkill={handleTagSkill}
+          onUntagSkill={handleTagSkill}
+          taggedSkills={favoriteSkills}
+        />
       </div>
     </div>
   );

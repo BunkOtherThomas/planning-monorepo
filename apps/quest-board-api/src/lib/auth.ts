@@ -3,6 +3,8 @@ import type { JWT } from "next-auth/jwt";
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@quest-board/database";
+import { verify } from 'jsonwebtoken';
+import { NextRequest } from 'next/server';
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -49,4 +51,35 @@ export const authOptions = {
   },
 };
 
-export const { auth, signIn, signOut } = NextAuth(authOptions); 
+export const { auth, signIn, signOut } = NextAuth(authOptions);
+
+export async function getAuthenticatedUser(request: NextRequest) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.split(' ')[1];
+  
+  try {
+    const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        avatarId: true,
+        isProjectManager: true,
+        isTeamMember: true,
+        skills: true,
+        favoriteSkills: true,
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return null;
+  }
+} 

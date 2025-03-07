@@ -56,11 +56,13 @@ const TeamSkills: FC<TeamSkillsProps> = ({
               <div
                 key={skill}
                 className={`${styles.skillTag} relative flex justify-between items-center cursor-pointer ${
-                  user?.skills?.[skill] === 0 ? 'opacity-10' : ''
+                  user?.skills?.[skill] === 0 && !user?.favoriteSkills?.includes(skill) ? 'opacity-10' : ''
                 }`}
                 onClick={() => !isNewSkill && onSkillClick(skill)}
               >
-                <div className="flex items-center font-lora text-text-light">
+                <div className={`flex items-center font-lora text-text-light ${
+                  user?.favoriteSkills?.includes(skill) ? 'text-amber-400' : ''
+                }`}>
                   {getSkillName(skill)}
                 </div>
                 {isNewSkill ? (

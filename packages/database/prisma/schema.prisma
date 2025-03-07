@@ -27,6 +27,7 @@ model User {
   notifications    Notification[]
   teams            TeamsOnUsers[]
   skills           Json             @default("{}") // Object with skill names as keys and XP as values
+  favoriteSkills   String[]         @default([]) // Array of tagged/favorite skill names
 }
 
 model BusinessDetails {

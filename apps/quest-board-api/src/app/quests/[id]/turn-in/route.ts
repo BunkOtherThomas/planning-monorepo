@@ -5,6 +5,7 @@ import { QuestStatus, Quest, Prisma } from '@prisma/client';
 
 // XP multiplier for quest completion
 const QUEST_COMPLETION_XP_MULTIPLIER = 5;
+const FAVORITE_SKILL_XP_MULTIPLIER = 3;
 
 type QuestWithAssignedTo = Quest & {
   assignedTo: {
@@ -19,6 +20,12 @@ interface SkillXPChange {
   before: number;
   after: number;
   gained: number;
+  isFavorite: boolean;
+}
+
+interface UserSkillsResult {
+  skills: Prisma.JsonValue;
+  favoriteSkills: string[];
 }
 
 export async function POST(
@@ -55,17 +62,20 @@ export async function POST(
       return NextResponse.json({ error: 'Not authorized to turn in this quest' }, { status: 403 });
     }
 
-    // Get user's current skills
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { skills: true }
-    });
+    // Get user's current skills and favorite skills using raw query
+    const users = await prisma.$queryRaw<UserSkillsResult[]>`
+      SELECT skills, "favoriteSkills"
+      FROM "User"
+      WHERE id = ${userId}
+    `;
+    const user = users[0];
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const currentSkills = user.skills as Record<string, number>;
+    const favoriteSkills = user.favoriteSkills;
     const questSkills = quest.questSkills as Record<string, number>;
     const updatedSkills = { ...currentSkills };
     const skillChanges: Record<string, SkillXPChange> = {};
@@ -73,14 +83,19 @@ export async function POST(
     // Update user's skills based on quest skills
     for (const [skillName, skillValue] of Object.entries(questSkills)) {
       const currentXP = currentSkills[skillName] || 0;
-      const xpGain = skillValue * QUEST_COMPLETION_XP_MULTIPLIER;
+      const isFavorite = favoriteSkills.includes(skillName);
+      const multiplier = isFavorite ? 
+        QUEST_COMPLETION_XP_MULTIPLIER * FAVORITE_SKILL_XP_MULTIPLIER : 
+        QUEST_COMPLETION_XP_MULTIPLIER;
+      const xpGain = skillValue * multiplier;
       const newXP = currentXP + xpGain;
       
       updatedSkills[skillName] = newXP;
       skillChanges[skillName] = {
         before: currentXP,
         after: newXP,
-        gained: xpGain
+        gained: xpGain,
+        isFavorite
       };
     }
 

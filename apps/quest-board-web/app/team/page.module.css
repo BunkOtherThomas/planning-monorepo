@@ -67,12 +67,35 @@
   margin-bottom: 1.5rem;
 }
 
-.skillTag {
-  background: #e0f2fe;
-  color: #0369a1;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
+.skillBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-size: 0.9em;
+  position: relative;
+}
+
+.favorite {
+  background: rgba(var(--primary-rgb), 0.2);
+  border: 1px solid rgba(var(--primary-rgb), 0.3);
+}
+
+.favoriteIcon {
+  color: var(--primary);
+  font-size: 1.2em;
+  margin-left: 4px;
+}
+
+.skillName {
+  font-weight: 500;
+}
+
+.skillLevel {
+  color: var(--text-secondary);
+  font-size: 0.9em;
 }
 
 .stats {

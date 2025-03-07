@@ -11,6 +11,7 @@ import TeamSkills from './TeamSkills';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
 import { SkillLevelModal } from './SkillLevelModal';
 import { ScrollableSection } from './ScrollableSection';
+import { SkillsModal } from './SkillsModal';
 
 interface Team {
   id: string;
@@ -37,6 +38,9 @@ export default function GuildLeaderDashboard() {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [viewingSkillLevel, setViewingSkillLevel] = useState<string | null>(null);
   const [skillAssessments, setSkillAssessments] = useState<SkillAssessment[]>([]);
+  const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
+  const [favoriteSkills, setFavoriteSkills] = useState<string[]>([]);
+  const [skills, setSkills] = useState<Record<string, number>>({});
 
   useEffect(() => {
     let isMounted = true;
@@ -53,6 +57,8 @@ export default function GuildLeaderDashboard() {
           setTeam(teamData);
           setQuests(questsData);
           setCurrentUser(userData);
+          setSkills(userData.skills || {});
+          setFavoriteSkills(userData.favoriteSkills || []);
         }
       } catch (err) {
         if (isMounted) {
@@ -191,6 +197,18 @@ export default function GuildLeaderDashboard() {
     }
   };
 
+  const handleTagSkill = (skill: string) => {
+    setFavoriteSkills(prev => {
+      if (prev.includes(skill)) {
+        return prev.filter(s => s !== skill);
+      }
+      if (prev.length >= 3) {
+        return prev;
+      }
+      return [...prev, skill];
+    });
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
@@ -231,7 +249,17 @@ export default function GuildLeaderDashboard() {
           )}
         </ScrollableSection>
 
-        <ScrollableSection title="Skills">
+        <ScrollableSection 
+          title="Skills"
+          footer={
+            <button
+              className={styles.manageSkillsButton}
+              onClick={() => setIsSkillsModalOpen(true)}
+            >
+              Manage Skills
+            </button>
+          }
+        >
           <TeamSkills
             team={team}
             user={currentUser}
@@ -339,6 +367,20 @@ export default function GuildLeaderDashboard() {
           skillName={viewingSkillLevel}
           xp={currentUser.skills?.[viewingSkillLevel] || 0}
           onClose={() => setViewingSkillLevel(null)}
+        />
+      )}
+
+      {currentUser && (
+        <SkillsModal
+          isOpen={isSkillsModalOpen}
+          onClose={() => setIsSkillsModalOpen(false)}
+          user={currentUser}
+          teamSkills={team?.skills || []}
+          onSkillClick={handleSkillClick}
+          onDeclineSkill={handleDeclineSkill}
+          onTagSkill={handleTagSkill}
+          onUntagSkill={handleTagSkill}
+          taggedSkills={favoriteSkills}
         />
       )}
     </div>

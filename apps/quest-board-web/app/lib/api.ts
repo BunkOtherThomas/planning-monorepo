@@ -368,3 +368,16 @@ export async function assignQuestToSelf(questId: string): Promise<void> {
     throw new Error(error.error || 'Failed to assign quest');
   }
 }
+
+export async function updateFavoriteSkills(favoriteSkills: string[]): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/users/me/favorite-skills`, {
+    method: 'PUT',
+    ...getDefaultOptions(true),
+    body: JSON.stringify({ favoriteSkills }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update favorite skills');
+  }
+}

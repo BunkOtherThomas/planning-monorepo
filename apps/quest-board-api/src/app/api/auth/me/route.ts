@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import { prisma } from '@quest-board/database';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
@@ -16,18 +17,21 @@ export async function GET(request: Request) {
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
     
     // Get user data
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        displayName: true,
-        avatarId: true,
-        isProjectManager: true,
-        isTeamMember: true,
-        skills: true,
-      },
-    });
+    const users = await prisma.$queryRaw<Array<{
+      id: string;
+      email: string;
+      displayName: string;
+      avatarId: number;
+      isProjectManager: boolean;
+      isTeamMember: boolean;
+      skills: Prisma.JsonValue;
+      favoriteSkills: string[];
+    }>>`
+      SELECT id, email, "displayName", "avatarId", "isProjectManager", "isTeamMember", skills, "favoriteSkills"
+      FROM "User"
+      WHERE id = ${decoded.userId}
+    `;
+    const user = users[0];
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

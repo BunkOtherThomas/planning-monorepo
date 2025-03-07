@@ -1118,4 +1118,20 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+}
+
+.manageSkillsButton {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.manageSkillsButton:hover {
+  background: var(--primary-dark);
 } 
