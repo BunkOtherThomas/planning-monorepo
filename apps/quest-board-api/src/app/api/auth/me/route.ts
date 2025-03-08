@@ -1,9 +1,8 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import { prisma } from '@quest-board/database';
-import { Prisma } from '@prisma/client';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // Get the token from the Authorization header
     const authHeader = request.headers.get('Authorization');
@@ -24,7 +23,7 @@ export async function GET(request: Request) {
       avatarId: number;
       isProjectManager: boolean;
       isTeamMember: boolean;
-      skills: Prisma.JsonValue;
+      skills: Record<string, number>;
       favoriteSkills: string[];
     }>>`
       SELECT id, email, "displayName", "avatarId", "isProjectManager", "isTeamMember", skills, "favoriteSkills"
