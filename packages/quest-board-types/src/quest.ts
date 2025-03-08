@@ -53,6 +53,7 @@ export interface Quest {
   title: string;
   description: string;
   status: 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+  difficulty: number;
   skills: {
     name: string;
     xp: number;

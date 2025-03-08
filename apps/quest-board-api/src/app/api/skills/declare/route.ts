@@ -4,13 +4,6 @@ import { z } from 'zod';
 import { UserSkills } from '@quest-board/types';
 import { verify } from 'jsonwebtoken';
 
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  isGlobal: boolean;
-}
-
 const skillDeclarationSchema = z.object({
   skillName: z.string(),
   professionalExperience: z.number().min(0).max(5),

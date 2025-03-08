@@ -5,7 +5,7 @@ import { getCurrentTeam, getSkills, declareSkill } from '../lib/api';
 import styles from './Dashboard.module.css';
 import { SkillAssessmentModal } from './SkillAssessmentModal';
 import { SkillLevelModal } from './SkillLevelModal';
-import { Team as TeamType, UserSkills, SkillAssessment, User } from '@quest-board/types';
+import { Team as TeamType, UserSkills, SkillAssessment, User, Skill } from '@quest-board/types';
 import { FC } from 'react';
 import { getLevel } from '@planning/common-utils';
 import AssignedQuests from './AssignedQuests';
@@ -14,13 +14,6 @@ import TeamSkills from './TeamSkills';
 import { ScrollableSection } from './ScrollableSection';
 import { SkillsModal } from './SkillsModal';
 import { SkillsSection } from './SkillsSection';
-
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  isGlobal: boolean;
-}
 
 interface SkillAssessmentValues {
   professionalExperience: number;

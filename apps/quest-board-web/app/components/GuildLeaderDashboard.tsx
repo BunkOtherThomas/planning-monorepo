@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getCurrentTeam, addTeamSkill, getQuests, createQuest, getCurrentUser, declareSkill, turnInQuest, assignQuestToSelf } from '../lib/api';
 import { Avatar } from '../../components/Avatar';
 import styles from './Dashboard.module.css';
-import { QuestResponse, QuestStatus, User, SkillAssessment, Team as TeamType, Team } from '@quest-board/types';
+import { QuestResponse, QuestStatus, User, SkillAssessment, Team } from '@quest-board/types';
 import { CreateQuestModal } from './CreateQuestModal';
 import { QuestDetailsModal } from '@repo/ui/quest-details-modal';
 import TeamSkills from './TeamSkills';
@@ -25,10 +25,10 @@ interface SkillAssessmentValues {
   confidence: number;
 }
 
-type TeamMember = TeamType['members'][0];
+type TeamMember = Team['members'][0];
 
 export default function GuildLeaderDashboard() {
-  const [team, setTeam] = useState<TeamType | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [quests, setQuests] = useState<QuestResponse[]>([]);
@@ -339,7 +339,7 @@ export default function GuildLeaderDashboard() {
         isOpen={isCreateQuestModalOpen}
         onClose={() => setIsCreateQuestModalOpen(false)}
         onSubmit={handleCreateQuest}
-        team={team as unknown as Team}
+        team={team}
       />
 
       {selectedQuest && currentUser && (

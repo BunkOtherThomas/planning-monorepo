@@ -3,20 +3,6 @@ import styles from './Dashboard.module.css';
 import { Team as TeamType, User } from '@quest-board/types';
 import { getLevel } from '@planning/common-utils';
 
-interface LocalTeam {
-  id: string;
-  inviteCode: string;
-  members: User[];
-  skills: string[];
-}
-
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  isGlobal: boolean;
-}
-
 interface TeamSkillsProps {
   team: TeamType | null;
   user: User | null;

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import styles from './dashboard.module.css';
+import { Button } from '@repo/ui/button';
 import type { StaticImageData } from 'next/image';
-import { Button } from "@repo/ui/button";
-import styles from "./dashboard.module.css";
 
 interface DualImageProps {
   className?: string;
@@ -67,7 +67,7 @@ export default function Dashboard() {
           <p>This is the Quest Board web application.</p>
         </div>
         <div className={styles.grid}>
-          <Button appName="web">Click me</Button>
+          <Button label="Click me" />
         </div>
       </main>
       <footer className={styles.footer}>

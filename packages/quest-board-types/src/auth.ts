@@ -33,7 +33,7 @@ export interface User {
   id: string;
   email: string;
   displayName: string;
-  avatarId?: number;
+  avatarId: number;
   isProjectManager: boolean;
   isTeamMember: boolean;
   skills?: Record<string, number>;

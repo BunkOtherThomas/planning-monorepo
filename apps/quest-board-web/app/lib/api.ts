@@ -176,6 +176,7 @@ export async function getOpenQuestsForUser(id: string) {
     title: 'Placeholder Quest',
     description: 'Placeholder Description',
     status: 'open',
+    difficulty: 1,
     skills: [],
     assignedTo: {
       id: '1',

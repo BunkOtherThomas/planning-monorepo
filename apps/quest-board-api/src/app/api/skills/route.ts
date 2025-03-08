@@ -1,15 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
-import { SkillDeclarationRequest, UserSkills } from '@quest-board/types';
+import { Skill, SkillDeclarationRequest, UserSkills } from '@quest-board/types';
 import { z } from 'zod';
 import { verify } from 'jsonwebtoken';
-
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  isGlobal: boolean;
-}
 
 const skillDeclarationSchema = z.object({
   skillName: z.string(),

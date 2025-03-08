@@ -8,8 +8,8 @@ import { Skill, User } from '@quest-board/types';
  */
 export function sortCandidatesBySkills(requiredSkills: Record<string, number>, users: User[]): User[] {
   return [...users].sort((userA, userB) => {
-    const scoreA = calculateMatchScore(requiredSkills, userA.skills);
-    const scoreB = calculateMatchScore(requiredSkills, userB.skills);
+    const scoreA = calculateMatchScore(requiredSkills, userA.skills || {});
+    const scoreB = calculateMatchScore(requiredSkills, userB.skills || {});
     return scoreB - scoreA; // Higher score first
   });
 }

@@ -4,14 +4,7 @@ import { FC, useState } from 'react';
 import styles from './page.module.css';
 import { SkillAssessmentModal } from '../components/SkillAssessmentModal';
 import { getSkills, declareSkill } from '../lib/api';
-
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  isGlobal: boolean;
-  xp: number;
-}
+import { Skill } from '@quest-board/types';
 
 interface SkillAssessmentValues {
   professionalExperience: number;

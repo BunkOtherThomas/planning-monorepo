@@ -3,6 +3,7 @@ export interface Skill {
   name: string;
   description: string;
   isGlobal: boolean;
+  xp?: number;
 }
 
 export interface UserSkills {
