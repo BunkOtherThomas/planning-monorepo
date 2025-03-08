@@ -25,29 +25,49 @@
 }
 
 .skillsList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   margin-top: 12px;
 }
 
 .skillItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
+  text-align: center;
+  gap: 8px;
+  padding: 12px;
   background-color: var(--background-secondary);
   border-radius: 4px;
 }
 
 .skillName {
-  flex: 1;
   font-weight: 500;
+}
+
+.levelContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.level {
+  color: var(--text-secondary);
+  font-size: 0.9em;
 }
 
 .skillXP {
   color: var(--text-secondary);
   font-size: 0.9em;
+}
+
+.skillLocked {
+  color: var(--error, #ff4444);
+  font-size: 1.2em;
+  font-weight: bold;
 }
 
 .favorite {

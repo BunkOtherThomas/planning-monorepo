@@ -56,12 +56,32 @@ export function TeamMemberModal({ isOpen, onClose, member }: TeamMemberModalProp
           {error && <p className={styles.error}>Error: {error}</p>}
           {!loading && !error && skills && (
             <div className={styles.skillsList}>
-              {Object.entries(skills).map(([skillName, xp]) => (
-                <div key={skillName} className={styles.skillItem}>
-                  <span className={styles.skillName}>{skillName}</span>
-                  <span className={styles.skillXP}>XP: {xp}</span>
-                </div>
-              ))}
+              {Object.entries(skills)
+                .sort(([, xpA], [, xpB]) => {
+                  // Put -1 (locked) skills at the end
+                  if (xpA === -1) return 1;
+                  if (xpB === -1) return -1;
+                  // Sort rest by XP descending
+                  return xpB - xpA;
+                })
+                .map(([skillName, xp]) => {
+                  const levelInfo = xp === -1 ? null : getLevel(xp);
+                  return (
+                    <div key={skillName} className={styles.skillItem}>
+                      <span className={styles.skillName}>{skillName}</span>
+                      {xp === -1 ? (
+                        <span className={styles.skillLocked}>-</span>
+                      ) : (
+                        <div className={styles.levelContainer}>
+                          <LevelProgress 
+                            level={levelInfo?.level || 0}
+                            progress={levelInfo ? levelInfo.xp / (levelInfo.xp + levelInfo.remaining) : 0}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           )}
           {!loading && !error && (!skills || Object.keys(skills).length === 0) && (
