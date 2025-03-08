@@ -5,7 +5,7 @@ describe('Authentication Flow', () => {
       statusCode: 200,
       delayMs: 1000, // Add delay to show loading state
       body: {
-        token: 'fake-jwt-token',
+        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaXNQcm9qZWN0TWFuYWdlciI6dHJ1ZSwiaXNUZWFtTWVtYmVyIjpmYWxzZSwiaWF0IjoxNzA5OTI2ODAwLCJleHAiOjE3MTA1MzE2MDB9.Hs_oKRgO_y-UUTwQhMDOtXn-55Tb4WKJrz0tK-kMPMU',
         user: {
           id: '1',
           displayName: 'TestUser',
@@ -21,7 +21,7 @@ describe('Authentication Flow', () => {
       statusCode: 200,
       delayMs: 1000, // Add delay to show loading state
       body: {
-        token: 'fake-jwt-token',
+        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaXNQcm9qZWN0TWFuYWdlciI6dHJ1ZSwiaXNUZWFtTWVtYmVyIjpmYWxzZSwiaWF0IjoxNzA5OTI2ODAwLCJleHAiOjE3MTA1MzE2MDB9.Hs_oKRgO_y-UUTwQhMDOtXn-55Tb4WKJrz0tK-kMPMU',
         user: {
           id: '1',
           displayName: 'TestUser',
@@ -118,8 +118,8 @@ describe('Authentication Flow', () => {
       cy.setCookie('auth-token', interception.response?.body.token);
     });
     
-    // Verify redirect to goals
-    cy.url().should('include', '/goals', { timeout: 10000 });
+    // Verify redirect to dashboard
+    cy.url().should('include', '/dashboard', { timeout: 10000 });
   });
 
   it('shows error message for mismatched passwords', () => {
