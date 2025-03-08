@@ -55,7 +55,7 @@ jobs:
         working-directory: apps/quest-board-web
 
       - name: Run backend tests
-        run: pnpm run test:api
+        run: pnpm run test
         working-directory: apps/quest-board-api
 
       - name: Run E2E tests
