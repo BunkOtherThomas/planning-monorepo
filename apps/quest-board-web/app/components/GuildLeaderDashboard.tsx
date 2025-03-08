@@ -270,6 +270,26 @@ export default function GuildLeaderDashboard() {
           onSkillClick={handleSkillClick}
           onDeclineSkill={handleDeclineSkill}
           onTagSkill={handleTagSkill}
+          onSkillUpdate={(skill, xp) => {
+            if (!currentUser) return;
+            setCurrentUser(prev => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                skills: {
+                  ...prev.skills,
+                  [skill]: xp
+                }
+              };
+            });
+          }}
+          onTeamSkillsUpdate={(newSkills) => {
+            if (!team) return;
+            setTeam({
+              ...team,
+              skills: newSkills
+            });
+          }}
         />
 
         <ScrollableSection title="Team">

@@ -187,6 +187,14 @@ const AdventurerDashboard: FC<AdventurerDashboardProps> = ({ user, onSkillUpdate
           onSkillClick={handleSkillClick}
           onDeclineSkill={handleDeclineSkill}
           onTagSkill={handleTagSkill}
+          onSkillUpdate={onSkillUpdate}
+          onTeamSkillsUpdate={(newSkills) => {
+            if (!team) return;
+            setTeam({
+              ...team,
+              skills: newSkills
+            });
+          }}
         />
 
         {selectedSkill && (

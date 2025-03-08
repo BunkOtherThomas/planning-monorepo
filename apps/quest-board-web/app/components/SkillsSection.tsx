@@ -17,6 +17,8 @@ interface SkillsSectionProps {
   onSkillClick: (skill: string) => void;
   onDeclineSkill: (skill: string) => void;
   onTagSkill: (skill: string) => void;
+  onSkillUpdate?: (skill: string, xp: number) => void;
+  onTeamSkillsUpdate?: (newSkills: string[]) => void;
 }
 
 interface SkillAssessmentValues {
@@ -35,6 +37,8 @@ export const SkillsSection: FC<SkillsSectionProps> = ({
   onSkillClick,
   onDeclineSkill,
   onTagSkill,
+  onSkillUpdate,
+  onTeamSkillsUpdate,
 }) => {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [viewingSkillLevel, setViewingSkillLevel] = useState<string | null>(null);
@@ -72,6 +76,8 @@ export const SkillsSection: FC<SkillsSectionProps> = ({
         }
         return [...prev, { skill: selectedSkill, xp: response.xp }];
       });
+
+      onSkillUpdate?.(selectedSkill, response.xp);
 
       setSelectedSkill(null);
     } catch (error) {
@@ -128,6 +134,7 @@ export const SkillsSection: FC<SkillsSectionProps> = ({
           onTagSkill={onTagSkill}
           onUntagSkill={onTagSkill}
           taggedSkills={favoriteSkills}
+          onTeamSkillsUpdate={onTeamSkillsUpdate}
         />
       )}
     </ScrollableSection>
