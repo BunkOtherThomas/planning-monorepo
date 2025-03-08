@@ -41,6 +41,19 @@ describe('Authentication Flow', () => {
       }
     }).as('teamStatusCheck');
 
+    // Add auth verification intercept
+    cy.intercept('GET', 'http://localhost:3001/api/auth/me', {
+      statusCode: 200,
+      body: {
+        id: '1',
+        displayName: 'TestUser',
+        email: 'test@example.com',
+        isProjectManager: true,
+        isTeamMember: false,
+        avatarId: 0,
+      },
+    }).as('authVerification');
+
     // Clear cookies before each test
     cy.clearCookies();
   });
