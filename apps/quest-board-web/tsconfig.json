@@ -13,12 +13,7 @@
       "esnext"
     ],
     "incremental": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@planning/*": ["../../packages/*/src"],
-      "@quest-board/*": ["../../packages/*/src"]
-    }
+    "resolveJsonModule": true
   },
   "include": [
     "**/*.ts",
