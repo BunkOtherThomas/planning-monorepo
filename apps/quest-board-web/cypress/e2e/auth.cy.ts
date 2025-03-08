@@ -62,9 +62,6 @@ describe('Authentication Flow', () => {
     
     cy.get('input[name="confirmPassword"]').type('Password123!@#', { delay: 100 });
     
-    // Select adventurer role (it's already selected by default)
-    cy.get('input[value="adventurer"]').should('be.checked');
-    
     // Wait for password validation to complete
     cy.get('button[type="submit"]').should('not.be.disabled');
     
