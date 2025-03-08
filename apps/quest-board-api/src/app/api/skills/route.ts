@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../lib/prisma';
+import { prisma } from '@quest-board/database';
 import { Skill, SkillDeclarationRequest, UserSkills } from '@quest-board/types';
 import { z } from 'zod';
 import { verify } from 'jsonwebtoken';
@@ -11,31 +11,34 @@ const skillDeclarationSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // Get the token from the Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Missing token' }, { status: 401 });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    // Verify the token
+    const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
+    const userId = decoded.userId;
+
     const body: SkillDeclarationRequest = await request.json();
     const validatedData = skillDeclarationSchema.parse(body);
 
-    // TODO: Get user ID from auth session
-    const userId = 'user-id';
+    // Get current user
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
 
-    // Check if skill exists
-    const skills = await prisma.$queryRaw<Skill[]>`
-      SELECT * FROM "Skill" WHERE name = ${validatedData.skillName}
-    `;
-
-    if (!skills[0]) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Skill not found' },
+        { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Get current user skills
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { skills: true }
-    });
-
-    const currentSkills = user?.skills as UserSkills || {};
+    const currentSkills = user.skills as UserSkills || {};
     
     // Update user's skills
     const updatedUser = await prisma.user.update({
@@ -45,11 +48,10 @@ export async function POST(request: Request) {
           ...currentSkills,
           [validatedData.skillName]: validatedData.xp
         }
-      },
-      select: { skills: true }
+      }
     });
 
-    return NextResponse.json(updatedUser, { status: 201 });
+    return NextResponse.json({ skills: updatedUser.skills }, { status: 201 });
   } catch (error) {
     console.error('Skill declaration error:', error);
     return NextResponse.json(
@@ -73,24 +75,9 @@ export async function GET(request: Request) {
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
     const userId = decoded.userId;
 
-    const { searchParams } = new URL(request.url);
-    const includeGlobal = searchParams.get('includeGlobal') !== 'false';
-    const getAll = searchParams.get('all') === 'true';
-
-    // If getAll is true, return all global skills
-    if (getAll) {
-      const skills = await prisma.$queryRaw<Skill[]>`
-        SELECT * FROM "Skill"
-        WHERE "businessId" IS NULL
-      `;
-
-      return NextResponse.json(skills);
-    }
-
     // Get user's skills
     const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { skills: true }
+      where: { id: userId }
     });
 
     if (!user) {
@@ -100,15 +87,13 @@ export async function GET(request: Request) {
       );
     }
 
-    // Get all skills (global and user's)
+    // Get all global skills
     const skills = await prisma.$queryRaw<Skill[]>`
-      SELECT s.*
-      FROM "Skill" s
-      WHERE (${includeGlobal} AND s."businessId" IS NULL)
-        OR s.name = ANY(${Object.keys(user.skills as UserSkills)})
+      SELECT * FROM "Skill"
+      WHERE "businessId" IS NULL
     `;
 
-    return NextResponse.json(skills);
+    return NextResponse.json(skills, { status: 200 });
   } catch (error) {
     console.error('Skills fetch error:', error);
     return NextResponse.json(

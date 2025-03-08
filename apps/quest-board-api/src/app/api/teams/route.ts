@@ -23,22 +23,31 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const { skills } = body;
+    const { name, skills } = body;
 
     // Create a new team with the current user as the first member
     const team = await prisma.team.create({
       data: {
+        name: name || 'Test Team',
         members: {
           create: {
             userId: decoded.userId
           }
         },
-        skills
+        skills: skills || []
       },
       include: {
         members: {
           include: {
-            user: true
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                email: true,
+                skills: true,
+                avatarId: true
+              }
+            }
           }
         }
       }
@@ -49,7 +58,7 @@ export async function POST(request: Request) {
       const currentSkills = member.user.skills as Record<string, number> || {};
       const updatedSkills = { ...currentSkills };
       
-      for (const skillName of skills) {
+      for (const skillName of team.skills) {
         if (!(skillName in updatedSkills)) {
           updatedSkills[skillName] = -1;
         }
@@ -61,7 +70,24 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({ team });
+    // Transform the response to match the expected structure
+    const teamResponse = {
+      id: team.id,
+      name: team.name,
+      inviteCode: team.inviteCode,
+      skills: team.skills,
+      createdAt: team.createdAt,
+      updatedAt: team.updatedAt,
+      members: team.members.map(member => ({
+        id: member.user.id,
+        displayName: member.user.displayName,
+        email: member.user.email,
+        skills: member.user.skills,
+        avatarId: member.user.avatarId
+      }))
+    };
+
+    return NextResponse.json({ team: teamResponse });
   } catch (error) {
     console.error('Error creating team:', error);
     return NextResponse.json(
@@ -88,17 +114,6 @@ export async function GET(request: Request) {
     const teamMembership = await prisma.teamsOnUsers.findFirst({
       where: {
         userId: decoded.userId,
-      },
-      include: {
-        team: {
-          include: {
-            members: {
-              include: {
-                user: true
-              }
-            }
-          }
-        }
       }
     });
 
@@ -106,12 +121,44 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'User is not a member of any team' }, { status: 404 });
     }
 
-    const team = teamMembership.team;
+    const team = await prisma.team.findUnique({
+      where: { id: teamMembership.teamId },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                email: true,
+                skills: true,
+                avatarId: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!team) {
+      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+    }
+
+    // Transform the response to match the expected structure
     const teamResponse = {
       id: team.id,
+      name: team.name,
       inviteCode: team.inviteCode,
-      members: team.members.map((member: { user: any }) => member.user),
-      skills: team.skills || []
+      skills: team.skills,
+      createdAt: team.createdAt,
+      updatedAt: team.updatedAt,
+      members: team.members.map(member => ({
+        id: member.user.id,
+        displayName: member.user.displayName,
+        email: member.user.email,
+        skills: member.user.skills,
+        avatarId: member.user.avatarId
+      }))
     };
 
     return NextResponse.json(teamResponse);
@@ -144,9 +191,6 @@ export async function PATCH(request: Request) {
     const teamMembership = await prisma.teamsOnUsers.findFirst({
       where: {
         userId: decoded.userId,
-      },
-      include: {
-        team: true
       }
     });
 
@@ -154,23 +198,52 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'User is not a member of any team' }, { status: 404 });
     }
 
-    // Check if skill already exists
-    if (teamMembership.team.skills.includes(skill)) {
+    const team = await prisma.team.findUnique({
+      where: { id: teamMembership.teamId },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                email: true,
+                skills: true,
+                avatarId: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!team) {
+      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+    }
+
+    // Check if skill already exists in team
+    if (team.skills.includes(skill)) {
       return NextResponse.json({ error: 'Skill already exists in team' }, { status: 400 });
     }
 
-    // Add the skill to the team
+    // Add the new skill to the team
     const updatedTeam = await prisma.team.update({
-      where: { id: teamMembership.team.id },
+      where: { id: team.id },
       data: {
-        skills: {
-          push: skill
-        }
+        skills: [...team.skills, skill]
       },
       include: {
         members: {
           include: {
-            user: true
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                email: true,
+                skills: true,
+                avatarId: true
+              }
+            }
           }
         }
       }
@@ -191,11 +264,28 @@ export async function PATCH(request: Request) {
       });
     }
 
-    return NextResponse.json({ team: updatedTeam });
+    // Transform the response to match the expected structure
+    const teamResponse = {
+      id: updatedTeam.id,
+      name: updatedTeam.name,
+      inviteCode: updatedTeam.inviteCode,
+      skills: updatedTeam.skills,
+      createdAt: updatedTeam.createdAt,
+      updatedAt: updatedTeam.updatedAt,
+      members: updatedTeam.members.map(member => ({
+        id: member.user.id,
+        displayName: member.user.displayName,
+        email: member.user.email,
+        skills: member.user.skills,
+        avatarId: member.user.avatarId
+      }))
+    };
+
+    return NextResponse.json({ team: teamResponse });
   } catch (error) {
-    console.error('Error adding skill to team:', error);
+    console.error('Error updating team:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to add skill to team' },
+      { error: error instanceof Error ? error.message : 'Failed to update team' },
       { status: 500 }
     );
   }

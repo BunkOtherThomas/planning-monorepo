@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { OpenAI } from 'openai';
 
 let openai: OpenAI | null = null;
 try {
@@ -28,6 +28,8 @@ interface TaskAnalysisResponse {
 
 export async function POST(request: Request) {
   try {
+    const body: TaskAnalysisRequest = await request.json();
+
     // If OpenAI client is not initialized, return mock data during build
     if (!openai) {
       return NextResponse.json({ 
@@ -36,8 +38,6 @@ export async function POST(request: Request) {
         ]
       } as TaskAnalysisResponse);
     }
-
-    const body: TaskAnalysisRequest = await request.json();
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -62,15 +62,21 @@ export async function POST(request: Request) {
       
       // Validate the response format
       if (!Array.isArray(skillProficiencies)) {
-        throw new Error('Invalid response format');
+        return NextResponse.json({ 
+          error: 'Failed to analyze skills',
+          skillProficiencies: []
+        } as TaskAnalysisResponse, { status: 500 });
       }
 
       // Validate each proficiency is between 0-3
-      skillProficiencies.forEach(sp => {
-        if (sp.proficiency < 0 || sp.proficiency > 3) {
-          throw new Error('Invalid proficiency value');
+      for (const sp of skillProficiencies) {
+        if (typeof sp.proficiency !== 'number' || sp.proficiency < 0 || sp.proficiency > 3) {
+          return NextResponse.json({ 
+            error: 'Failed to analyze skills',
+            skillProficiencies: []
+          } as TaskAnalysisResponse, { status: 500 });
         }
-      });
+      }
 
       return NextResponse.json({ skillProficiencies } as TaskAnalysisResponse);
     } catch (parseError) {
@@ -78,13 +84,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ 
         error: 'Failed to analyze skills',
         skillProficiencies: []
-      } as TaskAnalysisResponse);
+      } as TaskAnalysisResponse, { status: 500 });
     }
   } catch (error) {
     console.error('Error analyzing skills:', error);
     return NextResponse.json({ 
       error: 'Failed to analyze skills',
       skillProficiencies: []
-    } as TaskAnalysisResponse);
+    } as TaskAnalysisResponse, { status: 500 });
   }
 } 

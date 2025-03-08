@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-import { prisma } from '../../../../lib/prisma';
+import { prisma } from '@quest-board/database';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -16,10 +16,7 @@ export async function POST(req: Request) {
 
     // Find user
     const user = await prisma.user.findUnique({
-      where: { email: validatedData.email },
-      include: {
-        businessDetails: true,
-      },
+      where: { email: validatedData.email }
     });
 
     if (!user) {
@@ -57,7 +54,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       token,
       user: userWithoutPassword,
-    });
+    }, { status: 200 });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

@@ -14,17 +14,6 @@ const skillDeclarationSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const validatedData = skillDeclarationSchema.parse(body);
-
-    // Calculate XP based on the form values
-    const xp = Math.round(
-      (validatedData.professionalExperience * 0.4 +
-       validatedData.formalEducation * 0.3 +
-       validatedData.informalExperience * 0.2 +
-       validatedData.confidence * 0.1) * 165 // This will give us a max of 165 XP
-    );
-
     // Get the token from the Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -36,9 +25,24 @@ export async function POST(req: Request) {
     // Verify the token
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-scroll') as { userId: string };
 
+    const body = await req.json();
+    const validatedData = skillDeclarationSchema.parse(body);
+
+    // Calculate XP based on the form values
+    const xp = Math.round(
+      (validatedData.professionalExperience * 0.4 +
+       validatedData.formalEducation * 0.3 +
+       validatedData.informalExperience * 0.2 +
+       validatedData.confidence * 0.1) * 165 // This will give us a max of 165 XP
+    );
+
     const user = await prisma.$queryRaw<{ skills: UserSkills }[]>`
       SELECT skills FROM "User" WHERE id = ${decoded.userId}
     `;
+
+    if (!user[0]) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
     const currentSkills = user[0]?.skills || {};
 
@@ -52,9 +56,15 @@ export async function POST(req: Request) {
       WHERE id = ${decoded.userId}
     `;
 
-    return NextResponse.json({ xp });
+    return NextResponse.json({ xp }, { status: 200 });
   } catch (error) {
     console.error('Error declaring skill:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Failed to declare skill' },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to declare skill' },
       { status: 500 }
