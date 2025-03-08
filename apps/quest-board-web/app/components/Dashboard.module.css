@@ -1102,6 +1102,13 @@
 .assigneeSkill {
   font-size: 0.875rem;
   color: var(--text-secondary);
+  font-family: var(--font-cinzel);
+  display: flex;
+  gap: 0.25rem;
+}
+
+.assigneeSkill span {
+  font-family: var(--font-cinzel);
 }
 
 .moreMembers {

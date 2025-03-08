@@ -353,7 +353,7 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                           const skillLevel = getLevel(xp).level;
                           return xp > 0 ? (
                             <div key={skill.skill} className={styles.assigneeSkill}>
-                              {`${skill.skill}: ${skillLevel}`}
+                              {`${skill.skill} - Lv. ${skillLevel}`}
                             </div>
                           ) : null;
                         })}
@@ -395,7 +395,7 @@ export function CreateQuestModal({ isOpen, onClose, onSubmit, team }: CreateQues
                               const skillLevel = member.skills?.[skill.skill] || 0;
                               return skillLevel > 0 ? (
                                 <div key={skill.skill} className={styles.assigneeSkill}>
-                                  {`${skill.skill}: ${skillLevel}`}
+                                  {`${skill.skill} - Lv. ${skillLevel}`}
                                 </div>
                               ) : null;
                             })}
