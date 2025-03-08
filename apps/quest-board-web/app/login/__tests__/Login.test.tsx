@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import Login from '../page';
@@ -6,6 +7,9 @@ import { login } from '../../lib/api';
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn().mockReturnValue({
+    get: jest.fn().mockReturnValue(null),
+  }),
 }));
 
 // Mock api calls
@@ -26,7 +30,7 @@ describe('Login Component', () => {
   it('renders login form', () => {
     render(<Login />);
     
-    expect(screen.getByText(/Welcome Back, Adventurer/i)).toBeInTheDocument();
+    expect(screen.getByText(/Welcome, Adventurer/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/your@email.com/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/••••••••/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Enter the Realm/i })).toBeInTheDocument();
@@ -45,7 +49,7 @@ describe('Login Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Enter the Realm/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument();
+      expect(screen.getByText(/Your scroll of passage seems to be incorrect/i)).toBeInTheDocument();
     });
   });
 
@@ -86,6 +90,6 @@ describe('Login Component', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /Enter the Realm/i }));
 
-    expect(screen.getByRole('button', { name: /Enter the Realm/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Opening Portal/i })).toBeDisabled();
   });
 }); 

@@ -119,6 +119,7 @@ function SignupForm() {
               type="password"
               id="password"
               name="password"
+              data-testid="password"
               placeholder="••••••••"
               required
               className={styles.input}
@@ -137,6 +138,7 @@ function SignupForm() {
               type="password"
               id="confirmPassword"
               name="confirmPassword"
+              data-testid="confirmPassword"
               placeholder="••••••••"
               required
               className={styles.input}

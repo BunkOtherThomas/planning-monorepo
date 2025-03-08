@@ -1,55 +1,58 @@
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useRouter } from 'next/navigation';
-import Signup from '../page';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signup } from '../../lib/api';
+import Signup from '../page';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn().mockReturnValue({
+    get: jest.fn().mockReturnValue(null),
+  }),
 }));
 
-// Mock api calls
+// Mock signup API
 jest.mock('../../lib/api', () => ({
   signup: jest.fn(),
 }));
 
-describe('Signup Component', () => {
-  const mockRouter = {
-    push: jest.fn(),
-  };
+const mockRouter = {
+  push: jest.fn(),
+};
 
+(useRouter as jest.Mock).mockReturnValue(mockRouter);
+
+describe('Signup Component', () => {
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue(mockRouter);
-    (signup as jest.Mock).mockReset();
+    jest.clearAllMocks();
   });
 
   it('renders signup form', () => {
     render(<Signup />);
-    
-    expect(screen.getByText(/Join the Quest Board/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Enter your name/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/How shall we address you\?/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/your@email.com/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/••••••••/i)).toBeInTheDocument();
-    expect(screen.getByText(/Adventurer/i)).toBeInTheDocument();
-    expect(screen.getByText(/Guild Leader/i)).toBeInTheDocument();
+    expect(screen.getByTestId('password')).toBeInTheDocument();
+    expect(screen.getByText(/Leave empty to create a new team as a Guild Leader/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Begin Your Journey/i })).toBeInTheDocument();
   });
 
   it('shows error message when passwords do not match', async () => {
     render(<Signup />);
-
-    fireEvent.change(screen.getByPlaceholderText(/Enter your name/i), {
-      target: { value: 'TestUser' },
+    
+    fireEvent.change(screen.getByPlaceholderText(/How shall we address you\?/i), {
+      target: { value: 'testuser' },
     });
     fireEvent.change(screen.getByPlaceholderText(/your@email.com/i), {
       target: { value: 'test@example.com' },
     });
-    fireEvent.change(screen.getByLabelText(/Scroll of Passage/i), {
-      target: { value: 'password123' },
+    fireEvent.change(screen.getByTestId('password'), {
+      target: { value: 'Password123!' },
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Scroll of Passage/i), {
-      target: { value: 'password456' },
+    fireEvent.change(screen.getByTestId('confirmPassword'), {
+      target: { value: 'Password124!' },
     });
+
     fireEvent.click(screen.getByRole('button', { name: /Begin Your Journey/i }));
 
     await waitFor(() => {
@@ -57,30 +60,27 @@ describe('Signup Component', () => {
     });
   });
 
-  it('redirects to dashboard on successful signup', async () => {
-    (signup as jest.Mock).mockResolvedValue({
-      user: {
-        id: '1',
-        email: 'test@example.com',
-        username: 'TestUser',
-        role: 'adventurer',
-      },
-    });
+  it('redirects to dashboard on successful signup with team code', async () => {
+    (signup as jest.Mock).mockResolvedValueOnce({ token: 'fake-token' });
 
     render(<Signup />);
-
-    fireEvent.change(screen.getByPlaceholderText(/Enter your name/i), {
-      target: { value: 'TestUser' },
+    
+    fireEvent.change(screen.getByPlaceholderText(/How shall we address you\?/i), {
+      target: { value: 'testuser' },
     });
     fireEvent.change(screen.getByPlaceholderText(/your@email.com/i), {
       target: { value: 'test@example.com' },
     });
-    fireEvent.change(screen.getByLabelText(/Scroll of Passage/i), {
-      target: { value: 'password123' },
+    fireEvent.change(screen.getByTestId('password'), {
+      target: { value: 'Password123!' },
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Scroll of Passage/i), {
-      target: { value: 'password123' },
+    fireEvent.change(screen.getByTestId('confirmPassword'), {
+      target: { value: 'Password123!' },
     });
+    fireEvent.change(screen.getByPlaceholderText(/Enter team code to join as an adventurer/i), {
+      target: { value: 'TEAM123' },
+    });
+
     fireEvent.click(screen.getByRole('button', { name: /Begin Your Journey/i }));
 
     await waitFor(() => {
@@ -88,43 +88,28 @@ describe('Signup Component', () => {
     });
   });
 
-  it('allows role selection', async () => {
-    (signup as jest.Mock).mockResolvedValue({
-      user: {
-        id: '1',
-        email: 'test@example.com',
-        username: 'TestUser',
-        role: 'guild_leader',
-      },
-    });
+  it('redirects to goals on successful signup without team code', async () => {
+    (signup as jest.Mock).mockResolvedValueOnce({ token: 'fake-token' });
 
     render(<Signup />);
-
-    fireEvent.change(screen.getByPlaceholderText(/Enter your name/i), {
-      target: { value: 'TestUser' },
+    
+    fireEvent.change(screen.getByPlaceholderText(/How shall we address you\?/i), {
+      target: { value: 'testuser' },
     });
     fireEvent.change(screen.getByPlaceholderText(/your@email.com/i), {
       target: { value: 'test@example.com' },
     });
-    fireEvent.change(screen.getByLabelText(/Scroll of Passage/i), {
-      target: { value: 'password123' },
+    fireEvent.change(screen.getByTestId('password'), {
+      target: { value: 'Password123!' },
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Scroll of Passage/i), {
-      target: { value: 'password123' },
+    fireEvent.change(screen.getByTestId('confirmPassword'), {
+      target: { value: 'Password123!' },
     });
-    
-    const guildLeaderRadio = screen.getByLabelText(/Guild Leader/i);
-    fireEvent.click(guildLeaderRadio);
-    
+
     fireEvent.click(screen.getByRole('button', { name: /Begin Your Journey/i }));
 
     await waitFor(() => {
-      expect(signup).toHaveBeenCalledWith(
-        'TestUser',
-        'test@example.com',
-        'password123',
-        'guild_leader'
-      );
+      expect(mockRouter.push).toHaveBeenCalledWith('/goals');
     });
   });
 }); 
