@@ -3,7 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@quest-board/database"],
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs']
+    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
+    outputFileTracingIncludes: {
+      '**': ['node_modules/.prisma/**/*']
+    }
   },
   async headers() {
     return [
