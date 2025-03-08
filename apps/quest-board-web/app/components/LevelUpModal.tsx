@@ -6,6 +6,7 @@ import { getLevel } from '@planning/common-utils';
 import { Avatar } from '../../components/Avatar';
 import { LevelProgress } from './LevelProgress';
 import { useEffect, useState } from 'react';
+import ReactConfetti from 'react-confetti';
 
 interface LevelUpModalProps {
   isOpen: boolean;
@@ -24,18 +25,50 @@ interface LevelUpModalProps {
 
 export function LevelUpModal({ isOpen, onClose, avatarId, leveledUpSkills, otherSkills }: LevelUpModalProps) {
   const [showBouncingAvatar, setShowBouncingAvatar] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
         setShowBouncingAvatar(true);
+        setShowConfetti(true);
       }, 500);
-      return () => clearTimeout(timer);
+
+      // Hide confetti after 5 seconds
+      const confettiTimer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 5500);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(confettiTimer);
+      };
+    } else {
+      setShowConfetti(false);
     }
   }, [isOpen]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Level Up!">
+      {showConfetti && (
+        <ReactConfetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={200}
+          gravity={0.5}
+          colors={[
+            '#ffd700', // --accent-gold
+            '#8b7355', // --accent-brown
+            '#9c8261', // --accent-brown-light
+            '#6b5a40', // --accent-brown-dark
+            '#ffffff', // white
+            '#000000', // black
+            '#1a1a2e', // --primary-dark
+            '#16213e', // --primary-darker
+          ]}
+        />
+      )}
       <div className={styles.content}>
         <div className={styles.avatarContainer}>
           <Avatar 
