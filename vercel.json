@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm turbo build",
+  "buildCommand": "cd ../../ && pnpm install && pnpm turbo build --filter=quest-board-web...",
   "installCommand": "pnpm install",
   "framework": "nextjs",
   "outputDirectory": "apps/quest-board-web/.next"

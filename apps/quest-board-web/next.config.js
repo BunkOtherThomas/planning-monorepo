@@ -2,12 +2,16 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  transpilePackages: ["@repo/ui", "@planning/common-utils"],
+  transpilePackages: ['@planning/common-utils', '@quest-board/types'],
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  experimental: {
+    externalDir: true,
+    outputFileTracingRoot: process.env.VERCEL ? undefined : process.cwd(),
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
