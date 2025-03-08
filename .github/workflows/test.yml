@@ -51,7 +51,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Run frontend tests
-        run: pnpm run test:web
+        run: pnpm run test
         working-directory: apps/quest-board-web
 
       - name: Run backend tests
