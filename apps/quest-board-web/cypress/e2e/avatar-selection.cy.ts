@@ -59,6 +59,6 @@ describe('Avatar Selection During Signup', () => {
 
     // Verify the signup request was made
     cy.wait('@signupRequest');
-    cy.url().should('include', '/dashboard');
+    cy.url().should('include', '/goals');
   });
 }); 
