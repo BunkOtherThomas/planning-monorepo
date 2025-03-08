@@ -74,8 +74,8 @@ describe('Authentication Flow', () => {
       cy.setCookie('auth-token', interception.response?.body.token);
     });
     
-    // Verify redirect to dashboard
-    cy.url().should('include', '/dashboard', { timeout: 10000 });
+    // Verify redirect to goals
+    cy.url().should('include', '/goals', { timeout: 10000 });
 
     // Clear cookies for testing login
     cy.clearCookies();
@@ -97,8 +97,8 @@ describe('Authentication Flow', () => {
       cy.setCookie('auth-token', interception.response?.body.token);
     });
     
-    // Verify redirect to dashboard
-    cy.url().should('include', '/dashboard', { timeout: 10000 });
+    // Verify redirect to goals
+    cy.url().should('include', '/goals', { timeout: 10000 });
   });
 
   it('shows error message for mismatched passwords', () => {
