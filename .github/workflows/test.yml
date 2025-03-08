@@ -42,6 +42,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Generate Prisma Client
+        run: pnpm --filter @quest-board/database db:generate
+
       - name: Build packages
         run: pnpm run build
 
