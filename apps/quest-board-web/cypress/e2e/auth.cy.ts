@@ -10,8 +10,8 @@ describe('Authentication Flow', () => {
           id: '1',
           displayName: 'TestUser',
           email: 'test@example.com',
-          isProjectManager: false,
-          isTeamMember: true,
+          isProjectManager: true,
+          isTeamMember: false,
           avatarId: 0,
         },
       },
@@ -26,12 +26,20 @@ describe('Authentication Flow', () => {
           id: '1',
           displayName: 'TestUser',
           email: 'test@example.com',
-          isProjectManager: false,
-          isTeamMember: true,
+          isProjectManager: true,
+          isTeamMember: false,
           avatarId: 0,
         },
       },
     }).as('loginRequest');
+
+    // Add team status check intercept
+    cy.intercept('GET', 'http://localhost:3001/api/teams/status', {
+      statusCode: 200,
+      body: {
+        hasTeamWithSkills: false
+      }
+    }).as('teamStatusCheck');
 
     // Clear cookies before each test
     cy.clearCookies();
