@@ -79,11 +79,11 @@ export async function POST(request: Request) {
       skills: team.skills,
       createdAt: team.createdAt,
       updatedAt: team.updatedAt,
-      members: team.members.map((member: { user: User }) => ({
+      members: team.members.map((member: { user: Partial<User> }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
-        skills: member.user.skills,
+        skills: member.user.skills as Record<string, number>,
         avatarId: member.user.avatarId
       }))
     };
@@ -153,11 +153,11 @@ export async function GET(request: Request) {
       skills: team.skills,
       createdAt: team.createdAt,
       updatedAt: team.updatedAt,
-      members: team.members.map((member: { user: User }) => ({
+      members: team.members.map((member: { user: Partial<User> }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
-        skills: member.user.skills,
+        skills: member.user.skills as Record<string, number>,
         avatarId: member.user.avatarId
       }))
     };
