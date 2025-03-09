@@ -273,11 +273,11 @@ export async function PATCH(request: Request) {
       skills: updatedTeam.skills,
       createdAt: updatedTeam.createdAt,
       updatedAt: updatedTeam.updatedAt,
-      members: updatedTeam.members.map(member => ({
+      members: updatedTeam.members.map((member: { user: Partial<User> }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
-        skills: member.user.skills,
+        skills: member.user.skills as Record<string, number>,
         avatarId: member.user.avatarId
       }))
     };
