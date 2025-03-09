@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@quest-board/database';
+import { prisma, Prisma } from '@quest-board/database';
 import { verify } from 'jsonwebtoken';
 import { z } from 'zod';
 import { User } from '@quest-board/types';
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       skills: team.skills,
       createdAt: team.createdAt,
       updatedAt: team.updatedAt,
-      members: team.members.map((member: { user: Partial<User> }) => ({
+      members: team.members.map((member: { user: { id: string; displayName: string; email: string; skills: Prisma.JsonValue; avatarId: number } }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
@@ -153,7 +153,7 @@ export async function GET(request: Request) {
       skills: team.skills,
       createdAt: team.createdAt,
       updatedAt: team.updatedAt,
-      members: team.members.map((member: { user: Partial<User> }) => ({
+      members: team.members.map((member: { user: { id: string; displayName: string; email: string; skills: Prisma.JsonValue; avatarId: number } }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
@@ -273,7 +273,7 @@ export async function PATCH(request: Request) {
       skills: updatedTeam.skills,
       createdAt: updatedTeam.createdAt,
       updatedAt: updatedTeam.updatedAt,
-      members: updatedTeam.members.map((member: { user: Partial<User> }) => ({
+      members: updatedTeam.members.map((member: { user: { id: string; displayName: string; email: string; skills: Prisma.JsonValue; avatarId: number } }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
