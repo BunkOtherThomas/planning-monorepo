@@ -13,7 +13,7 @@ type QuestWithAssignedTo = Quest & {
     displayName: string;
     avatarId: number;
   } | null;
-  questSkills: Prisma.JsonValue;
+  questSkills: Record<string, number>;
 };
 
 interface SkillXPChange {
@@ -24,7 +24,7 @@ interface SkillXPChange {
 }
 
 interface UserSkillsResult {
-  skills: Prisma.JsonValue;
+  skills: Record<string, number>;
   favoriteSkills: string[];
 }
 

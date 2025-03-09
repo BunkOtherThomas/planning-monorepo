@@ -9,7 +9,7 @@ type QuestWithAssignedTo = Quest & {
     displayName: string;
     avatarId: number;
   } | null;
-  questSkills: Prisma.JsonValue;
+  questSkills: Record<string, number>;
 };
 
 export async function POST(

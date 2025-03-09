@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@quest-board/database';
 import { verify } from 'jsonwebtoken';
 import { z } from 'zod';
+import { User } from '@quest-board/types';
 
 const addSkillSchema = z.object({
   skill: z.string().min(1),
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
       skills: team.skills,
       createdAt: team.createdAt,
       updatedAt: team.updatedAt,
-      members: team.members.map(member => ({
+      members: team.members.map((member: { user: User }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
@@ -152,7 +153,7 @@ export async function GET(request: Request) {
       skills: team.skills,
       createdAt: team.createdAt,
       updatedAt: team.updatedAt,
-      members: team.members.map(member => ({
+      members: team.members.map((member: { user: User }) => ({
         id: member.user.id,
         displayName: member.user.displayName,
         email: member.user.email,
